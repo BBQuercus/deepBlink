@@ -1,0 +1,58 @@
+[MESSAGES CONTROL]
+
+# Disable the message(s) with the given id(s).
+# C0413 - wrong-import-position of third-party libraries
+# E1130 - invalid-unary-operand-type false positive https://github.com/PyCQA/pylint/issues/1472
+# R0801 - similar lines across files
+# W0511 - TODO comments
+# W1202 - logging-format-interpolation - Behavior barring fstrings in logging https://github.com/PyCQA/pylint/issues/2395
+# missing-function-dosctring: docstyle handles
+# bad-continuation: disagrees with black formatter
+disable=C0413,E1130,E1136,R0801,W0102,W0511,W1202,missing-function-docstring,bad-continuation
+
+[MASTER]
+
+# A comma-separated list of package or module names from where C extensions may
+# be loaded. Extensions are loading into the active Python interpreter and may
+# run arbitrary code
+extension-pkg-whitelist=numpy
+
+[TYPECHECK]
+
+# List of module names for which member attributes should not be checked
+# (useful for modules/projects where namespaces are manipulated during runtime
+# and thus existing member attributes cannot be deduced by static analysis. It
+# supports qualified module names, as well as Unix pattern matching.
+ignored-modules=numpy,skimage,tensorflow
+
+# List of classes names for which member attributes should not be checked
+# (useful for classes with attributes dynamically set). This supports can work
+# with qualified names.
+ignored-classes=numpy,skimage,tensorflow
+
+[BASIC]
+
+# Good variable names which should always be accepted, separated by a comma
+good-names = _, a, b, c, d, e, f, fn, i, j, k, n, N, m, M, D, p, r, t, v, x, X, y, Y, w, h, W, H, x1, x2, y1, y2, ax, df, xy, xyz, x0, y0, z0, z, xx, yy, app, log
+
+# Regular expression which should only match correct function names
+function-rgx=[a-z_][a-z0-9_]{2,70}$
+
+# Regular expression which should only match correct method names
+method-rgx=[a-z_][a-z0-9_]{2,70}$
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length = 120
+
+[DESIGN]
+# Minimum number of public methods for a class (see R0903).
+min-public-methods = 0
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes = 15
+
+max-locals = 25
+
+max-args = 10

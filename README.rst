@@ -10,11 +10,11 @@
 .. image:: https://img.shields.io/github/license/bbquercus/deepblink
     :alt: GitHub code licence is MIT.
 
-========
+============
 deepBlink
-========
+============
 .. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg
-   :scale: 25 %
+   :width: 25 %
    :alt: Logo of deepBlink.
    :align: right
 
