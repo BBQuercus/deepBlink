@@ -21,7 +21,7 @@ def read(*names, **kwargs):
 
 setup(
     name="deepblink",
-    version="0.0.1",
+    version="0.0.2",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description="%s\n%s"
