@@ -4,8 +4,8 @@
 .. image:: https://travis-ci.org/BBQuercus/deepBlink.svg?branch=master
     :target: https://travis-ci.org/BBQuercus/deepBlink
     :alt: Travis CI build status.
-.. image:: https://ci.appveyor.com/api/projects/status/deepblink?svg=true
-    :target: https://ci.appveyor.com/project/BBQuercus/deepblink
+.. image:: https://ci.appveyor.com/api/projects/status/86ylig998derkv0c/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/BBQuercus/deepblink/branch/master
     :alt: Appveyor build status.
 .. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/BBQuercus/deepBlink
@@ -49,11 +49,11 @@ You can also install the in-development version with::
 
     pip install git+ssh://git@github.com/bbquercus/deepblink/bbquercus/deepblink.git@master
 
-Documentation
-=============
+.. Documentation
+.. =============
 
 
-https://deepblink.readthedocs.io/
+.. https://deepblink.readthedocs.io/
 
 
 Development
