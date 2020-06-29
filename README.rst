@@ -11,14 +11,11 @@
     :target: https://codecov.io/gh/BBQuercus/deepBlink
     :alt: Codecov test coverage.
 .. image:: https://img.shields.io/github/license/bbquercus/deepblink
-    :target: https://github.com/BBQuercus/deepBlink/LICENSE
     :alt: GitHub code licence is MIT.
-|
 
-.. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg
-   :width: 200px
-   :alt: Logo of deepBlink.
-   :align: right
+.. raw:: html
+
+    <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">
 
 ============
 deepBlink
