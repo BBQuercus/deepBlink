@@ -23,5 +23,13 @@ parser.add_argument(
 
 
 def main(args=None):
+    """Addition of useful docstring.
+
+    Args:
+        args: Something I eat.
+
+    Returns:
+        I'm free, I don't return anything.
+    """
     args = parser.parse_args(args=args)
     print(args.names)
