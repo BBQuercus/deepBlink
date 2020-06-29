@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
+"""Setup file for pypi package called deepblink."""
 
 import io
 import re
@@ -17,61 +14,62 @@ from setuptools import setup
 
 def read(*names, **kwargs):
     with io.open(
-        join(dirname(__file__), *names),
-        encoding=kwargs.get('encoding', 'utf8')
-    ) as fh:
-        return fh.read()
+        join(dirname(__file__), *names), encoding=kwargs.get("encoding", "utf8")
+    ) as f:
+        return f.read()
 
 
 setup(
-    name='deepblink',
-    version='0.0.1',
-    license='MIT',
-    description='Threshold independent detection and localization of diffraction-limited spots.',
-    long_description='%s\n%s' % (
-        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
-        re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('docs/changelog.rst'))
+    name="deepblink",
+    version="0.0.1",
+    license="MIT",
+    description="Threshold independent detection and localization of diffraction-limited spots.",
+    long_description="%s\n%s"
+    % (
+        re.compile("^.. start-badges.*^.. end-badges", re.M | re.S)
+        .sub("", read("README.rst"))
+        .replace(
+            '.. raw:: html\n\n    <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">',  # noqa: E501, pylint: disable=c0301
+            ".. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg\n    :width: 200px\n    :align: right\n    :alt: Logo of deepBlink.",  # noqa: E501, pylint: disable=c0301
+        ),
+        re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("docs/changelog.rst")),
     ),
-    author='Bastian Eichenberger',
-    author_email='bastian@eichenbergers.ch',
-    url='https://github.com/bbquercus/deepblink/',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    author="Bastian Eichenberger",
+    author_email="bastian@eichenbergers.ch",
+    url="https://github.com/bbquercus/deepblink/",
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: Unix',
-        'Operating System :: POSIX',
-        'Operating System :: Microsoft :: Windows',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        # uncomment if you test on these interpreters:
-        # 'Programming Language :: Python :: Implementation :: IronPython',
-        # 'Programming Language :: Python :: Implementation :: Jython',
-        # 'Programming Language :: Python :: Implementation :: Stackless',
-        'Topic :: Utilities',
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: Unix",
+        "Operating System :: POSIX",
+        "Operating System :: Microsoft :: Windows",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Topic :: Scientific/Engineering :: Artificial Life",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Scientific/Engineering :: Medical Science Apps.",
+        "Topic :: Utilities",
     ],
     project_urls={
-        'Documentation': 'https://deepblink.readthedocs.io/',
-        'Changelog': 'https://deepblink.readthedocs.io/en/latest/changelog.html',
-        'Issue Tracker': 'https://github.com/bbquercus/deepblink/issues',
+        "Documentation": "https://deepblink.readthedocs.io/",
+        "Changelog": "https://deepblink.readthedocs.io/en/latest/changelog.html",
+        "Issue Tracker": "https://github.com/bbquercus/deepblink/issues",
     },
-    keywords=[
-        # eg: 'keyword1', 'keyword2', 'keyword3',
-    ],
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
+    keywords=["deep-learning", "biomedical", "image analysis", "spot detection"],
+    python_requires="<=3.6",
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
@@ -80,9 +78,5 @@ setup(
         #   'rst': ['docutils>=0.11'],
         #   ':python_version=="2.6"': ['argparse'],
     },
-    entry_points={
-        'console_scripts': [
-            'deepblink = deepblink.cli:main',
-        ]
-    },
+    entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
 )

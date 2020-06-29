@@ -13,6 +13,10 @@ repos:
     rev: master
     hooks:
       - id: isort
+  - repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+      - id: black
   - repo: https://gitlab.com/pycqa/flake8
     rev: master
     hooks:
