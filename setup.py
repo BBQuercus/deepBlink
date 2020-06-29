@@ -34,7 +34,7 @@ setup(
     ),
     author='Bastian Eichenberger',
     author_email='bastian@eichenbergers.ch',
-    url='https://github.com/bbquercus/deepblink/bbquercus/deepblink',
+    url='https://github.com/bbquercus/deepblink/',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -66,7 +66,7 @@ setup(
     project_urls={
         'Documentation': 'https://deepblink.readthedocs.io/',
         'Changelog': 'https://deepblink.readthedocs.io/en/latest/changelog.html',
-        'Issue Tracker': 'https://github.com/bbquercus/deepblink/bbquercus/deepblink/issues',
+        'Issue Tracker': 'https://github.com/bbquercus/deepblink/issues',
     },
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',

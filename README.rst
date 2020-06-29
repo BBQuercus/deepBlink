@@ -14,7 +14,7 @@
 deepBlink
 ============
 .. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg
-   :width: 25 %
+   :width: 200px
    :alt: Logo of deepBlink.
    :align: right
 

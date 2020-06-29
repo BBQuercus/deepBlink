@@ -8,7 +8,7 @@ little bit helps, and credit will always be given.
 Bug reports
 ===========
 
-When `reporting a bug <https://github.com/bbquercus/deepblink/bbquercus/deepblink/issues>`_ please include:
+When `reporting a bug <https://github.com/bbquercus/deepblink/issues>`_ please include:
 
     * Your operating system name and version.
     * Any details about your local setup that might be helpful in troubleshooting.
@@ -25,7 +25,7 @@ combine multiple changes (such as typos) into a single pull request.
 Feature requests and feedback
 =============================
 
-The best way to send feedback is to file an issue at https://github.com/bbquercus/deepblink/bbquercus/deepblink/issues.
+The best way to send feedback is to file an issue at https://github.com/bbquercus/deepblink/issues.
 
 If you are proposing a feature:
 
@@ -38,11 +38,11 @@ Development
 
 To set up `deepblink` for local development:
 
-1. Fork `deepblink <https://github.com/bbquercus/deepblink/bbquercus/deepblink>`_
+1. Fork `deepblink <https://github.com/bbquercus/deepblink/>`_
    (look for the "Fork" button).
 2. Clone your fork locally::
 
-    git clone git@github.com/bbquercus/deepblink:bbquercus/deepblink.git
+    git clone git@github.com:BBQuercus/deepBlink.git
 
 3. Create a branch for local development::
 
