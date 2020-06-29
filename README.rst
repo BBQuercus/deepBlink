@@ -1,10 +1,39 @@
+.. image:: https://badge.fury.io/py/deepblink.svg
+    :target: https://badge.fury.io/py/deepblink
+    :alt: Pypi package version number.
+.. image:: https://travis-ci.org/BBQuercus/deepBlink.svg?branch=master
+    :target: https://travis-ci.org/BBQuercus/deepBlinko
+    :alt: Travis CI build status.
+.. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/BBQuercus/deepBlink
+    :alt: Codecov test coverage.
+.. image:: https://img.shields.io/github/license/bbquercus/deepblink
+    :alt: GitHub code licence is MIT.
+
 ========
-Overview
+deepBlink
 ========
+.. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg
+   :scale: 25 %
+   :alt: Logo of deepBlink.
+   :align: right
 
 Threshold independent detection and localization of diffraction-limited spots.
 
-* Free software: MIT license
+
+Overview
+============
+In biomedical microscopy data, a common task involves the detection of
+diffraction-limited spots that visualize single proteins, domains, mRNAs,
+and many more. These spots were traditionally detected with mathematical
+operators such as Laplacian of Gaussian. These operators, however, rely
+on human input ranging from image-intensity thresholds, approximative
+spot sizes, etc. This process is tedious and not always reliable. DeepBlink
+relies on neural networks to automatically find spots without the need for
+human intervention. DeepBlink is available as a ready-to-use command-line
+interface.
+
+Example images will follow shortly.
 
 Installation
 ============
