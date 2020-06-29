@@ -15,19 +15,16 @@ matrix:
       env:
         - TOXENV=docs
     - env:
-        - TOXENV=py36
+        - TOXENV=py36, codecov
       python: '3.6'
     - env:
-        - TOXENV=py37
+        - TOXENV=py37, codecov
       python: '3.7'
     - env:
-        - TOXENV=py38
+        - TOXENV=py38, codecov
       python: '3.8'
     - env:
-        - TOXENV=pypy
-      python: 'pypy'
-    - env:
-        - TOXENV=pypy3
+        - TOXENV=pypy3, codecov
         - TOXPYTHON=pypy3
       python: 'pypy3'
 before_install:
@@ -42,8 +39,6 @@ install:
   - tox --version
 script:
   - tox -v
-after_success:
-  -codecov
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
