@@ -3,10 +3,12 @@ graft src
 graft ci
 graft tests
 
+prune images
+
 include .bumpversion.cfg
 include .coveragerc
-include .cookiecutterrc
 include .editorconfig
+include .pylintrc
 
 include LICENSE
 include README.rst
