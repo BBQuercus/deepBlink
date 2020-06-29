@@ -7,7 +7,6 @@
 
     installation
     usage/index
-    modules
     references/index
     contributing
     authors
