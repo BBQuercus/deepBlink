@@ -9,5 +9,5 @@
     usage/index
     references/index
     contributing
-    authors
     changelog
+    authors
