@@ -1,7 +1,7 @@
-Reference
+Usage
 =========
 
 .. toctree::
     :glob:
 
-    deepblink*
+    cli*
