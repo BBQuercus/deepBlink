@@ -49,11 +49,11 @@ You can also install the in-development version with::
 
     pip install git+ssh://git@github.com/bbquercus/deepblink/bbquercus/deepblink.git@master
 
-.. Documentation
-.. =============
+Documentation
+=============
 
 
-.. https://deepblink.readthedocs.io/
+https://deepblink.readthedocs.io/
 
 
 Development
