@@ -14,8 +14,9 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
 ]
+
 source_suffix = '.rst'
-master_doc = 'index'
+master_doc = 'readme'
 project = 'deepblink'
 year = '2020'
 author = 'Bastian Eichenberger'

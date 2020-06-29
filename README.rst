@@ -2,21 +2,27 @@
     :target: https://badge.fury.io/py/deepblink
     :alt: Pypi package version number.
 .. image:: https://travis-ci.org/BBQuercus/deepBlink.svg?branch=master
-    :target: https://travis-ci.org/BBQuercus/deepBlinko
+    :target: https://travis-ci.org/BBQuercus/deepBlink
     :alt: Travis CI build status.
+.. image:: https://ci.appveyor.com/api/projects/status/deepblink?svg=true
+    :target: https://ci.appveyor.com/project/BBQuercus/deepblink
+    :alt: Appveyor build status.
 .. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/BBQuercus/deepBlink
     :alt: Codecov test coverage.
 .. image:: https://img.shields.io/github/license/bbquercus/deepblink
+    :target: https://github.com/BBQuercus/deepBlink/LICENSE
     :alt: GitHub code licence is MIT.
+|
 
-============
-deepBlink
-============
 .. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg
    :width: 200px
    :alt: Logo of deepBlink.
    :align: right
+
+============
+deepBlink
+============
 
 Threshold independent detection and localization of diffraction-limited spots.
 
