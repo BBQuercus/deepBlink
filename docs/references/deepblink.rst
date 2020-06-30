@@ -4,10 +4,14 @@ deepblink package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+deepblink.cli module
+--------------------
 
-   deepblink.cli
+.. automodule:: deepblink.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Module contents
 ---------------

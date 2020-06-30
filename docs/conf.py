@@ -1,5 +1,21 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+"""Configuration file for sphinx documentation.
+To build locally start populating 'references' manually
+via apidoc from the home dir:
+
+    sphinx-apidoc -o docs/references src\
+                  -H References\
+                  --tocfile index\
+                  -f
+
+Next, make sure all links are functional. Due to inconsistent behaviour,
+it currently isn't included in the tox checks. Run:
+
+    sphinx-build -b linkcheck docs dist/docs
+
+Finally, check proper building using:
+
+    sphinx-build docs dist/docs
+"""
 
 import os
 
@@ -16,11 +32,11 @@ extensions = [
 ]
 
 source_suffix = ".rst"
-master_doc = "readme"
+master_doc = "index"
 project = "deepblink"
 year = "2020"
 author = "Bastian Eichenberger"
-copyright = "{0}, {1}".format(year, author)
+copyright = f"{year}, {author}"
 version = release = "0.0.2"
 
 pygments_style = "trac"
@@ -41,7 +57,7 @@ html_split_index = False
 html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
-html_short_title = "%s-%s" % (project, version)
+html_short_title = f"{project}-{version}"
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
