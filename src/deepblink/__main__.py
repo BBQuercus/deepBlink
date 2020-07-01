@@ -1,6 +1,5 @@
 """Entrypoint module, in case you use `python -mdeepblink`.
 
-
 Why does this file exist, and why __main__? For more info, read:
 
 - https://www.python.org/dev/peps/pep-0338/
