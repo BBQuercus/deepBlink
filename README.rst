@@ -7,11 +7,11 @@
 .. image:: https://ci.appveyor.com/api/projects/status/86ylig998derkv0c/branch/master?svg=true
     :target: https://ci.appveyor.com/project/BBQuercus/deepblink/branch/master
     :alt: Appveyor build status.
-.. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/BBQuercus/deepBlink
-    :alt: Codecov test coverage.
 .. image:: https://img.shields.io/github/license/bbquercus/deepblink
     :alt: GitHub code licence is MIT.
+.. .. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
+..     :target: https://codecov.io/gh/BBQuercus/deepBlink
+..     :alt: Codecov test coverage.
 
 .. raw:: html
 
