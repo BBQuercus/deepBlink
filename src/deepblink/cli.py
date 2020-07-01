@@ -25,6 +25,8 @@ parser.add_argument(
 def main(args=None):
     """Addition of useful docstring.
 
+    A very important change that CI checking triggers.
+
     Args:
         args: Something I eat.
 
