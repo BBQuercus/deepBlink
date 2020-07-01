@@ -1,5 +1,4 @@
-"""
-Entrypoint module, in case you use `python -mdeepblink`.
+"""Entrypoint module, in case you use `python -mdeepblink`.
 
 
 Why does this file exist, and why __main__? For more info, read:
