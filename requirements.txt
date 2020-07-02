@@ -20,5 +20,5 @@ mypy
 pycodestyle
 pydocstyle
 pylint
-safety
+safety==1.9.0
 tox
