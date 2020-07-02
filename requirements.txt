@@ -18,7 +18,7 @@ bandit
 black
 mypy
 pycodestyle
-pydocstyle
+pydocstyle==5.0.2
 pylint
 safety
 tox
