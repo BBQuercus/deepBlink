@@ -1,7 +1,29 @@
-References
-==========
+API-Reference
+=============
+
+Modules
+----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
-   deepblink
+   deepblink.augment
+   deepblink.cli
+   deepblink.data
+   deepblink.datasets
+   deepblink.io
+   deepblink.losses
+   deepblink.metrics
+   deepblink.models
+   deepblink.networks
+   deepblink.optimizers
+   deepblink.training
+   deepblink.util
+
+.. Module contents
+.. ---------------
+
+.. .. automodule:: deepblink
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
