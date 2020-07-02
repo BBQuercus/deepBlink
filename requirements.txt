@@ -17,7 +17,7 @@ wandb>=0.7.0
 bandit
 black
 mypy
-pycodestyle
+pycodestyle==2.6.0
 pydocstyle
 pylint
 safety
