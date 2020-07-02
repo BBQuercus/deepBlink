@@ -21,4 +21,4 @@ pycodestyle
 pydocstyle
 pylint
 safety
-tox
+tox==3.16.1
