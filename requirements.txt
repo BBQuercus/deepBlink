@@ -19,6 +19,6 @@ black
 mypy
 pycodestyle
 pydocstyle
-pylint
+pylint==2.5.3
 safety
 tox
