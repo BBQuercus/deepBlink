@@ -7,7 +7,7 @@
 matplotlib
 numpy
 pandas
-pillow
+pillow==7.2.0
 scikit-image
 scipy
 tensorflow>=2.0.1
