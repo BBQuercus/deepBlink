@@ -47,7 +47,7 @@ setup(
         "numpy",
         "pandas",
         "pillow",
-        "tensorflow>=2.0.1",
+        "tensorflow>=2.0",
         "wandb>=0.7.0"
         # "scikit-image",
         # "scipy",
