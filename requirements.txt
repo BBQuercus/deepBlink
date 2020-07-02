@@ -9,7 +9,7 @@ numpy
 pandas
 pillow
 scikit-image
-scipy
+scipy==1.5.0
 tensorflow>=2.0.1
 wandb>=0.7.0
 
