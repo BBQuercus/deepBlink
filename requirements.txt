@@ -5,7 +5,7 @@
 
 # Functionality
 matplotlib
-numpy
+numpy==1.19.0
 pandas
 pillow
 scikit-image
