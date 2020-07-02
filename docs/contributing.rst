@@ -49,30 +49,44 @@ To set up `deepblink` for local development:
     git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
+4. Install the conda development environment::
 
-4. When you're done making changes run all the checks and docs builder with `tox <https://tox.readthedocs.io/en/latest/install.html>`_ one command::
+    conda env create -f environment.yml
+
+   Activate it and work as desired.
+5. In case some conda versions are outdated, be sure to update them using: ::
+
+    conda update --all
+    pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U
+
+   Once updated [1]_, export the environment for the next one to use by replacing the current environment.yml with: ::
+
+    conda env export > environment.yml
+
+6. When you're done making changes run all the checks and docs builder with `tox <https://tox.readthedocs.io/en/latest/install.html>`_ one command::
 
     tox
 
-5. Commit your changes and push your branch to GitHub::
+7. Commit your changes and push your branch to GitHub::
 
     git add .
-    git commit -m "Your detailed description of your changes."
+    git commit -m "Detailed description; Separated by semicolons; Without trailing period"
     git push origin name-of-your-bugfix-or-feature
 
-6. Submit a pull request through the GitHub website.
+8. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------
 
 All pull requests are code reviewed by the core development team. For larger changes make sure to:
 
-1. Include passing tests (run ``tox``) [1]_.
+1. Include passing tests (run ``tox``) [2]_.
 2. Update documentation when there's new API, functionality etc.
 3. Add a note to ``CHANGELOG.rst`` about the changes.
 4. Add yourself to ``AUTHORS.rst``.
 
-.. [1] If you don't have all the necessary python versions available locally you can rely on Travis - it will
+.. [1] Thanks to rbp answering question #2720014 on `stackoverflow <https://stackoverflow.com/questions/2720014/how-to-upgrade-all-python-packages-with-pip>`_.
+.. [2] If you don't have all the necessary python versions available locally you can rely on Travis - it will
        `run the tests <https://travis-ci.org/github/bbquercus/deepblink/pull_requests>`_ for each change you add in the pull request.
 
        It will be slower though ...

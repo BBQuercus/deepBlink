@@ -1,0 +1,24 @@
+# Conda is encouraged for training and development.
+# Use the environment.yml file for the most up-to-date version.
+# GPU support only works for products listed here: https://www.tensorflow.org/install/gpu
+# Conda install "tensorflow-gpu" and make sure cudnn/cudatoolkit are installed.
+
+# Functionality
+matplotlib
+numpy
+pandas
+pillow
+scikit-image
+scipy
+tensorflow>=2.0.1
+wandb>=0.7.0
+
+# Development
+bandit
+black
+mypy
+pycodestyle
+pydocstyle
+pylint
+safety
+tox

@@ -1,3 +1,4 @@
+"""Boilerplate test."""
 
 from deepblink.cli import main
 
