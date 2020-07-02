@@ -43,7 +43,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
         self.grid_size = self.image_size // self.cell_size
 
-    def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613
+    def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613,W0221
         """Logs the ground truth at train_begin."""
         ground_truth = []
         for i, mask in enumerate(self.train_masks):

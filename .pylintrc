@@ -2,13 +2,19 @@
 
 # Disable the message(s) with the given id(s).
 # C0413 - wrong-import-position of third-party libraries
+# E0401 - used when pylint has been unable to import a module.
 # E1130 - invalid-unary-operand-type false positive https://github.com/PyCQA/pylint/issues/1472
+# E1136 - emitted when a subscripted value doesn’t support subscription(i.e. doesn’t define __getitem__ method)
+# E0203 - used when an instance member is accessed before it’s actually assigned.
 # R0801 - similar lines across files
+# W0102 - used when a mutable value as list or dictionary is detected in a default value for an argument.
+# W0201 - used when an instance attribute is defined outside the __init__ method.
+# W0235 - Useless super delegation in method '__init__'
 # W0511 - TODO comments
 # W1202 - logging-format-interpolation - Behavior barring fstrings in logging https://github.com/PyCQA/pylint/issues/2395
-# missing-function-dosctring: docstyle handles
 # bad-continuation: disagrees with black formatter
-disable=E203,C0413,E1130,E1136,R0801,W0102,W0511,W1202,missing-function-docstring,bad-continuation
+# missing-function-dosctring: docstyle handles
+disable=E0401,W0201,W0235,W0511,bad-continuation
 
 [MASTER]
 
