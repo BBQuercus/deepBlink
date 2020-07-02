@@ -15,7 +15,7 @@ wandb>=0.7.0
 
 # Development
 bandit
-black
+black==19.10b0
 mypy
 pycodestyle
 pydocstyle
