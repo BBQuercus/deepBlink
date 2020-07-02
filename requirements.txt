@@ -4,7 +4,7 @@
 # Conda install "tensorflow-gpu" and make sure cudnn/cudatoolkit are installed.
 
 # Functionality
-matplotlib
+matplotlib==3.2.2
 numpy
 pandas
 pillow
