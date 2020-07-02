@@ -2,19 +2,19 @@
 To build locally start populating 'references' manually
 via apidoc from the home dir:
 
-    sphinx-apidoc -o docs/references src\
-                  -H References\
-                  --tocfile index\
-                  -f
+    $ sphinx-apidoc -o docs/references src\
+                    -H References\
+                    --tocfile index\
+                    -f
 
 Next, make sure all links are functional. Due to inconsistent behaviour,
 it currently isn't included in the tox checks. Run:
 
-    sphinx-build -b linkcheck docs dist/docs
+    $ sphinx-build -b linkcheck docs dist/docs
 
 Finally, check proper building using:
 
-    sphinx-build docs dist/docs
+    $ sphinx-build docs dist/docs
 """
 
 import os
@@ -37,7 +37,7 @@ project = "deepblink"
 year = "2020"
 author = "Bastian Eichenberger"
 copyright = f"{year}, {author}"
-version = release = "0.0.2"
+version = release = "0.0.3"
 
 pygments_style = "trac"
 templates_path = ["."]

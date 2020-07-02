@@ -1,17 +1,35 @@
 """Module that contains the command line app.
 
+NOTE - Currently not functional. Will be populated in the next release.
+Used for inferencing of new data with pretrained models.
+
+Usage:
+    deepblink <model> <input> [-o, --output] <output> [-t, --type] <type> [--verbose]
+    deepblink -i
+    deepblink --help
+
+Examples:
+    deepblink ./model.h5 ./data/ -o ./output/ -t csv
+
+Arguments:
+    <model>         Model .h5 file location.
+    <input>         Input file/folder location.
+
+Options:
+    -i              Interactive mode.
+    -o, --output    Output file/folder location. [default: input location]
+    -t, --type      Output file type. [options: csv, txt] [default: csv]
+    --verbose       Set program output to verbose. [default: quiet]
+    -h, --help      Show this help screen.
+    -V, --version   Show version.
+
 Why does this file exist, and why not put this in __main__?
-
-You might be tempted to import things from __main__ later, but that will cause
-problems: the code will get executed twice:
-
-- When you run `python -mdeepblink` python will execute
-  ``__main__.py`` as a script. That means there won't be any
-  ``deepblink.__main__`` in ``sys.modules``.
+- When you run `python -mdeepblink` or `deepblink` directly, python will
+    execute ``__main__.py`` as a script. That means there won't be any
+    ``deepblink.__main__`` in ``sys.modules``.
 - When you import __main__ it will get executed again (as a module) because
-  there's no ``deepblink.__main__`` in ``sys.modules``.
-
-Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
+    there's no ``deepblink.__main__`` in ``sys.modules``.
+- Therefore, to avoid double excecution of the code, this split-up way is safer.
 """
 import argparse
 
