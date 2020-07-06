@@ -1,7 +1,6 @@
 """List of functions to handle data including converting matrices <-> coordinates."""
 
 
-import itertools
 import math
 import operator
 from typing import Tuple
@@ -16,6 +15,13 @@ def next_power(x: int, k: int = 2) -> int:
         y = k ** power
         power += 1
     return y
+
+
+def next_multiple(x: int, k: int = 512) -> int:
+    """Calculate x's closest higher multiple of base k."""
+    if x % k:
+        x = x + (k - x % k)
+    return x
 
 
 def random_cropping(
@@ -86,9 +92,7 @@ def normalize_images(images: np.ndarray) -> np.ndarray:
     return images
 
 
-def get_coordinate_list(
-    matrix: np.ndarray, size_image: int = 512, size_grid: int = 64
-) -> np.ndarray:
+def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray:
     """Convert the prediction matrix into a list of coordinates.
 
     Note - if plotting with plt.scatter, x and y must be reversed!
@@ -96,11 +100,18 @@ def get_coordinate_list(
     Args:
         matrix: Matrix representation of spot coordinates.
         size_image: Default image size the grid was layed on.
-        size_grid: Number of grid cells used.
 
     Returns:
         Array of x, y coordinates with the shape (n, 2).
     """
+    if not matrix.ndim == 3:
+        raise ValueError("Matrix must have a shape of (x, y, 3).")
+    if not matrix.shape[2] == 3:
+        raise ValueError("Matrix must a depth of 3.")
+    if not matrix.shape[0] == matrix.shape[1] and not matrix.shape[0] >= 1:
+        raise ValueError("Matrix must have equal length >= 1 of x, y.")
+
+    size_grid = matrix.shape[0]
     size_gridcell = size_image // size_grid
     coords_x = []
     coords_y = []
@@ -108,23 +119,22 @@ def get_coordinate_list(
     # Top left coordinates of every cell
     grid = np.array([x * size_gridcell for x in range(size_grid)])
 
-    # TODO use np.where instead.
-    for x, y in itertools.product(range(matrix.shape[0]), range(matrix.shape[1])):
+    gx, gy = np.asarray(matrix[..., 0] > 0.5).nonzero()
+    for x, y in zip(gx, gy):
 
-        if matrix[x, y, 0] > 0.5:
-            grid_x = grid[x]
-            grid_y = grid[y]
-            spot_x = matrix[x, y, 1]
-            spot_y = matrix[x, y, 2]
+        grid_x = grid[x]
+        grid_y = grid[y]
+        spot_x = matrix[x, y, 1]
+        spot_y = matrix[x, y, 2]
 
-            coord_abs = get_absolute_coordinates(
-                coord_spot=(spot_x, spot_y),
-                coord_cell=(grid_x, grid_y),
-                size_gridcell=size_gridcell,
-            )
+        coord_abs = get_absolute_coordinates(
+            coord_spot=(spot_x, spot_y),
+            coord_cell=(grid_x, grid_y),
+            size_gridcell=size_gridcell,
+        )
 
-            coords_x.append(coord_abs[0])
-            coords_y.append(coord_abs[1])
+        coords_x.append(coord_abs[0])
+        coords_y.append(coord_abs[1])
 
     return np.array([coords_y, coords_x]).T
 
