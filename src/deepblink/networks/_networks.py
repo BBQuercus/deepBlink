@@ -5,6 +5,7 @@ from typing import Tuple
 import tensorflow as tf
 
 OPTIONS_CONV = {"kernel_size": 3, "padding": "same", "kernel_initializer": "he_normal"}
+"""dict: Default options used in all non-logit convolutional layers."""
 
 
 def conv_block(

@@ -3,22 +3,12 @@
 import functools
 
 import numpy as np
-import tensorflow as tf
 
 from ..augment import augment_batch_baseline
 from ..losses import f1_l2_combined_loss
 from ..losses import f1_score
 from ..losses import l2_norm
 from ._models import Model
-
-DEFAULT_TRAIN_ARGS = {
-    "batch_size": 16,
-    "epochs": 10,
-    "learning_rate": 3e-04,
-}
-DEFAULT_NETWORK_ARGS = {"n_classes": 3}
-DEFAULT_LOSS = tf.keras.losses.binary_crossentropy
-DEFAULT_OPTIMIZER = tf.keras.optimizers.Adam(DEFAULT_TRAIN_ARGS["learning_rate"])
 
 
 class SpotsModel(Model):
@@ -39,7 +29,7 @@ class SpotsModel(Model):
 
     @property
     def metrics(self) -> list:
-        """Metrics used in the training."""
+        """List of all metrics recorded during training."""
         return [
             "accuracy",
             "mse",

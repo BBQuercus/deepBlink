@@ -5,7 +5,7 @@ import tensorflow as tf
 from ._networks import OPTIONS_CONV
 
 
-def fcn(n_channels: int = 3) -> tf.keras.models.Model:
+def fcn() -> tf.keras.models.Model:
     """Simplest FCN architecture without skips or dropout."""
     i = 5  # 32
 
@@ -30,13 +30,13 @@ def fcn(n_channels: int = 3) -> tf.keras.models.Model:
     x = tf.keras.layers.Activation("relu")(x)
     x = tf.keras.layers.Conv2D(filters=2 ** (i + 3), strides=1, **OPTIONS_CONV)(x)
     x = tf.keras.layers.Activation("relu")(x)
-    x = tf.keras.layers.Conv2D(filters=n_channels, kernel_size=1, strides=1)(x)
+    x = tf.keras.layers.Conv2D(filters=3, kernel_size=1, strides=1)(x)
     x = tf.keras.layers.Activation("sigmoid")(x)
 
     return tf.keras.Model(inputs=inputs, outputs=x)
 
 
-def fcn_dropout(n_channels: int = 3) -> tf.keras.models.Model:
+def fcn_dropout() -> tf.keras.models.Model:
     """Simple FCN architecture without skips."""
     i = 6  # 64
 
@@ -73,7 +73,7 @@ def fcn_dropout(n_channels: int = 3) -> tf.keras.models.Model:
     x = tf.keras.layers.Conv2D(filters=2 ** (i + 3), strides=1, **OPTIONS_CONV)(x)
     x = tf.keras.layers.Activation("relu")(x)
     x = tf.keras.layers.Dropout(0.2)(x)
-    x = tf.keras.layers.Conv2D(filters=n_channels, kernel_size=1, strides=1)(x)
+    x = tf.keras.layers.Conv2D(filters=3, kernel_size=1, strides=1)(x)
     x = tf.keras.layers.Activation("sigmoid")(x)
 
     return tf.keras.Model(inputs=inputs, outputs=x)
