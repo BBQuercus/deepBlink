@@ -1,7 +1,9 @@
 """Boilerplate test."""
 
-from deepblink.cli import main
+
+def inc(x):
+    return x + 1
 
 
-def test_main():
-    main([])
+def test_inc():
+    assert inc(3) == 4
