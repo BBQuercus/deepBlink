@@ -47,9 +47,9 @@ setup(
         "numpy",
         "pandas",
         "pillow",
+        "scikit-image",
         "tensorflow>=2.0",
         "wandb>=0.7.0"
-        # "scikit-image",
         # "scipy",
     ],
     entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
