@@ -10,7 +10,7 @@ import numpy as np
 
 
 def remove_zeros(lst: list) -> list:
-    """Removes all occurences of "0" from a list."""
+    """Removes all occurences of "0" from a list of numpy arrays."""
     return [i for i in lst if isinstance(i, np.ndarray)]
 
 
@@ -32,8 +32,8 @@ def train_valid_split(
         valid_split: Number between 0-1 to denote the percentage of examples used for validation.
 
     Returns:
-        x_train, x_valid, y_train, y_valid: Splited lists containing training
-            or validation examples respectively.
+        (x_train, x_valid, y_train, y_valid) splited lists containing training
+        or validation examples respectively.
     """
     if not all(isinstance(i, list) for i in [x_list, y_list]):
         raise TypeError(

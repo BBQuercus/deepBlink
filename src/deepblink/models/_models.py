@@ -50,9 +50,7 @@ class Model:
         self.loss_fn = loss_fn
         self.optimizer_fn = optimizer_fn
 
-        self.network = network_fn(
-            n_channels=network_args["n_channels"]
-        )  # **network_args
+        self.network = network_fn(**network_args)
         self.dataset_args = dataset_args
         self.train_args = train_args
         self.batch_format_fn = batch_format_fn
@@ -113,7 +111,7 @@ class Model:
         )
 
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> List[float]:
-        """Evaluates on images / masks and return l2 norm and f1 score."""
+        """Evaluate on images / masks and return l2 norm and f1 score."""
         if x.ndim < 4:
             x = np.expand_dims(x, -1)
 
@@ -127,7 +125,7 @@ class Model:
         return [f1_score_.numpy(), l2_norm_.numpy()]
 
     def load_weights(self) -> None:
-        """Load model weights."""
+        """Load model weights from file."""
         self.network.load_weights(self.train_args["pretrained"])
 
     def save_weights(self) -> None:

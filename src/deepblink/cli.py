@@ -5,18 +5,14 @@ Because the model is loaded into memory for every run, it is faster to
 run multiple images at once by passing a directory as input.
 
 Usage:
-    deepblink MODEL INPUT [-o, --output] OUTPUT [-t, --type] TYPE [-v, --verbose]
-    deepblink -i
-    deepblink --help
+    ``$ deepblink MODEL INPUT [-o, --output] OUTPUT [-t, --type] TYPE [-v, --verbose]``
+    ``$ deepblink --help``
 
-Examples:
-    deepblink ./model.h5 ./data/ -o ./output/ -t csv
-
-Arguments:
+Positional Arguments:
     MODEL           model .h5 file location
     INPUT           input file/folder location
 
-Options:
+Optional Arguments:
     -h, --help      show this help screen
 
     -o, --output    output file/folder location [default: input location]
@@ -25,12 +21,11 @@ Options:
     -V, --version   show version program's version number and exit
 
 Why does this file exist, and why not put this in __main__?
-- When you run `python -mdeepblink` or `deepblink` directly, python will
-    execute ``__main__.py`` as a script. That means there won't be any
-    ``deepblink.__main__`` in ``sys.modules``.
-- When you import __main__ it will get executed again (as a module) because
-    there's no ``deepblink.__main__`` in ``sys.modules``.
-- Therefore, to avoid double excecution of the code, this split-up way is safer.
+    - When you run `python -mdeepblink` or `deepblink` directly, python will execute ``__main__.py``
+      as a script. That means there won't be any ``deepblink.__main__`` in ``sys.modules``.
+    - When you import __main__ it will get executed again (as a module) because there's no
+      ``deepblink.__main__`` in ``sys.modules``.
+    - Therefore, to avoid double excecution of the code, this split-up way is safer.
 """
 import argparse
 import glob
@@ -52,7 +47,9 @@ from .losses import f1_score
 from .losses import l2_norm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 EXTENSIONS = ["tif", "jpeg", "jpg", "png"]
+"""List[str]: List of currently supported image file extensions."""
 
 
 def _parse_args():

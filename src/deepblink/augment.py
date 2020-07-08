@@ -15,7 +15,21 @@ def augment_batch_baseline(
     translate_: bool = False,
     cell_size: int = 4,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Baseline augmentation function."""
+    """Baseline augmentation function.
+
+    Probability of augmentations is determined in the corresponding functions
+    and not in this baseline.
+
+    Args:
+        images: Batch of input image to be augmented.
+        masks: Batch of corresponding prediction matrix with ground truth values.
+        flip_: If True, images might be flipped.
+        illuminate_: If True, images might be altered in illumination.
+        gaussian_noise_: If True, gaussian noise might be added.
+        rotate_: If True, images might be rotated.
+        translate_: If True, images might be translated.
+        cell_size: Size of one cell in the prediction matrix.
+    """
     aug_images = []
     aug_masks = []
 
@@ -76,7 +90,7 @@ def gaussian_noise(
 
     Args:
         image: Image to be augmented.
-        mask: Corresponding mask with ground truth values.
+        mask: Corresponding prediction matrix with ground truth values.
         mean: Average noise pixel values added. Zero means no net difference occurs.
     """
     sigma = np.random.uniform(0.0001, 0.01)
@@ -123,8 +137,8 @@ def translate(
 
     Args:
         image: Image to be augmented.
-        mask: Corresponding mask with ground truth values.
-        cell_size: Size of one cell in the grid.
+        mask: Corresponding prediction matrix with ground truth values.
+        cell_size: Size of one cell in the prediction matrix.
     """
     direction = np.random.choice([0, 1])
     image = image.copy()

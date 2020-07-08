@@ -8,10 +8,10 @@ import tensorflow as tf
 
 
 def adam(learning_rate: float):
-    """Return the adam optimizer with a specified learning rate."""
+    """Keras' adam optimizer with a specified learning rate."""
     return tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
 
 def rmsprop(learning_rate: float):
-    """Return the rmsprop optimizer with a specified learning rate."""
+    """Keras' rmsprop optimizer with a specified learning rate."""
     return tf.keras.optimizers.RMSprop(learning_rate=learning_rate)

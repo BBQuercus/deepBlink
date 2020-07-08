@@ -1,81 +1,85 @@
-"""Metrics functions."""
+"""Functions to calculate training loss on single image."""
+
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 
 def euclidean_dist(x1: float, y1: float, x2: float, y2: float) -> float:
-    """Return the euclidean distance between two points."""
+    """Return the euclidean distance between two the points (x1, y1) and (x2, y2)."""
     return np.sqrt(np.square(x1 - x2) + np.square(y1 - y2))
 
 
-def precision(pred: np.ndarray, true: np.ndarray) -> float:
-    """Returns the precision defined as (True positive)/(True positive + False positive).
+def precision_score(pred: np.ndarray, true: np.ndarray) -> float:
+    """Precision score metric.
 
-    Precision will be measured within cell of size "cell_size". If cell_size = 1, precision
-    will be measured at resolution of pixel.
+    Defined as ``tp / (tp + fp)`` where tp is the number of true positives and fp the number of false positives.
+    Can be interpreted as the accuracy to not mislabel samples or how many selected items are relevant.
+    The best value is 1 and the worst value is 0.
 
-    Note – direction dependent, arguments cant be switched!!
+    NOTE – direction dependent, arguments cant be switched!!
 
     Args:
         pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
         true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-
-    Returns:
-        Precision score.
     """
     selection = pred[..., 0] == 1
-    p = np.mean(true[selection, 0])
-    return p
+    precision = np.mean(true[selection, 0])
+    return precision
 
 
-def recall(pred: np.ndarray, true: np.ndarray) -> float:
-    """Returns the recall defined as (True positive)/(True positive + False negative).
+def recall_score(pred: np.ndarray, true: np.ndarray) -> float:
+    """Recall score metric.
 
-    Recall will be measured within cell of size "cell_size". If cell_size = 1, recall
-    will be measured at resolution of pixel.
+    Defined as ``tp / (tp + fn)`` where tp is the number of true positives and fn the number of false negatives.
+    Can be interpreted as the accuracy of finding positive samples or how many relevant samples were selected.
+    The best value is 1 and the worst value is 0.
 
-    Note – direction dependent, arguments cant be switched!!
+    NOTE – direction dependent, arguments cant be switched!!
 
     Args:
         pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
         true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-
-    Returns:
-        Recall score.
     """
     selection = true[..., 0] == 1
-    r = np.mean(pred[selection, 0])
-    return r
+    recall = np.mean(pred[selection, 0])
+    return recall
 
 
-def f1_score(pred: np.ndarray, true: np.ndarray) -> float:
-    """Returns F1 score defined as: 2 * precision*recall / precision+recall.
+def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
+    r"""F1 score metric.
 
-    F1 score will be measured within cell of size "cell_size". If cell_size = 1, F1 score
-    will be measured at resolution of pixel.
+    .. math::
+        F1 = \frac{2 * precision * recall} / {precision + recall}.
 
-    Note – direction dependent, arguments cant be switched!!
+    The equally weighted average of precision and recall.
+    The best value is 1 and the worst value is 0.
+
+    NOTE – direction dependent, arguments cant be switched!!
 
     Args:
         pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
         true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-
-    Returns:
-        F1 score.
     """
-    r = recall(pred, true)
-    p = precision(pred, true)
+    recall = recall_score(pred, true)
+    precision = precision_score(pred, true)
 
-    if r == 0 and p == 0:
-        return 0
+    if recall == 0 and precision == 0:
+        return None
 
-    f1_score_ = 2 * p * r / (p + r)
-    return f1_score_
+    f1_value = (2 * precision * recall) / (precision + recall)
+    return f1_value
 
 
-def error_on_coordinates(pred: np.ndarray, true: np.ndarray, cell_size: int) -> float:
-    """Calculate the average error on spot coordinates.
+# TODO find better name
+def error_on_coordinates(
+    pred: np.ndarray, true: np.ndarray, cell_size: int
+) -> Optional[float]:
+    """The mean error on spot coordinates.
+
+    F1 score will be measured within cell of size "cell_size".
+    If cell_size = 1, F1 score will be measured at resolution of pixel.
 
     Args:
         pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
@@ -83,7 +87,7 @@ def error_on_coordinates(pred: np.ndarray, true: np.ndarray, cell_size: int) -> 
         cell_size: Size of cell used to calculate F1 score, precision and recall.
 
     Returns:
-        Error on coordinate.
+        If no spots are found None, else the error on coordinate.
     """
     spot = (true[..., 0] == 1) & (pred[..., 0] == 1)
     d = 0.0
@@ -101,49 +105,47 @@ def error_on_coordinates(pred: np.ndarray, true: np.ndarray, cell_size: int) -> 
                 counter += 1
 
     if counter:
-        d = d / counter
-    else:
-        d = None  # type: ignore
+        return d / counter
 
-    return d
+    return None
 
 
+# TODO find better name
 def weighted_f1_coordinates(
     pred: np.ndarray, true: np.ndarray, cell_size: int, weight: float = 1
-) -> float:
-    """Returns weighted single score defined as: weight*(1-F1) + (error on coordinate).
+) -> Optional[float]:
+    """A single weighted score defined as ``weight*(F1 loss) + (error on coordinate)``.
 
-    F1 score will be measured within cell of size "cell_size". If cell_size = 1, F1 score
-    will be measured at resolution of pixel.
-
-    Note – direction dependent, arguments cant be switched!!
+    F1 score will be measured within cell of size "cell_size".
+    If cell_size = 1, F1 score will be measured at resolution of pixel.
+    NOTE – direction dependent, arguments cant be switched!!
 
     Args:
         pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
         true: np.ndarray of shape (n, n, 3): p, x, y format for each cell
         cell_size: Size of cells in the grid used to calculate F1 score, relative coordinates.
         weight: Weight of 1-F1 score in the average default = 1.
-
-    Returns:
-        Weighted score.
     """
-    f1_score_ = f1_score(pred, true)
-    f1_score_ = (1.0 - f1_score_) * weight
-
+    f1_value = f1_score(pred, true)
     error_coordinates = error_on_coordinates(pred, true, cell_size)
-    if error_coordinates is not None:
-        score = (f1_score_ + error_coordinates) / 2
+
+    if f1_value is not None and error_coordinates is not None:
+        f1_value = (1.0 - f1_value) * weight
+        score = (f1_value + error_coordinates) / 2
         return score
 
     return None
 
 
+# TODO find better name
 def compute_score(
     true: np.ndarray, pred: np.ndarray, cell_size: int, weight: float
 ) -> pd.DataFrame:
     """Compute F1 score, error on coordinate and a weighted average of the two.
 
-    Note – direction dependent, arguments cant be switched!!
+    F1 score will be measured within cell of size "cell_size".
+    If cell_size = 1, F1 score will be measured at resolution of pixel.
+    NOTE – direction dependent, arguments cant be switched!!
 
     Args:
         pred: list of np.ndarray of shape (n, n, 3): p, x, y format for each cell.
@@ -154,17 +156,17 @@ def compute_score(
     Returns:
         DataFrame with all three columns corresponding to f1 score, coordinate error, and weighted average.
     """
-    f1_score_ = pd.Series()
+    f1_value = pd.Series()
     error_on_coordinates_ = pd.Series()
     weighted_f1_coordinates_ = pd.Series()
 
-    for p, t in zip(true, pred):
-        f1_score_.append(f1_score(p, t))
+    for t, p in zip(true, pred):
+        f1_value.append(f1_score(p, t))
         error_on_coordinates_.append(error_on_coordinates(p, t, cell_size))
         weighted_f1_coordinates_.append(
             weighted_f1_coordinates(p, t, cell_size, weight)
         )
 
-    df = pd.DataFrame([f1_score_, error_on_coordinates_, weighted_f1_coordinates_]).T
+    df = pd.DataFrame([f1_value, error_on_coordinates_, weighted_f1_coordinates_]).T
     df.columns = ["f1_score", "err_coordinate", "weighted_average"]
     return df

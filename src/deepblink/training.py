@@ -106,7 +106,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
 def train_model(
     model: Model, dataset: Dataset, cfg: Dict, use_wandb: bool = True
 ) -> Model:
-    """Model training/fitting with wandb callbacks."""
+    """Model training loop with callbacks."""
     dataset_args = cfg["dataset_args"]
     image_callback = WandbImageLogger(model, dataset, dataset_args["cell_size"])
     saver_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -118,15 +118,15 @@ def train_model(
         wandb_callback = wandb.keras.WandbCallback()
         callbacks.append(wandb_callback)
 
-    tic = time.time()
     model.fit(dataset=dataset, callbacks=callbacks)
-    print("Training took {:2f} s".format(time.time() - tic))
 
     return model
 
 
 def run_experiment(cfg: Dict, save_weights: bool = False):
     """Run a training experiment.
+
+    An example of the configuration file below can be viewed in the bin/ directory of the github repository.
 
     Args:
         cfg: Dictionary configuration file.
@@ -147,22 +147,25 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
                 model (str): Name of the model class, e.g. "SpotsModel"
                 network (str): Name of the network architecture, e.g. "resnet"
                 network_args:
-                    n_channels (int): Set to 3 unless a custom architecture is used.
+                    Arguments passed to the network function.
+                    *dropout (int): Percentage of dropout only for resnet architecture.
                 loss (str): Primary loss, e.g. "binary_crossentropy"
                 optimizer (str): Optimizer, e.g. "adam"
                 train_args:
                     batch_size (int): Number of images per mini-batch.
                     epochs (int): Total rounds of training.
                     learning_rate (float): Learning rate, e.g. 1e-4
+                    pretrained (str): Optional weights file to jumpstart training.
+
 
         save_weights: If model weights should be saved separately.
             The complete model is automatically saved.
     """
-    dataset_class_ = get_from_module("spot_detection.datasets", cfg["dataset"])
-    model_class_ = get_from_module("spot_detection.models", cfg["model"])
-    network_fn_ = get_from_module("spot_detection.networks", cfg["network"])
-    optimizer_fn_ = get_from_module("spot_detection.optimizers", cfg["optimizer"])
-    loss_fn_ = get_from_module("spot_detection.losses", cfg["loss"])
+    dataset_class_ = get_from_module(".datasets", cfg["dataset"])
+    model_class_ = get_from_module(".models", cfg["model"])
+    network_fn_ = get_from_module(".networks", cfg["network"])
+    optimizer_fn_ = get_from_module(".optimizers", cfg["optimizer"])
+    loss_fn_ = get_from_module(".losses", cfg["loss"])
 
     network_args = cfg.get("network_args", {})
     dataset_args = cfg.get("dataset_args", {})

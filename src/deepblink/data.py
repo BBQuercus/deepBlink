@@ -30,13 +30,13 @@ def random_cropping(
     """Randomly crop an image and mask to size crop_size.
 
     Args:
-        - image: Image to be cropped.
-        - mask: Mask to be cropped.
-        - cell_size: size of cell used to calculate F1 score
-        - crop_size: Size to crop image and mask (both dimensions).
+        image: Image to be cropped.
+        mask: Mask to be cropped.
+        cell_size: size of cell used to calculate F1 score
+        crop_size: Size to crop image and mask (both dimensions).
 
     Returns:
-        - crop_image, crop_mask: Cropped image and mask respectively with shape (crop_size, crop_size).
+        crop_image, crop_mask: Cropped image and mask respectively with shape (crop_size, crop_size).
     """
     if not all(isinstance(i, np.ndarray) for i in [image, mask]):
         raise TypeError(
@@ -83,7 +83,14 @@ def random_cropping(
 
 
 def normalize_images(images: np.ndarray) -> np.ndarray:
-    """Normalizes images based on bit depth."""
+    """Normalizes images based on bit depth.
+
+    Args:
+        images: Input image with uint8 or uint16 formatting.
+
+    Returns:
+        Image normalized to 0-1 as float32.
+    """
     if images.dtype == np.uint8:
         return (images / 255).astype(np.float32)
     if images.dtype == np.uint16:
@@ -95,7 +102,7 @@ def normalize_images(images: np.ndarray) -> np.ndarray:
 def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray:
     """Convert the prediction matrix into a list of coordinates.
 
-    Note - if plotting with plt.scatter, x and y must be reversed!
+    NOTE - if plotting with plt.scatter, x and y must be reversed!
 
     Args:
         matrix: Matrix representation of spot coordinates.
@@ -174,7 +181,7 @@ def get_prediction_matrix(
         size_y: if not provided, it assumes it is squared image, otherwise the second shape of image
 
     Returns:
-        Prediction (nd.nparray): numpy array of shape (n, n, 3): p, x, y format for each cell.
+        The prediction matrix as numpy array of shape (n, n, 3): p, x, y format for each cell.
     """
     if not all(isinstance(i, int) for i in (size, cell_size)):
         raise TypeError(
