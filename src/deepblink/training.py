@@ -41,7 +41,6 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self.valid_masks = dataset.y_valid[:example_count]  # type: ignore[index]
         self.cell_size = cell_size
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
-        self.grid_size = self.image_size // self.cell_size
 
     def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613,W0221
         """Logs the ground truth at train_begin."""
@@ -49,9 +48,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         for i, mask in enumerate(self.train_masks):
             plt.figure()
             plt.imshow(self.train_images[i])
-            coord_list = get_coordinate_list(
-                matrix=mask, size_image=self.image_size, size_grid=self.grid_size
-            )
+            coord_list = get_coordinate_list(matrix=mask, size_image=self.image_size,)
             plt.scatter(
                 coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
             )
@@ -62,9 +59,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         for i, mask in enumerate(self.valid_masks):
             plt.figure()
             plt.imshow(self.valid_images[i])
-            coord_list = get_coordinate_list(
-                matrix=mask, size_image=self.image_size, size_grid=self.grid_size
-            )
+            coord_list = get_coordinate_list(matrix=mask, size_image=self.image_size,)
             plt.scatter(
                 coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
             )
@@ -83,7 +78,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
             plt.imshow(image)
             pred_mask = self.model_wrapper.predict_on_image(image)
             coord_list = get_coordinate_list(
-                matrix=pred_mask, size_image=self.image_size, size_grid=self.grid_size
+                matrix=pred_mask, size_image=self.image_size,
             )
             plt.scatter(
                 coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
@@ -97,7 +92,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
             plt.imshow(image)
             pred_mask = self.model_wrapper.predict_on_image(image)
             coord_list = get_coordinate_list(
-                matrix=pred_mask, size_image=self.image_size, size_grid=self.grid_size
+                matrix=pred_mask, size_image=self.image_size,
             )
             plt.scatter(
                 coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10

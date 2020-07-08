@@ -119,8 +119,8 @@ def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray
     # Top left coordinates of every cell
     grid = np.array([x * size_gridcell for x in range(size_grid)])
 
-    gx, gy = np.asarray(matrix[..., 0] > 0.5).nonzero()
-    for x, y in zip(gx, gy):
+    matrix_x, matrix_y = np.asarray(matrix[..., 0] > 0.5).nonzero()
+    for x, y in zip(matrix_x, matrix_y):
 
         grid_x = grid[x]
         grid_y = grid[y]

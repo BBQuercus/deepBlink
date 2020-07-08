@@ -4,6 +4,7 @@ import os
 import random
 from typing import Iterable
 from typing import List
+from typing import Tuple
 
 import numpy as np
 
@@ -76,10 +77,16 @@ def train_valid_split(
 
 
 # TODO check if files have x_train etc.
-def load_npz(fname: str):
+def load_npz(fname: str,) -> Tuple[np.ndarray, ...]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".
+
+    Args:
+        fname: Path to npz file.
+
+    Returns:
+        (x_train, y_train, x_valid, y_valid, x_test, y_test) as numpy arrays.
     """
     with np.load(fname, allow_pickle=True) as data:
         return (
