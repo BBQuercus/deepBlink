@@ -7,7 +7,8 @@
 .. image:: https://ci.appveyor.com/api/projects/status/86ylig998derkv0c/branch/master?svg=true
     :target: https://ci.appveyor.com/project/BBQuercus/deepblink/branch/master
     :alt: Appveyor build status.
-.. image:: https://img.shields.io/badge/License-MIT-brightgreen.svg
+.. image:: https://img.shields.io/badge/license-MIT-brightgreen.svg
+    :target: https://raw.githubusercontent.com/BBQuercus/deepBlink/master/LICENSE
     :alt: GitHub code licence is MIT.
 .. .. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
 ..     :target: https://codecov.io/gh/BBQuercus/deepBlink
@@ -36,7 +37,15 @@ relies on neural networks to automatically find spots without the need for
 human intervention. DeepBlink is available as a ready-to-use command-line
 interface.
 
-Example images will follow shortly.
+.. raw:: html
+
+    <table width="100%">
+      <tr>
+        <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/usage.jpg" alt="Basic usage example of deepBlink."></th>
+        <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/example.jpg" alt="Example images processed with deepBlink."></th>
+      </tr>
+    </table>
+
 
 Installation
 ============
