@@ -41,6 +41,10 @@ interface.
 
     <table width="100%">
       <tr>
+        <th>Usage</th>
+        <th>Example</th>
+      </tr>
+      <tr>
         <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/usage.jpg" alt="Basic usage example of deepBlink."></th>
         <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/example.jpg" alt="Example images processed with deepBlink."></th>
       </tr>
