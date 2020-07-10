@@ -30,8 +30,23 @@ setup(
         re.compile("^.. start-badges.*^.. end-badges", re.M | re.S)
         .sub("", read("README.rst"))
         .replace(
-            '.. raw:: html\n\n    <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">',  # noqa: E501, pylint: disable=c0301
-            ".. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg\n    :width: 200px\n    :align: right\n    :alt: Logo of deepBlink.",  # noqa: E501, pylint: disable=c0301
+            '.. raw:: html\n\n    <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">',
+            ".. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg\n    :width: 200px\n    :align: right\n    :alt: Logo of deepBlink.",
+        )
+        .replace(
+            """.. raw:: html
+
+    <table width="100%">
+      <tr>
+        <th>Usage</th>
+        <th>Example</th>
+      </tr>
+      <tr>
+        <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/usage.jpg" alt="Basic usage example of deepBlink."></th>
+        <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/example.jpg" alt="Example images processed with deepBlink."></th>
+      </tr>
+    </table>""",
+            ".. image:: https://github.com/bbquercus/deepblink/raw/master/images/usage.jpg\n    :width: 100%\n    :alt: Basic usage example of deepBlink.\n\n.. image:: https://github.com/bbquercus/deepblink/raw/master/images/example.jpg\n    :width: 100%\n    :alt: Example images processed with deepBlink.",
         ),
         re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("docs/changelog.rst")),
     ),
@@ -66,17 +81,19 @@ setup(
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 3 - Alpha",
-        "Intended Audience :: Science/Research",
+        "Environment :: Console",
         "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: Unix",
-        "Operating System :: POSIX",
+        "Operating System :: MacOS",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Artificial Life",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",

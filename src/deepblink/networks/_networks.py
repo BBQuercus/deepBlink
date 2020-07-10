@@ -11,7 +11,16 @@ OPTIONS_CONV = {"kernel_size": 3, "padding": "same", "kernel_initializer": "he_n
 def conv_block(
     inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2, dropout: float = 0
 ) -> tf.keras.layers.Layer:
-    """Convolutional block."""
+    """Convolutional block with optional dropout layer.
+
+    n_convs * (Conv2D -> ReLU -> Optional Dropout).
+
+    Args:
+        inputs: Input layer.
+        filters: Number of convolutional filters applied.
+        n_convs: Number of convolution+relu blocks.
+        dropout: If > 0, a dropout layer will be added.
+    """
     x = inputs
     for _ in range(n_convs):
         x = tf.keras.layers.Conv2D(filters, **OPTIONS_CONV)(x)
@@ -24,7 +33,7 @@ def conv_block(
 def convpool_block(
     inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2
 ) -> tf.keras.layers.Layer:
-    """n_convs * (Convolution -> ReLU) -> MaxPooling."""
+    """Conv_block with added 2D MaxPooling."""
     x = conv_block(inputs=inputs, filters=filters, n_convs=n_convs)
     x = tf.keras.layers.MaxPooling2D()(x)
 
@@ -34,7 +43,12 @@ def convpool_block(
 def convpool_skip_block(
     inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2
 ) -> Tuple[tf.keras.layers.Layer, tf.keras.layers.Layer]:
-    """n_convs * (Convolution -> ReLU) -> MaxPooling."""
+    """Conv_block with skip connection.
+
+    Returns:
+        skip: Layer to be used as skip connection. Output from conv_block.
+        x: Layer to be used in next process. Output from 2D MaxPooling.
+    """
     skip = conv_block(inputs=inputs, filters=filters, n_convs=n_convs)
     x = tf.keras.layers.MaxPooling2D()(skip)
 
@@ -47,7 +61,16 @@ def upconv_block(
     filters: int,
     n_convs: int = 2,
 ) -> tf.keras.layers.Layer:
-    """Upsampling -> Conv -> Concat -> Conv."""
+    """Upconvolutional block with skip connection concatenation.
+
+    Upsampling -> Conv2D -> ReLU -> Concatenation with skip -> Conv_block.
+
+    Args:
+        inputs: Input layer.
+        skip: Skip connection input layer.
+        filters: Number of convolutional filters applied.
+        n_convs: Number of convolution+relu blocks after concatenation.
+    """
     x = inputs
     x = tf.keras.layers.UpSampling2D()(x)
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
@@ -61,7 +84,10 @@ def upconv_block(
 def residual_block(
     inputs: tf.keras.layers.Layer, filters: int
 ) -> tf.keras.layers.Layer:
-    """Simple residual block with addition of skips."""
+    """Simple residual block with skip connection addition.
+
+    Conv2D -> ReLU (skip) -> Conv2D -> ReLU -> Conv2D -> Addition with skip -> ReLU.
+    """
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(inputs)
     x = tf.keras.layers.Activation("relu")(x)
     skip = x
@@ -79,7 +105,7 @@ def residual_block(
 def logit_block(
     inputs: tf.keras.layers.Layer, n_channels: int
 ) -> tf.keras.layers.Layer:
-    """Final decision output."""
+    """Final decision output with sigmoid/softmax activation depending on n_channels."""
     x = tf.keras.layers.Conv2D(filters=n_channels, kernel_size=1)(inputs)
     if n_channels == 1:
         x = tf.keras.layers.Activation("sigmoid")(x)
