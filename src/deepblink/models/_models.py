@@ -50,11 +50,16 @@ class Model:
         self.loss_fn = loss_fn
         self.optimizer_fn = optimizer_fn
 
-        self.network = network_fn(**network_args)
         self.dataset_args = dataset_args
         self.train_args = train_args
         self.batch_format_fn = batch_format_fn
         self.batch_augment_fn = batch_augment_fn
+
+        try:
+            self.network = network_fn(**network_args)
+        except TypeError:
+            print("Default network args used.")
+            self.network = network_fn()
 
         try:
             self.load_weights()

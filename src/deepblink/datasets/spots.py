@@ -15,9 +15,9 @@ class SpotsDataset(Dataset):
         super().__init__(name)
 
     @property
-    def data_filename(self) -> str:
+    def data_filename(self) -> str:  # type: ignore[return-value]
         """Return the absolute path to dataset."""
-        return f"{os.path.join(DATA_DIRNAME, self.name)}.npz"  # type: ignore[arg-type]
+        return os.path.abspath(self.name)  # type: ignore
 
     def load_data(self) -> None:
         """Load dataset into memory."""

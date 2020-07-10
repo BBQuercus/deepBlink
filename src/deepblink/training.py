@@ -1,8 +1,9 @@
 """Training functions."""
 
+from typing import Dict
+import os
 import platform
 import time
-from typing import Dict
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -23,7 +24,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         model_wrapper: Model used for predictions.
         dataset: Dataset class containing data.
         cell_size: Size of one cell in the grid.
-        example_count: Number of examples saved for display.
+        n_examples: Number of examples saved for display.
     """
 
     def __init__(
@@ -31,14 +32,14 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         model_wrapper: Model,
         dataset: Dataset,
         cell_size: int = 4,
-        example_count: int = 4,
+        n_examples: int = 4,
     ):
         super().__init__()
         self.model_wrapper = model_wrapper
-        self.valid_images = dataset.x_valid[:example_count]  # type: ignore[index]
-        self.train_images = dataset.x_train[:example_count]  # type: ignore[index]
-        self.train_masks = dataset.y_train[:example_count]  # type: ignore[index]
-        self.valid_masks = dataset.y_valid[:example_count]  # type: ignore[index]
+        self.valid_images = dataset.x_valid[:n_examples]  # type: ignore[index]
+        self.train_images = dataset.x_train[:n_examples]  # type: ignore[index]
+        self.train_masks = dataset.y_train[:n_examples]  # type: ignore[index]
+        self.valid_masks = dataset.y_valid[:n_examples]  # type: ignore[index]
         self.cell_size = cell_size
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
 
@@ -107,16 +108,20 @@ def train_model(
     model: Model, dataset: Dataset, cfg: Dict, use_wandb: bool = True
 ) -> Model:
     """Model training loop with callbacks."""
-    dataset_args = cfg["dataset_args"]
-    image_callback = WandbImageLogger(model, dataset, dataset_args["cell_size"])
-    saver_callback = tf.keras.callbacks.ModelCheckpoint(
-        f"../models/model_{cfg['name']}_{int(time.time())}.h5", save_best_only=False,
+    callbacks = []
+
+    cb_saver = tf.keras.callbacks.ModelCheckpoint(
+        os.path.join(cfg["savedir"], f"{cfg['name']}_{int(time.time())}.h5"),
+        save_best_only=True,
     )
-    callbacks = [image_callback, saver_callback]
+    callbacks.append(cb_saver)
 
     if use_wandb:
-        wandb_callback = wandb.keras.WandbCallback()
-        callbacks.append(wandb_callback)
+        cb_image = WandbImageLogger(model, dataset, cfg["dataset_args"]["cell_size"])
+        callbacks.append(cb_image)
+
+        cb_wandb = wandb.keras.WandbCallback()
+        callbacks.append(cb_wandb)
 
     model.fit(dataset=dataset, callbacks=callbacks)
 
@@ -127,6 +132,8 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
     """Run a training experiment.
 
     An example of the configuration file below can be viewed in the bin/ directory of the github repository.
+    NOTE - There are currently only one type of dataset and model option. This is intentional to make
+    future development easier of new models such as 3D / 4D options.
 
     Args:
         cfg: Dictionary configuration file.
@@ -134,6 +141,7 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
 
                 name (str): Name of the Wandb project.
                 comments (str): Comments on runs.
+                savedir (str): Path to where the model should be saved.
                 use_wandb (bool): If Wandb should be used.
                 dataset (str): Name of dataset class, e.g. "SpotsDataset"
                 dataset_args:
@@ -161,28 +169,27 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
         save_weights: If model weights should be saved separately.
             The complete model is automatically saved.
     """
-    dataset_class_ = get_from_module(".datasets", cfg["dataset"])
-    model_class_ = get_from_module(".models", cfg["model"])
-    network_fn_ = get_from_module(".networks", cfg["network"])
-    optimizer_fn_ = get_from_module(".optimizers", cfg["optimizer"])
-    loss_fn_ = get_from_module(".losses", cfg["loss"])
+    dataset_class = get_from_module("deepblink.datasets", cfg["dataset"])
+    model_class = get_from_module("deepblink.models", cfg["model"])
+    network_fn = get_from_module("deepblink.networks", cfg["network"])
+    optimizer_fn = get_from_module("deepblink.optimizers", cfg["optimizer"])
+    loss_fn = get_from_module("deepblink.losses", cfg["loss"])
 
     network_args = cfg.get("network_args", {})
     dataset_args = cfg.get("dataset_args", {})
     train_args = cfg.get("train_args", {})
 
-    dataset = dataset_class_(dataset_args["version"])
+    dataset = dataset_class(dataset_args["version"])
     dataset.load_data()
 
     use_wandb = cfg["use_wandb"]
-
-    model = model_class_(
+    model = model_class(
         dataset_args=dataset_args,
         dataset_cls=dataset,
-        loss_fn=loss_fn_,
+        loss_fn=loss_fn,
         network_args=network_args,
-        network_fn=network_fn_,
-        optimizer_fn=optimizer_fn_,
+        network_fn=network_fn,
+        optimizer_fn=optimizer_fn,
         train_args=train_args,
     )
 
