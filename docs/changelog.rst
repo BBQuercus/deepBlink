@@ -2,6 +2,16 @@
 Changelog
 =========
 
+0.0.4 (2020-07-10)
+------------------
+
+* Addition of command line interface (currently without verbosity capabilities).
+* Bin/ folder with ready to use training script.
+* Removal of src/ directory. Deepblink is now sailing GitHub on its own.
+* Major docs overhaul with the addition of more detailed input / functionality descriptions and the addition of a usage overview and example in README.
+* @zhanyinx is now listed as co-author.
+
+
 0.0.3 (2020-07-02)
 ------------------
 

@@ -2,11 +2,8 @@
 
 import io
 import re
-from glob import glob
-from os.path import basename
 from os.path import dirname
 from os.path import join
-from os.path import splitext
 
 from setuptools import find_packages
 from setuptools import setup
@@ -22,7 +19,7 @@ def read(*names, **kwargs):
 setup(
     # Description
     name="deepblink",
-    version="0.0.3",
+    version="0.0.4",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description="%s\n%s"
@@ -51,9 +48,7 @@ setup(
         re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("docs/changelog.rst")),
     ),
     # Installation
-    packages=find_packages("src"),
-    package_dir={"": "src"},
-    py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     python_requires=">=3.6, !=3.9.*",
@@ -69,8 +64,8 @@ setup(
     ],
     entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
     # Metadata
-    author="Bastian Eichenberger",
-    author_email="bastian@eichenbergers.ch",
+    author="Bastian Eichenberger, YinXiu Zhan",
+    author_email="bastian@eichenbergers.ch, yinxiuzhan89@gmail.com",
     url="https://github.com/bbquercus/deepblink/",
     project_urls={
         "Documentation": "https://deepblink.readthedocs.io/",
