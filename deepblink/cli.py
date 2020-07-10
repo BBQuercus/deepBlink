@@ -47,6 +47,7 @@ from .losses import f1_score
 from .losses import l2_norm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+"""Removes tensorflow's information on CPU / GPU availablity."""
 
 EXTENSIONS = ["tif", "jpeg", "jpg", "png"]
 """List[str]: List of currently supported image file extensions."""
@@ -90,7 +91,7 @@ def _parse_args():
         action="store_true",
         help="output file/folder location [default: input location]",
     )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.3")
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.4")
     args = parser.parse_args()
 
     return args

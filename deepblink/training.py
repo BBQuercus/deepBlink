@@ -1,9 +1,9 @@
 """Training functions."""
 
-from typing import Dict
 import os
 import platform
 import time
+from typing import Dict
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
