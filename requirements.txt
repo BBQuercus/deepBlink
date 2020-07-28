@@ -6,7 +6,7 @@
 # Functionality
 matplotlib==3.2.2
 numpy==1.19.0
-pandas==1.0.5
+pandas==1.1.0
 pillow==7.2.0  # wandb requirement
 scikit-image==0.17.2
 scipy==1.5.0
