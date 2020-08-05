@@ -5,6 +5,7 @@ import math
 import operator
 from typing import Tuple
 
+import numba
 import numpy as np
 
 
@@ -169,6 +170,7 @@ def get_absolute_coordinates(
     return coord_abs  # type: ignore
 
 
+@numba.jit
 def get_prediction_matrix(
     spot_coord: np.ndarray, size: int, cell_size: int, size_y: int = None
 ) -> np.ndarray:
@@ -176,17 +178,17 @@ def get_prediction_matrix(
 
     Args:
         spot_coord: List of coordinates in x, y format with shape (n, 2).
-        size: size of the image from which List of coordinates are extracted.
-        cell_size: size of cell used to calculate F1 score, precision and recall.
-        size_y: if not provided, it assumes it is squared image, otherwise the second shape of image
+        size: Size of the image from which List of coordinates are extracted.
+        cell_size: Size of cell used to calculate F1 score, precision and recall.
+        size_y: If not provided, assumes a squared image. Else the length of the y axis.
 
     Returns:
         The prediction matrix as numpy array of shape (n, n, 3): p, x, y format for each cell.
     """
-    if not all(isinstance(i, int) for i in (size, cell_size)):
-        raise TypeError(
-            f"size and cell_size must be int, but are {type(size), type(cell_size)}."
-        )
+    # if not all(isinstance(i, int) for i in (size, cell_size)):
+    #     raise TypeError(
+    #         f"size and cell_size must be int, but are {type(size), type(cell_size)}."
+    #     )
 
     nrow = math.ceil(size / cell_size)
     ncol = nrow
