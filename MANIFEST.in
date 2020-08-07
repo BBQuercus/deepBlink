@@ -1,20 +1,13 @@
-graft docs
-graft src
-graft ci
-graft tests
-graft bin
-
+prune bin
+prune ci
+prune docs
 prune images
+prune tests
 
-include .bumpversion.cfg
-include .coveragerc
-include .editorconfig
-include .pylintrc
+exclude .*
+exclude tox.ini
+global-exclude *.py[cod] __pycache__/* *.so *.dylib
 
 include LICENSE
 include README.rst
-
 include requirements.txt environment.yml
-include tox.ini .travis.yml .appveyor.yml .readthedocs.yml .pre-commit-config.yaml
-
-global-exclude *.py[cod] __pycache__/* *.so *.dylib

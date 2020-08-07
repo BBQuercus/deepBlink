@@ -1,20 +1,7 @@
 """Setup file for pypi package called deepblink."""
 
-import io
-import re
-from os.path import dirname
-from os.path import join
-
 from setuptools import find_packages
 from setuptools import setup
-
-
-def read(*names, **kwargs):
-    with io.open(
-        join(dirname(__file__), *names), encoding=kwargs.get("encoding", "utf8")
-    ) as f:
-        return f.read()
-
 
 setup(
     # Description
@@ -22,31 +9,12 @@ setup(
     version="0.0.4",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
-    long_description="%s\n%s"
-    % (
-        re.compile("^.. start-badges.*^.. end-badges", re.M | re.S)
-        .sub("", read("README.rst"))
-        .replace(
-            '.. raw:: html\n\n    <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">',
-            ".. image:: https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg\n    :width: 200px\n    :align: right\n    :alt: Logo of deepBlink.",
-        )
-        .replace(
-            """.. raw:: html
+    long_description="""In biomedical microscopy data, a common task involves the detection of diffraction-limited spots that visualize single proteins, domains, mRNAs, and many more. These spots were traditionally detected with mathematical operators such as Laplacian of Gaussian. These operators, however, rely on human input ranging from image-intensity thresholds, approximative spot sizes, etc. This process is tedious and not always reliable.
 
-    <table width="100%">
-      <tr>
-        <th>Usage</th>
-        <th>Example</th>
-      </tr>
-      <tr>
-        <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/usage.jpg" alt="Basic usage example of deepBlink."></th>
-        <th min-width="200px" width="50%"><img src="https://github.com/bbquercus/deepblink/raw/master/images/example.jpg" alt="Example images processed with deepBlink."></th>
-      </tr>
-    </table>""",
-            ".. image:: https://github.com/bbquercus/deepblink/raw/master/images/usage.jpg\n    :width: 100%\n    :alt: Basic usage example of deepBlink.\n\n.. image:: https://github.com/bbquercus/deepblink/raw/master/images/example.jpg\n    :width: 100%\n    :alt: Example images processed with deepBlink.",
-        ),
-        re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("docs/changelog.rst")),
-    ),
+    DeepBlink relies on neural networks to automatically find spots without the need for human intervention. DeepBlink is available as a ready-to-use command-line interface.
+
+    All deepBlink wheels distributed on PyPI are MIT licensed.
+    """,
     # Installation
     packages=find_packages(),
     include_package_data=True,
