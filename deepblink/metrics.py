@@ -1,5 +1,6 @@
 """Functions to calculate training loss on single image."""
 
+import warnings
 from typing import Optional
 
 import numpy as np
@@ -94,15 +95,17 @@ def error_on_coordinates(
     counter = 0
     assert pred.shape == true.shape
 
-    for i in range(len(pred)):
-        for j in range(len(pred)):
-            if spot[i, j]:
-                x1 = true[i, j, 1] * cell_size
-                x2 = pred[i, j, 1] * cell_size
-                y1 = true[i, j, 2] * cell_size
-                y2 = pred[i, j, 2] * cell_size
-                d += euclidean_dist(x1=x1, y1=y1, x2=x2, y2=y2)
-                counter += 1
+    # for i in range(len(pred)):
+    #     for j in range(len(pred)):
+    #         if spot[i, j]:
+    row, col = np.asarray(spot).nonzero()
+    for i, j in zip(row, col):
+        x1 = true[i, j, 1] * cell_size
+        x2 = pred[i, j, 1] * cell_size
+        y1 = true[i, j, 2] * cell_size
+        y2 = pred[i, j, 2] * cell_size
+        d += euclidean_dist(x1=x1, y1=y1, x2=x2, y2=y2)
+        counter += 1
 
     if counter:
         return d / counter
@@ -110,7 +113,6 @@ def error_on_coordinates(
     return None
 
 
-# TODO find better name
 def weighted_f1_coordinates(
     pred: np.ndarray, true: np.ndarray, cell_size: int, weight: float = 1
 ) -> Optional[float]:
@@ -126,6 +128,12 @@ def weighted_f1_coordinates(
         cell_size: Size of cells in the grid used to calculate F1 score, relative coordinates.
         weight: Weight of 1-F1 score in the average default = 1.
     """
+    warnings.warn(
+        """This function was used in development to combine two metrics.
+        It will be depreciated in the next major release.""",
+        DeprecationWarning,
+    )
+
     f1_value = f1_score(pred, true)
     error_coordinates = error_on_coordinates(pred, true, cell_size)
 
@@ -138,9 +146,7 @@ def weighted_f1_coordinates(
 
 
 # TODO find better name
-def compute_score(
-    true: np.ndarray, pred: np.ndarray, cell_size: int, weight: float
-) -> pd.DataFrame:
+def compute_score(pred: np.ndarray, true: np.ndarray, cell_size: int) -> pd.DataFrame:
     """Compute F1 score, error on coordinate and a weighted average of the two.
 
     F1 score will be measured within cell of size "cell_size".
@@ -148,25 +154,16 @@ def compute_score(
     NOTE – direction dependent, arguments cant be switched!!
 
     Args:
-        pred: list of np.ndarray of shape (n, n, 3): p, x, y format for each cell.
         true: list of np.ndarray of shape (n, n, 3): p, x, y format for each cell.
+        pred: list of np.ndarray of shape (n, n, 3): p, x, y format for each cell.
         cell_size: Size of cells in the grid used to calculate F1 score, relative coordinates.
-        weight: Weight to on f1 score.
 
     Returns:
         DataFrame with all three columns corresponding to f1 score, coordinate error, and weighted average.
     """
-    f1_value = pd.Series()
-    error_on_coordinates_ = pd.Series()
-    weighted_f1_coordinates_ = pd.Series()
+    f1_value = f1_score(pred, true)
+    error_on_coordinates_ = error_on_coordinates(pred, true, cell_size)
 
-    for t, p in zip(true, pred):
-        f1_value.append(f1_score(p, t))
-        error_on_coordinates_.append(error_on_coordinates(p, t, cell_size))
-        weighted_f1_coordinates_.append(
-            weighted_f1_coordinates(p, t, cell_size, weight)
-        )
-
-    df = pd.DataFrame([f1_value, error_on_coordinates_, weighted_f1_coordinates_]).T
-    df.columns = ["f1_score", "err_coordinate", "weighted_average"]
+    df = pd.DataFrame([f1_value, error_on_coordinates_]).T
+    df.columns = ["f1_score", "err_coordinate"]
     return df

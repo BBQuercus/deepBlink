@@ -61,20 +61,19 @@ def _parse_args():
     )
 
     # Positional arguments
+    # TODO Find type to allow for file and folder
     parser.add_argument(
         "MODEL", type=argparse.FileType("r"), help="model .h5 file location"
     )
     parser.add_argument(
-        "INPUT",
-        type=argparse.FileType("r"),
-        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+        "INPUT", type=str, help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
 
     # Optional arguments
     parser.add_argument(
         "-o",
         "--output",
-        type=argparse.FileType("w"),
+        type=str,
         help="output file/folder location [default: input location]",
     )
     parser.add_argument(
@@ -210,9 +209,11 @@ def main():
             "f1_l2_combined_loss": f1_l2_combined_loss,
         },
     )
+    if args.verbose:
+        print("Model imported.")
 
     # File listing
-    inputs = os.path.abspath(args.INPUT.name)
+    inputs = os.path.abspath(args.INPUT)
     if os.path.isdir(inputs):
         files = _grab_files(inputs, EXTENSIONS)
         inpath = inputs
@@ -221,14 +222,10 @@ def main():
         inpath = os.path.dirname(inputs)
     else:
         raise ImportError("Input file(s) could not be found.")
+    if args.verbose:
+        print(f"{len(files)} file(s) found.")
 
-    # File import
-    images = [_import_image(file) for file in files]
-
-    # Prediction
-    coords = [predict_baseline(image, model) for image in images]
-
-    # Save coord list
+    # Output path definition
     if args.output is not None and os.path.exists(args.output):
         outpath = os.path.abspath(args.output)
     else:
@@ -236,8 +233,17 @@ def main():
     delimeter = " " if args.type == "txt" else ","
     header = "x y" if args.type == "txt" else "x,y"
 
-    for file, coord in zip(files, coords):
+    for file in files:
+        # Image import
+        image = _import_image(file)
+
+        # Prediction
+        coord = predict_baseline(image, model)
+
+        # Save coord list
         fname = os.path.join(outpath, f"{extract_basename(file)}.{args.type}")
         np.savetxt(
             fname, coord, fmt="%.4f", delimiter=delimeter, header=header, comments=""
         )
+    if args.verbose:
+        print("Predictions complete.")

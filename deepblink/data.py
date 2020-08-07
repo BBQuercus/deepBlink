@@ -38,14 +38,6 @@ def random_cropping(
     Returns:
         crop_image, crop_mask: Cropped image and mask respectively with shape (crop_size, crop_size).
     """
-    if not all(isinstance(i, np.ndarray) for i in [image, mask]):
-        raise TypeError(
-            f"image, mask must be np.ndarray but is {type(image), type(mask)}."
-        )
-    if not all(isinstance(i, int) for i in [crop_size, cell_size]):
-        raise TypeError(
-            f"crop_size, cell_size must be an int but is {type(crop_size), type(cell_size)}."
-        )
     if crop_size == 0:
         raise ValueError("crop_size must be larger than 0.")
     if not all(image.shape[i] >= crop_size for i in range(2)):
@@ -176,18 +168,13 @@ def get_prediction_matrix(
 
     Args:
         spot_coord: List of coordinates in x, y format with shape (n, 2).
-        size: size of the image from which List of coordinates are extracted.
-        cell_size: size of cell used to calculate F1 score, precision and recall.
-        size_y: if not provided, it assumes it is squared image, otherwise the second shape of image
+        size: Size of the image from which List of coordinates are extracted.
+        cell_size: Size of cell used to calculate F1 score, precision and recall.
+        size_y: If not provided, assumes a squared image. Else the length of the y axis.
 
     Returns:
         The prediction matrix as numpy array of shape (n, n, 3): p, x, y format for each cell.
     """
-    if not all(isinstance(i, int) for i in (size, cell_size)):
-        raise TypeError(
-            f"size and cell_size must be int, but are {type(size), type(cell_size)}."
-        )
-
     nrow = math.ceil(size / cell_size)
     ncol = nrow
     if size_y is not None:
