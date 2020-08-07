@@ -5,7 +5,6 @@ import math
 import operator
 from typing import Tuple
 
-import numba
 import numpy as np
 
 
@@ -39,14 +38,6 @@ def random_cropping(
     Returns:
         crop_image, crop_mask: Cropped image and mask respectively with shape (crop_size, crop_size).
     """
-    if not all(isinstance(i, np.ndarray) for i in [image, mask]):
-        raise TypeError(
-            f"image, mask must be np.ndarray but is {type(image), type(mask)}."
-        )
-    if not all(isinstance(i, int) for i in [crop_size, cell_size]):
-        raise TypeError(
-            f"crop_size, cell_size must be an int but is {type(crop_size), type(cell_size)}."
-        )
     if crop_size == 0:
         raise ValueError("crop_size must be larger than 0.")
     if not all(image.shape[i] >= crop_size for i in range(2)):
@@ -170,7 +161,6 @@ def get_absolute_coordinates(
     return coord_abs  # type: ignore
 
 
-@numba.jit
 def get_prediction_matrix(
     spot_coord: np.ndarray, size: int, cell_size: int, size_y: int = None
 ) -> np.ndarray:
@@ -185,11 +175,6 @@ def get_prediction_matrix(
     Returns:
         The prediction matrix as numpy array of shape (n, n, 3): p, x, y format for each cell.
     """
-    # if not all(isinstance(i, int) for i in (size, cell_size)):
-    #     raise TypeError(
-    #         f"size and cell_size must be int, but are {type(size), type(cell_size)}."
-    #     )
-
     nrow = math.ceil(size / cell_size)
     ncol = nrow
     if size_y is not None:

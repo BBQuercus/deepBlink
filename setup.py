@@ -54,7 +54,6 @@ setup(
     python_requires=">=3.6, !=3.9.*",
     install_requires=[
         "matplotlib",
-        "numba",
         "numpy",
         "pandas",
         "pillow",
