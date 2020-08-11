@@ -87,6 +87,8 @@ def normalize_images(images: np.ndarray) -> np.ndarray:
         return (images / 255).astype(np.float32)
     if images.dtype == np.uint16:
         return (images / 65535).astype(np.float32)
+    if np.nanmax(images) != 0:
+        return (images / np.nanmax(images)).astype(np.float32)
 
     return images
 

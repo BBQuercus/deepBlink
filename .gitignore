@@ -76,3 +76,6 @@ docs/_build
 *.npz
 *.h5
 wandb/
+
+# Tests
+.hypothesis/
