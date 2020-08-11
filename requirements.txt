@@ -4,7 +4,7 @@
 # Conda install "tensorflow-gpu" and make sure cudnn/cudatoolkit are installed.
 
 # Functionality
-matplotlib==3.2.2
+matplotlib==3.3.0
 numpy==1.19.0
 pandas==1.1.0
 pillow==7.2.0  # wandb requirement
