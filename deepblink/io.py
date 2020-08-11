@@ -7,6 +7,8 @@ from typing import List
 from typing import Tuple
 
 import numpy as np
+import skimage.color
+import skimage.io
 
 
 def remove_zeros(lst: list) -> list:
@@ -22,7 +24,7 @@ def extract_basename(path: str) -> str:
 def train_valid_split(
     x_list: List[str], y_list: List[str], valid_split: float = 0.2, shuffle: bool = True
 ) -> Iterable[List[str]]:
-    """Split two lists (input and predictions).
+    """Split two lists (input and prediction files).
 
     Splitting into random training and validation sets with an optional shuffling.
 
@@ -97,3 +99,18 @@ def load_npz(fname: str,) -> Tuple[np.ndarray, ...]:
             data["x_test"],
             data["y_test"],
         )
+
+
+def load_image(fname: str):
+    """Import a single image as numpy array checking format requirements."""
+    try:
+        image = skimage.io.imread(fname).squeeze()
+        if image.ndim == 3 and image.shape[2] == 3:
+            return skimage.color.rgb2gray(image)
+        if image.ndim == 2 and image.shape[0] > 0 and image.shape[1] > 0:
+            return image
+        raise ValueError(
+            f"File must be in the format (x, y) or (x, y, 3) but is {image.shape}."
+        )
+    except ValueError:
+        raise ImportError(f"File '{fname}' could not be imported.")
