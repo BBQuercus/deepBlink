@@ -10,4 +10,5 @@ global-exclude *.py[cod] __pycache__/* *.so *.dylib
 
 include LICENSE
 include README.rst
+include *.md
 include requirements.txt environment.yml
