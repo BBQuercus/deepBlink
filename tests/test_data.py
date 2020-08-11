@@ -6,7 +6,11 @@ from hypothesis.extra.numpy import arrays
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from deepblink.data import next_power, next_multiple, normalize_images, get_coordinate_list, get_prediction_matrix
+from deepblink.data import next_power
+from deepblink.data import next_multiple
+from deepblink.data import normalize_images
+from deepblink.data import get_coordinate_list
+from deepblink.data import get_prediction_matrix
 
 
 def test_next_power():
@@ -21,9 +25,14 @@ def test_next_multiple():
 
 # TODO random cropping
 @given(arrays(np.float, (5, 5), elements=floats(0, 100)))
-def test_normalize_images(img):
+def test_normalize_images(matrix):
     """Test normalisation image function."""
-    assert (normalize_images(img) <= 1).all()
+    print(matrix.dtype)
+    if not ((normalize_images(matrix) <= 1)).all():
+        print(matrix)
+        print(((normalize_images(matrix))))
+        print("\n")
+    assert ((normalize_images(matrix) <= 1)).all()
 
 
 def test_get_coordinate_list():
