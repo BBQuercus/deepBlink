@@ -2,7 +2,6 @@
 
 from typing import Callable
 from typing import Iterable
-from typing import List
 from typing import Tuple
 import importlib
 import random
@@ -24,15 +23,15 @@ def relative_shuffle(x_list: list, y_list: list) -> Tuple[list, list]:
 
 
 def train_valid_split(
-    x_list: List[str], y_list: List[str], valid_split: float = 0.2, shuffle: bool = True
+    x_list: list, y_list: list, valid_split: float = 0.2, shuffle: bool = True
 ) -> Iterable[list]:
     """Split two lists (usually input and ground truth).
 
     Splitting into random training and validation sets with an optional shuffling.
 
     Args:
-        x_list: List containing filenames of all input.
-        y_list: List containing filenames of all predictions.
+        x_list: First list of items. Typically input data.
+        y_list: Second list of items. Typically labeled data.
         valid_split: Number between 0-1 to denote the percentage of examples used for validation.
 
     Returns:
