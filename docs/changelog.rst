@@ -2,6 +2,13 @@
 Changelog
 =========
 
+0.0.5 (2020-08-??)
+------------------
+
+* Depreciation of db.metrics.compute_score and db.metrics.weighted_f1_coordinates.
+* Addition of db.metrics.f1_cutoff_score as alternative computation method compared to the prediction matrix based existing one.
+
+
 0.0.4 (2020-07-10)
 ------------------
 

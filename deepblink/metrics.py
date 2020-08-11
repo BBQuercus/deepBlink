@@ -2,9 +2,10 @@
 
 import warnings
 from typing import Optional
+from typing import Tuple
 
 import numpy as np
-import pandas as pd
+import scipy.optimize
 
 
 def euclidean_dist(x1: float, y1: float, x2: float, y2: float) -> float:
@@ -113,57 +114,75 @@ def error_on_coordinates(
     return None
 
 
-def weighted_f1_coordinates(
-    pred: np.ndarray, true: np.ndarray, cell_size: int, weight: float = 1
-) -> Optional[float]:
-    """A single weighted score defined as ``weight*(F1 loss) + (error on coordinate)``.
+def linear_sum_assignment(
+    matrix: np.ndarray, cutoff: float = None
+) -> Tuple[list, list]:
+    """Solve the linear sum assignment problem with a cutoff.
 
-    F1 score will be measured within cell of size "cell_size".
-    If cell_size = 1, F1 score will be measured at resolution of pixel.
-    NOTE – direction dependent, arguments cant be switched!!
-
-    Args:
-        pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        true: np.ndarray of shape (n, n, 3): p, x, y format for each cell
-        cell_size: Size of cells in the grid used to calculate F1 score, relative coordinates.
-        weight: Weight of 1-F1 score in the average default = 1.
-    """
-    warnings.warn(
-        """This function was used in development to combine two metrics.
-        It will be depreciated in the next major release.""",
-        DeprecationWarning,
-    )
-
-    f1_value = f1_score(pred, true)
-    error_coordinates = error_on_coordinates(pred, true, cell_size)
-
-    if f1_value is not None and error_coordinates is not None:
-        f1_value = (1.0 - f1_value) * weight
-        score = (f1_value + error_coordinates) / 2
-        return score
-
-    return None
-
-
-# TODO find better name
-def compute_score(pred: np.ndarray, true: np.ndarray, cell_size: int) -> pd.DataFrame:
-    """Compute F1 score, error on coordinate and a weighted average of the two.
-
-    F1 score will be measured within cell of size "cell_size".
-    If cell_size = 1, F1 score will be measured at resolution of pixel.
-    NOTE – direction dependent, arguments cant be switched!!
+    A problem instance is described by matrix matrix where each matrix[i, j]
+    is the cost of matching i (worker) with j (job). The goal is to find the
+    most optimal assignment of j to i if the given cost is below the cutoff.
 
     Args:
-        true: list of np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        pred: list of np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        cell_size: Size of cells in the grid used to calculate F1 score, relative coordinates.
+        matrix: Matrix containing cost/distance to assign cols to rows.
+        cutoff: Maximum cost/distance value assignments can have.
 
     Returns:
-        DataFrame with all three columns corresponding to f1 score, coordinate error, and weighted average.
+        (rows, columns) corresponding to the matching assignment.
     """
-    f1_value = f1_score(pred, true)
-    error_on_coordinates_ = error_on_coordinates(pred, true, cell_size)
+    # Prevent scipy to optimize on values above the cutoff
+    if cutoff is not None:
+        matrix = np.where(matrix >= cutoff, matrix.max(), matrix)
 
-    df = pd.DataFrame([f1_value, error_on_coordinates_]).T
-    df.columns = ["f1_score", "err_coordinate"]
-    return df
+    row, col = scipy.optimize.linear_sum_assignment(matrix)
+
+    # Allow for no assignment based on cutoff
+    if cutoff is not None:
+        nrow = []
+        ncol = []
+        for r, c in zip(row, col):
+            if matrix[r, c] <= cutoff:
+                nrow.append(r)
+                ncol.append(c)
+        return nrow, ncol
+
+    return list(row), list(col)
+
+
+def f1_cutoff_score(pred: np.ndarray, true: np.ndarray, cutoff: float = None) -> float:
+    """Alternative way of F1 score computation.
+
+    Computes a distance matrix between every coordinate.
+    Based on the best assignment below a cutoff (coordinate closeness),
+    corresponding precision and recall is calculated.
+
+    Args:
+        pred: Array of shape (n, 2) for predicted coordinates.
+        true: Array of shape (n, 2) for ground truth coordinates.
+        cutoff: Distance cutoff to allow coordinate assignment.
+
+    Returns:
+        F1 score metric.
+    """
+    warnings.warn(
+        "F1 cuttoff score is a test function and might be depreciated in the next release.",
+        FutureWarning,
+    )
+
+    matrix = scipy.spatial.distance.cdist(pred, true, metric="euclidean")
+
+    pred_true = linear_sum_assignment(matrix, cutoff)[0]
+    true_pred = linear_sum_assignment(matrix.T, cutoff)[0]
+
+    if not pred_true:
+        return 0.0
+
+    tp = len(true_pred)
+    fn = len(true) - len(true_pred)
+    fp = len(pred) - len(pred_true)
+
+    recall = tp / (tp + fn)
+    precision = tp / (tp + fp)
+    f1_value = (2 * precision * recall) / (precision + recall)
+
+    return f1_value

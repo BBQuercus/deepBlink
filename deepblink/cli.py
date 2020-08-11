@@ -35,13 +35,13 @@ from typing import List
 from typing import Tuple
 
 import numpy as np
-import skimage.color
-import skimage.io
+import skimage.util
 import tensorflow as tf
 
 from .data import get_coordinate_list
 from .data import next_multiple
 from .io import extract_basename
+from .io import load_image
 from .losses import f1_l2_combined_loss
 from .losses import f1_score
 from .losses import l2_norm
@@ -118,21 +118,6 @@ def _grab_files(path: str, extensions: List[str]):
     return sorted(files)
 
 
-def _import_image(fname: str):
-    """Import a single image as numpy array checking format requirements."""
-    try:
-        image = skimage.io.imread(fname).squeeze()
-        if image.ndim == 3 and image.shape[2] == 3:
-            return skimage.color.rgb2gray(image)
-        if image.ndim == 2 and image.shape[0] > 0 and image.shape[1] > 0:
-            return image
-        raise ValueError(
-            f"File must be in the format (x, y) or (x, y, 3) but is {image.shape}."
-        )
-    except ValueError:
-        raise ImportError(f"File '{fname}' could not be imported.")
-
-
 def _predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
     """Predict on a image of size needed for the network and return coordinates."""
     if not image.shape[0] == image.shape[1]:
@@ -193,7 +178,6 @@ def predict_baseline(
     return coords.T  # Transposition to save as rows
 
 
-# TODO add verbosity changes
 # TODO rename functions
 def main():
     """Entrypoint for the CLI."""
@@ -235,7 +219,7 @@ def main():
 
     for file in files:
         # Image import
-        image = _import_image(file)
+        image = load_image(file)
 
         # Prediction
         coord = predict_baseline(image, model)
