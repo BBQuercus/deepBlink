@@ -26,9 +26,9 @@ setup(
         "pandas",
         "pillow",
         "scikit-image",
+        "scipy",
         "tensorflow>=2.0",
-        "wandb>=0.7.0"
-        # "scipy",
+        "wandb>=0.7.0",
     ],
     entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
     # Metadata
