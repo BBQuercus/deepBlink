@@ -87,9 +87,9 @@ def normalize_images(images: np.ndarray) -> np.ndarray:
         return (images / 255).astype(np.float32)
     if images.dtype == np.uint16:
         return (images / 65535).astype(np.float32)
-
+    if np.nanmax(images) != 0:
+        return (images / np.nanmax(images)).astype(np.float32)
     return images
-
 
 def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray:
     """Convert the prediction matrix into a list of coordinates.
