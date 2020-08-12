@@ -15,33 +15,38 @@ from deepblink.augment import translate
 @given(arrays(np.int8, (5, 5)))
 def test_flip(matrix):
     """Test function that flips an image."""
-    img, _ = flip(matrix, matrix)
+    img, mask = flip(matrix, matrix)
     assert np.sum(np.sum(img)) == np.sum(np.sum(matrix))
+    assert mask.shape == matrix.shape
 
 
 @given(arrays(np.int8, (5, 5)))
 def test_illuminate(matrix):
     """Test function that adds illumation correction to image."""
-    img, _ = illuminate(matrix, matrix)
+    img, mask = illuminate(matrix, matrix)
     assert img.shape == matrix.shape
+    assert mask.shape == matrix.shape
 
 
 @given(arrays(np.int8, (5, 5)))
 def test_gaussian_noise(matrix):
     """Test function that adds gaussian noise to image."""
-    img, _ = gaussian_noise(matrix, matrix)
+    img, mask = gaussian_noise(matrix, matrix)
     assert img.shape == matrix.shape
+    assert mask.shape == matrix.shape
 
 
 @given(arrays(np.int8, (5, 5)))
 def test_rotate(matrix):
     """Test function that rotates image."""
-    img, _ = rotate(matrix, matrix)
+    img, mask = rotate(matrix, matrix)
     assert np.sum(np.sum(img)) == np.sum(np.sum(matrix))
+    assert mask.shape == matrix.shape
 
 
 @given(arrays(np.int8, (5, 5)))
 def test_translate(matrix):
     """Test function that translates image."""
-    img, _ = translate(matrix, matrix)
+    img, mask = translate(matrix, matrix)
     assert np.sum(np.sum(img)) == np.sum(np.sum(matrix))
+    assert mask.shape == matrix.shape
