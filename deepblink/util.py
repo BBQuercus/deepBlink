@@ -45,7 +45,7 @@ def train_valid_split(
             f"Lists must be of equal length: {len(x_list)} != {len(y_list)}."
         )
     if len(x_list) <= 2:
-        raise ValueError("Lists must contain 2 elements or more.")
+        raise ValueError("Lists must contain 3 elements or more.")
 
     if shuffle:
         x_list, y_list = relative_shuffle(x_list, y_list)
