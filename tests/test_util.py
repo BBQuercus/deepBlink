@@ -1,7 +1,5 @@
 """Test utils functions."""
 
-import math
-
 from hypothesis.strategies import lists
 from hypothesis.strategies import floats
 from hypothesis import given
