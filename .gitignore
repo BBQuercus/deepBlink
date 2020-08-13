@@ -75,6 +75,7 @@ docs/_build
 # Training
 *.npz
 *.h5
+!model512x512.h5
 wandb/
 
 # Tests
