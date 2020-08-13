@@ -94,6 +94,7 @@ def test_linear_sum_assignment():
 @given(arrays(np.int8, (10, 2)))
 def test_f1_cutoff_score(true):
     """Test function that calculates f1 score based on best assignment."""
-    pred = true + 1
-    assert f1_cutoff_score(pred, true, 0) == 0
+    pred = true
+    pred = pred + np.ones((10, 2))
     assert f1_cutoff_score(pred, true, 2) == 1
+    assert f1_cutoff_score(pred, true, 0) == 0
