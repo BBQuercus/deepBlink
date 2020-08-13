@@ -34,7 +34,7 @@ def test_normalize_images(matrix):
 
 
 def test_get_coordinate_list():
-    """Test for function that given the prediction matrix, get the absolute coordinates of spots."""
+    """Test for function that given the prediction matrix, returns the absolute coordinates of spots."""
     grid_size = 4
     img_size = 512
 
@@ -46,7 +46,7 @@ def test_get_coordinate_list():
 
 
 def test_get_prediction_matrix():
-    """Test for function that given the list of coordinates, it returns the prediction matrix."""
+    """Test for function that given the list of coordinates, returns the prediction matrix."""
     img_size = 12
     cell_size = 4
     x = 5
