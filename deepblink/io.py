@@ -13,6 +13,7 @@ def remove_zeros(lst: list) -> list:
     return [i for i in lst if isinstance(i, np.ndarray)]
 
 
+# TODO rename to "basename"
 def extract_basename(path: str) -> str:
     """Returns the basename removing path and extension."""
     return os.path.splitext(os.path.basename(path))[0]

@@ -2,6 +2,9 @@
 
 import os
 
+import numpy as np
+
+from ..data import get_prediction_matrix
 from ..io import load_npz
 from ._datasets import Dataset
 
@@ -11,12 +14,13 @@ DATA_DIRNAME = Dataset.data_dirname()
 class SpotsDataset(Dataset):
     """Class used to load all spots data."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, cell_size: int):
         super().__init__(name)
+        self.cell_size = cell_size
 
     @property
     def data_filename(self) -> str:  # type: ignore[return-value]
-        """Return the absolute path to dataset."""
+        """Return the absolute path to the dataset."""
         return os.path.abspath(self.name)  # type: ignore
 
     def load_data(self) -> None:
@@ -29,3 +33,22 @@ class SpotsDataset(Dataset):
             self.x_test,
             self.y_test,
         ) = load_npz(self.data_filename)
+        self.prepare_data()
+
+    def prepare_data(self) -> None:
+        """Convert raw labels into labels usable for training.
+
+        In the "spots" format, training labels are stored as lists of coordinates,
+        this format cannot be used for training. Here, this format is converted into
+        prediction matrices.
+        """
+        size = self.x_train[0].shape[0]  # type: ignore
+
+        def __conversion(dataset, size, cell_size):
+            return np.array(
+                [get_prediction_matrix(coords, size, cell_size) for coords in dataset]
+            )
+
+        self.y_train = __conversion(self.y_train, size, self.cell_size)
+        self.y_valid = __conversion(self.y_valid, size, self.cell_size)
+        self.y_test = __conversion(self.y_test, size, self.cell_size)

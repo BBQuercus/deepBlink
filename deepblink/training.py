@@ -145,7 +145,7 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
                 use_wandb (bool): If Wandb should be used.
                 dataset (str): Name of dataset class, e.g. "SpotsDataset"
                 dataset_args:
-                    version (str): Name of npz file, e.g. "spots_synt_99659a57"
+                    version (str): Path to dataset.npz file.
                     cell_size (int): Size of one cell in the grid.
                     flip (bool): If flipping should be used as augmentation.
                     illuminate (bool): If illumination should be used as augmentation.
@@ -179,7 +179,7 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
     dataset_args = cfg.get("dataset_args", {})
     train_args = cfg.get("train_args", {})
 
-    dataset = dataset_class(dataset_args["version"])
+    dataset = dataset_class(dataset_args["version"], dataset_args["cell_size"])
     dataset.load_data()
 
     use_wandb = cfg["use_wandb"]

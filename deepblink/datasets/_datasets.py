@@ -6,8 +6,8 @@ import pathlib
 class Dataset:
     """Simple abstract class for datasets."""
 
-    def __init__(self, name: str = None):
-        self.name = name
+    def __init__(self, name: str, *_):
+        self.name = name if name else None
         self.x_train = None
         self.y_train = None
         self.x_valid = None
@@ -22,3 +22,6 @@ class Dataset:
 
     def load_data(self):
         """Empty method to import or create data."""
+
+    def prepare_data(self):
+        """Empty method to prepare or convert data."""
