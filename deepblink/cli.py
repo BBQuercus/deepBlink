@@ -96,7 +96,7 @@ def _parse_args():
     return args
 
 
-def _grab_files(path: str, extensions: List[str]):
+def _grab_files(path: str, extensions: List[str]) -> List[str]:
     """Grab all files in directory with listed extensions.
 
     Args:

@@ -1,6 +1,7 @@
 """Model utility functions for augmentation."""
 
 from typing import Tuple
+import warnings
 
 import numpy as np
 
@@ -21,8 +22,8 @@ def augment_batch_baseline(
     and not in this baseline.
 
     Args:
-        images: Batch of input image to be augmented.
-        masks: Batch of corresponding prediction matrix with ground truth values.
+        images: Batch of input image to be augmented with shape (n, x, y).
+        masks: Batch of corresponding prediction matrix with ground truth values with shape (n, x, y).
         flip_: If True, images might be flipped.
         illuminate_: If True, images might be altered in illumination.
         gaussian_noise_: If True, gaussian noise might be added.
@@ -30,6 +31,17 @@ def augment_batch_baseline(
         translate_: If True, images might be translated.
         cell_size: Size of one cell in the prediction matrix.
     """
+    if images.shape.index(min(images.shape)) != 0:
+        warnings.warn(
+            f"Images have shape {images.shape} and might not be in the format (n, x, y)!",
+            UserWarning,
+        )
+    if masks.shape.index(min(masks.shape)) != 0:
+        warnings.warn(
+            f"Masks have shape {masks.shape} and might not be in the format (n, x, y)!",
+            UserWarning,
+        )
+
     aug_images = []
     aug_masks = []
 
