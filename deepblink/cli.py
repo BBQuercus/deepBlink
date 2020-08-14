@@ -90,7 +90,7 @@ def _parse_args():
         action="store_true",
         help="output file/folder location [default: input location]",
     )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.4")
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.5")
     args = parser.parse_args()
 
     return args

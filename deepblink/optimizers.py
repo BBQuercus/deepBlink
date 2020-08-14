@@ -17,6 +17,6 @@ def rmsprop(learning_rate: float):
     return tf.keras.optimizers.RMSprop(learning_rate=learning_rate)
 
 
-def amsgrad(learning_rage: float):
+def amsgrad(learning_rate: float):
     """Keras' amsgrad optimizer with a specified learning rate."""
-    return tf.keras.optimizers.Adam(learning_rate=learning_rage, amsgrad=True)
+    return tf.keras.optimizers.Adam(learning_rate=learning_rate, amsgrad=True)

@@ -65,7 +65,7 @@ To set up `deepblink` for local development:
 
 6. When you're done making changes run all the checks and docs builder with `tox <https://tox.readthedocs.io/en/latest/install.html>`_ one command::
 
-    tox
+    tox -v
 
 7. Commit your changes and push your branch to GitHub::
 

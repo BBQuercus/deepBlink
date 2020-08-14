@@ -6,7 +6,7 @@ from setuptools import setup
 setup(
     # Description
     name="deepblink",
-    version="0.0.4",
+    version="0.0.5",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description="""In biomedical microscopy data, a common task involves the detection of diffraction-limited spots that visualize single proteins, domains, mRNAs, and many more. These spots were traditionally detected with mathematical operators such as Laplacian of Gaussian. These operators, however, rely on human input ranging from image-intensity thresholds, approximative spot sizes, etc. This process is tedious and not always reliable.
