@@ -13,6 +13,7 @@ def _shuffle(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     return x[shuffled_indices], y[shuffled_indices]
 
 
+# TODO add overfitting flag option
 class SequenceDataset(tf.keras.utils.Sequence):
     """Custom Sequence class used to feed data into model.fit.
 

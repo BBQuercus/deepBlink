@@ -163,14 +163,15 @@ def absolute_coordinates(
 
 
 def get_prediction_matrix(
-    spot_coord: np.ndarray, size: int, cell_size: int, size_y: int = None
+    coords: np.ndarray, size: int, cell_size: int, size_y: int = None
 ) -> np.ndarray:
     """Return np.ndarray of shape (n, n, 3): p, x, y format for each cell.
 
     Args:
-        spot_coord: List of coordinates in x, y format with shape (n, 2).
+        coords: List of coordinates in x, y format with shape (n, 2).
         size: Size of the image from which List of coordinates are extracted.
-        cell_size: Size of cell used to calculate F1 score, precision and recall.
+        cell_size: Size of one grid cell inside the matrix. A cell_size of 2 means that one
+            cell corresponds to 2 pixels in the original image.
         size_y: If not provided, assumes a squared image. Else the length of the y axis.
 
     Returns:
@@ -182,11 +183,11 @@ def get_prediction_matrix(
         ncol = math.ceil(size_y / cell_size)
 
     pred = np.zeros((nrow, ncol, 3))
-    for nspot in range(len(spot_coord)):
-        i = int(np.floor(spot_coord[nspot, 0])) // cell_size
-        j = int(np.floor(spot_coord[nspot, 1])) // cell_size
-        rel_x = (spot_coord[nspot, 0] - i * cell_size) / cell_size
-        rel_y = (spot_coord[nspot, 1] - j * cell_size) / cell_size
+    for nspot in range(len(coords)):
+        i = int(np.floor(coords[nspot, 0])) // cell_size
+        j = int(np.floor(coords[nspot, 1])) // cell_size
+        rel_x = (coords[nspot, 0] - i * cell_size) / cell_size
+        rel_y = (coords[nspot, 1] - j * cell_size) / cell_size
         pred[i, j, 0] = 1
         pred[i, j, 1] = rel_x
         pred[i, j, 2] = rel_y
