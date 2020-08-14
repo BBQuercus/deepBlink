@@ -128,7 +128,7 @@ def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray
         spot_x = matrix[x, y, 1]
         spot_y = matrix[x, y, 2]
 
-        coord_abs = get_absolute_coordinates(
+        coord_abs = absolute_coordinates(
             coord_spot=(spot_x, spot_y),
             coord_cell=(grid_x, grid_y),
             size_gridcell=size_gridcell,
@@ -140,7 +140,7 @@ def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray
     return np.array([coords_y, coords_x]).T
 
 
-def get_absolute_coordinates(
+def absolute_coordinates(
     coord_spot: Tuple[np.float32, np.float32],
     coord_cell: Tuple[np.float32, np.float32],
     size_gridcell: int = 8,
@@ -159,7 +159,6 @@ def get_absolute_coordinates(
 
     coord_rel = tuple(map(lambda x: x * size_gridcell, coord_spot))
     coord_abs = tuple(map(operator.add, coord_cell, coord_rel))
-    # coord_abs = tuple(map(lambda x: int(x), coord_abs))
     return coord_abs  # type: ignore
 
 
