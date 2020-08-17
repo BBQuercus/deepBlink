@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.0.5 (2020-08-14)
+0.0.5 (2020-08-17)
 ------------------
 
     “It works fine on MY computer”
@@ -10,15 +10,16 @@ Changelog
 Those days are over as it's testing time. While the test-suite is not fully complete it gives us some more confidence over our commits.
 Additional changes in this release include:
 
-* Scipy requirement for a new `deepblink.metrics.f1_cutoff_score` way of calculating the F1 score directly from coordinates.
-* Depreciation of `deepblink.metrics.compute_score` and `deepblink.metrics.weighted_f1_coordinates`.
-* Addition of `deepblink.optimizers.amsgrad` function.
+* Change from prediction matrix to coordinate list as default dataset component. Accompanying changes include the use of cell_size in the ``dataset`` class.
+* Scipy requirement for a new ``deepblink.metrics.f1_cutoff_score`` way of calculating the F1 score directly from coordinates.
+* Depreciation of ``deepblink.metrics.compute_score`` and ``deepblink.metrics.weighted_f1_coordinates``.
+* Addition of ``deepblink.optimizers.amsgrad`` function.
 * Movement of functions:
 
-    * `train_valid_split` to `util`
-    * `load_image` to `io`
+    * ``train_valid_split`` to ``util``
+    * ``load_image`` to ``io``
 
-The next release will include benchmarking scripts and is most likely the last release before the first minor `0.1.0` and non-pre-release.
+The next release will include benchmarking scripts and is most likely the last release before the first minor ``0.1.0`` and non-pre-release.
 
 
 0.0.4 (2020-07-10)
