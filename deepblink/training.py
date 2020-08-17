@@ -179,6 +179,8 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
     dataset_args = cfg.get("dataset_args", {})
     train_args = cfg.get("train_args", {})
 
+    network_args["cell_size"] = dataset_args["cell_size"]
+
     dataset = dataset_class(dataset_args["version"], dataset_args["cell_size"])
     dataset.load_data()
 
