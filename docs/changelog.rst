@@ -10,7 +10,7 @@ Changelog
 Those days are over as it's testing time. While the test-suite is not fully complete it gives us some more confidence over our commits.
 Additional changes in this release include:
 
-* Change from prediction matrix to coordinate list as default dataset component. Accompanying changes include the use of cell_size in the ``dataset`` class.
+* Change from prediction matrix to coordinate list as default dataset component. Accompanying changes include the use of cell_size in the ``dataset`` class and a dynamic Resnet architecture.
 * Scipy requirement for a new ``deepblink.metrics.f1_cutoff_score`` way of calculating the F1 score directly from coordinates.
 * Depreciation of ``deepblink.metrics.compute_score`` and ``deepblink.metrics.weighted_f1_coordinates``.
 * Addition of ``deepblink.optimizers.amsgrad`` function.
