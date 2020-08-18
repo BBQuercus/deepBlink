@@ -1,9 +1,9 @@
 """List of functions to handle data including converting matrices <-> coordinates."""
 
 
+from typing import Tuple
 import math
 import operator
-from typing import Tuple
 
 import numpy as np
 
@@ -93,103 +93,109 @@ def normalize_images(images: np.ndarray) -> np.ndarray:
     return images
 
 
-def get_coordinate_list(matrix: np.ndarray, size_image: int = 512) -> np.ndarray:
+def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray:
     """Convert the prediction matrix into a list of coordinates.
 
-    NOTE - if plotting with plt.scatter, x and y must be reversed!
+    NOTE - plt.scatter uses the x, y system. Therefore any plots
+    must be inverted by assigning x=c, y=r!
 
     Args:
         matrix: Matrix representation of spot coordinates.
-        size_image: Default image size the grid was layed on.
+        image_size: Default image size the grid was layed on.
 
     Returns:
-        Array of x, y coordinates with the shape (n, 2).
+        Array of r, c coordinates with the shape (n, 2).
     """
     if not matrix.ndim == 3:
-        raise ValueError("Matrix must have a shape of (x, y, 3).")
+        raise ValueError("Matrix must have a shape of (r, c, 3).")
     if not matrix.shape[2] == 3:
         raise ValueError("Matrix must a depth of 3.")
     if not matrix.shape[0] == matrix.shape[1] and not matrix.shape[0] >= 1:
-        raise ValueError("Matrix must have equal length >= 1 of x, y.")
+        raise ValueError("Matrix must have equal length >= 1 of r, c.")
 
     size_grid = matrix.shape[0]
-    size_gridcell = size_image // size_grid
-    coords_x = []
-    coords_y = []
+    cell_size = image_size // size_grid
+    coords_r = []
+    coords_c = []
 
     # Top left coordinates of every cell
-    grid = np.array([x * size_gridcell for x in range(size_grid)])
+    grid = np.array([c * cell_size for c in range(size_grid)])
 
-    matrix_x, matrix_y = np.asarray(matrix[..., 0] > 0.5).nonzero()
-    for x, y in zip(matrix_x, matrix_y):
+    matrix_r, matrix_c = np.round(matrix[..., 0]).nonzero()
+    for r, c in zip(matrix_r, matrix_c):
 
-        grid_x = grid[x]
-        grid_y = grid[y]
-        spot_x = matrix[x, y, 1]
-        spot_y = matrix[x, y, 2]
+        grid_r = grid[r]
+        grid_c = grid[c]
+        spot_r = matrix[r, c, 1]
+        spot_c = matrix[r, c, 2]
 
-        coord_abs = absolute_coordinates(
-            coord_spot=(spot_x, spot_y),
-            coord_cell=(grid_x, grid_y),
-            size_gridcell=size_gridcell,
+        coord_abs = absolute_coordinate(
+            coord_spot=(spot_r, spot_c),
+            coord_cell=(grid_r, grid_c),
+            cell_size=cell_size,
         )
 
-        coords_x.append(coord_abs[0])
-        coords_y.append(coord_abs[1])
+        coords_r.append(coord_abs[0])
+        coords_c.append(coord_abs[1])
 
-    return np.array([coords_y, coords_x]).T
+    return np.array([coords_r, coords_c]).T
 
 
-def absolute_coordinates(
+def absolute_coordinate(
     coord_spot: Tuple[np.float32, np.float32],
     coord_cell: Tuple[np.float32, np.float32],
-    size_gridcell: int = 8,
+    cell_size: int = 4,
 ) -> Tuple[np.float32, np.float32]:
-    """Return the absolute image coordinates from relative cell coordinates.
+    """Return the absolute image coordinate from a relative cell coordinate.
 
     Args:
-        coord_spot: Relative spot coordinate in format (x, y).
+        coord_spot: Relative spot coordinate in format (r, c).
         coord_cell: Top-left coordinate of the cell.
-        size_gridcell: Size of one cell in a grid.
+        cell_size: Size of one cell in a grid.
 
     Returns:
         Absolute coordinate.
     """
-    assert len(coord_spot) == 2 and len(coord_cell) == 2
+    if not len(coord_spot) == len(coord_cell) == 2:
+        raise ValueError(
+            f"coord_spot, coord_cell must have format (r, c). Lengths are {len(coord_spot), len(coord_cell)} resp."
+        )
 
-    coord_rel = tuple(map(lambda x: x * size_gridcell, coord_spot))
+    coord_rel = tuple(map(lambda x: x * cell_size, coord_spot))
     coord_abs = tuple(map(operator.add, coord_cell, coord_rel))
     return coord_abs  # type: ignore
 
 
 def get_prediction_matrix(
-    coords: np.ndarray, size: int, cell_size: int, size_y: int = None
+    coords: np.ndarray, image_size: int, cell_size: int = 4, size_c: int = None
 ) -> np.ndarray:
-    """Return np.ndarray of shape (n, n, 3): p, x, y format for each cell.
+    """Return np.ndarray of shape (n, n, 3): p, r, c format for each cell.
 
     Args:
-        coords: List of coordinates in x, y format with shape (n, 2).
-        size: Size of the image from which List of coordinates are extracted.
+        coords: List of coordinates in r, c format with shape (n, 2).
+        image_size: Size of the image from which List of coordinates are extracted.
         cell_size: Size of one grid cell inside the matrix. A cell_size of 2 means that one
             cell corresponds to 2 pixels in the original image.
-        size_y: If not provided, assumes a squared image. Else the length of the y axis.
+        size_c: If empty, assumes a squared image. Else the length of the r axis.
 
     Returns:
-        The prediction matrix as numpy array of shape (n, n, 3): p, x, y format for each cell.
+        The prediction matrix as numpy array of shape (n, n, 3): p, r, c format for each cell.
     """
-    nrow = math.ceil(size / cell_size)
-    ncol = nrow
-    if size_y is not None:
-        ncol = math.ceil(size_y / cell_size)
+    nrow = ncol = math.ceil(image_size / cell_size)
+    if size_c is not None:
+        ncol = math.ceil(size_c / cell_size)
 
-    pred = np.zeros((nrow, ncol, 3))
-    for nspot in range(len(coords)):
-        i = int(np.floor(coords[nspot, 0])) // cell_size
-        j = int(np.floor(coords[nspot, 1])) // cell_size
-        rel_x = (coords[nspot, 0] - i * cell_size) / cell_size
-        rel_y = (coords[nspot, 1] - j * cell_size) / cell_size
-        pred[i, j, 0] = 1
-        pred[i, j, 1] = rel_x
-        pred[i, j, 2] = rel_y
+    prediction_matrix = np.zeros((nrow, ncol, 3))
+    for r, c in coords:
+        # Position of cell coordinate in prediction matrix
+        cell_r = int(np.floor(r)) // cell_size
+        cell_c = int(np.floor(c)) // cell_size
 
-    return pred
+        # Relative position within cell
+        relative_r = (r - cell_r * cell_size) / cell_size
+        relative_c = (c - cell_c * cell_size) / cell_size
+
+        # Assign values along prediction matrix dimension 3
+        prediction_matrix[cell_r, cell_c] = 1, relative_r, relative_c
+
+    return prediction_matrix
