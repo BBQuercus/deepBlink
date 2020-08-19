@@ -1,9 +1,9 @@
 """Training functions."""
 
+from typing import Dict
 import os
 import platform
 import time
-from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,7 +21,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
 
     Expects segmentation images and the model class to have a predict_on_image method.
 
-    Args:
+    Attributes:
         model_wrapper: Model used for predictions.
         dataset: Dataset class containing data.
         cell_size: Size of one cell in the grid.
@@ -48,7 +48,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self, title: str, images: np.ndarray, masks: np.ndarray = None
     ) -> None:
         """Plot one set of images to wandb."""
-        images = []
+        plots = []
         for i, image in enumerate(images):
             # Mask predictions if not given
             if masks is not None:
@@ -60,7 +60,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
             plt.figure()
             plt.imshow(image)
             plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
-            images.append(wandb.Image(plt, caption=f"{title}: {i}"))
+            plots.append(wandb.Image(plt, caption=f"{title}: {i}"))
         wandb.log({title: images}, commit=False)
         plt.close(fig="all")
 
@@ -134,6 +134,7 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
                     batch_size (int): Number of images per mini-batch.
                     epochs (int): Total rounds of training.
                     learning_rate (float): Learning rate, e.g. 1e-4
+                    overfit (bool): If model should overfit to one batch.
                     pretrained (str): Optional weights file to jumpstart training.
 
 
