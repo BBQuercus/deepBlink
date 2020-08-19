@@ -1,5 +1,6 @@
 """Setup file for pypi package called deepblink."""
 
+import textwrap
 from setuptools import find_packages
 from setuptools import setup
 
@@ -10,7 +11,17 @@ setup(
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description_content_type="text/plain",
-    long_description="""In biomedical microscopy data, a common task involves the detection of diffraction-limited spots that visualize single proteins, domains, mRNAs, and many more. These spots were traditionally detected with mathematical operators such as Laplacian of Gaussian. These operators, however, rely on human input ranging from image-intensity thresholds, approximative spot sizes, etc. This process is tedious and not always reliable.\n\n DeepBlink relies on neural networks to automatically find spots without the need for human intervention. DeepBlink is available as a ready-to-use command-line interface.\n\n All deepBlink wheels distributed on PyPI are MIT licensed.""",
+    long_description=textwrap.dedent(
+        """\
+        In biomedical microscopy data, a common task involves the detection of diffraction-limited spots that
+        visualize single proteins, domains, mRNAs, and many more. These spots were traditionally detected with
+        mathematical operators such as Laplacian of Gaussian. These operators, however, rely on human input ranging
+        from image-intensity thresholds, approximative spot sizes, etc. This process is tedious and not always
+        reliable.\n\n
+        DeepBlink relies on neural networks to automatically find spots without the need for human
+        intervention. DeepBlink is available as a ready-to-use command-line interface.\n\n
+        All deepBlink wheels distributed on PyPI are MIT licensed."""
+    ),
     # Installation
     packages=find_packages(),
     include_package_data=True,

@@ -1,8 +1,6 @@
 """Utility helper functions."""
 
-from typing import Callable
-from typing import Iterable
-from typing import Tuple
+from typing import Callable, Iterable, Tuple
 import importlib
 import random
 

@@ -40,7 +40,7 @@ def dice_score(y_true, y_pred, smooth: int = 1):
 
 
 def dice_loss(y_true, y_pred):
-    """Corresponding dice coefficient loss."""
+    """Dice score loss corresponding to deepblink.losses.dice_score."""
     return 1 - dice_score(y_true, y_pred)
 
 
@@ -90,7 +90,7 @@ def f1_score(y_true, y_pred):
 
 
 def f1_loss(y_true, y_pred):
-    """Corresponding F1 score loss."""
+    """F1 score loss corresponding to deepblink.losses.f1_score."""
     return 1 - f1_score(y_true, y_pred)
 
 

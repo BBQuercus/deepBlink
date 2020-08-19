@@ -1,7 +1,8 @@
 """Dataset preparation functions."""
 
+from typing import Any, List
 import os
-from typing import Tuple
+import warnings
 
 import numpy as np
 import skimage.color
@@ -13,39 +14,49 @@ def remove_zeros(lst: list) -> list:
     return [i for i in lst if isinstance(i, np.ndarray)]
 
 
-# TODO rename to "basename"
 def extract_basename(path: str) -> str:
+    """Depreciated name: Returns the basename removing path and extension."""
+    warnings.warn(
+        'Will be renamed to "basename" in the next release.', DeprecationWarning
+    )
+    return basename(path)
+
+
+def basename(path: str) -> str:
     """Returns the basename removing path and extension."""
     return os.path.splitext(os.path.basename(path))[0]
 
 
-# TODO check if files have x_train etc.
-def load_npz(fname: str,) -> Tuple[np.ndarray, ...]:
+def load_npz(fname: str, test_only: bool = False) -> List[Any]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".
 
     Args:
         fname: Path to npz file.
+        test_only: Only return testing images and labels.
 
     Returns:
-        (x_train, y_train, x_valid, y_valid, x_test, y_test) as numpy arrays.
+        A list of the required numpy arrays. If no "test_only" arguments were passed,
+        returns [x_train, y_train, x_valid, y_valid, x_test, y_test].
+
+    Raises:
+        ValueError: If not all datasets are found.
     """
+    expected = ["x_train", "y_train", "x_valid", "y_valid", "x_test", "y_test"]
+    if test_only:
+        expected = expected[-2:]
+
     with np.load(fname, allow_pickle=True) as data:
-        return (
-            data["x_train"],
-            data["y_train"],
-            data["x_valid"],
-            data["y_valid"],
-            data["x_test"],
-            data["y_test"],
-        )
+        if not all([f in expected for f in data.files]):
+            raise ValueError(f"{expected} must be present. Only found {data.files}.")
+        return [data[f] for f in expected]
 
 
 def load_image(fname: str):
     """Import a single image as numpy array checking format requirements."""
     try:
-        image = skimage.io.imread(fname).squeeze()
+        image = skimage.io.imread(fname).squeeze().astype(np.float32)
         if image.ndim == 3 and image.shape[2] == 3:
             return skimage.color.rgb2gray(image)
         if image.ndim == 2 and image.shape[0] > 0 and image.shape[1] > 0:

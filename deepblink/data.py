@@ -113,14 +113,15 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     if not matrix.shape[0] == matrix.shape[1] and not matrix.shape[0] >= 1:
         raise ValueError("Matrix must have equal length >= 1 of r, c.")
 
-    size_grid = matrix.shape[0]
-    cell_size = image_size // size_grid
+    matrix_size = matrix.shape[0]
+    cell_size = image_size // matrix_size
     coords_r = []
     coords_c = []
 
     # Top left coordinates of every cell
-    grid = np.array([c * cell_size for c in range(size_grid)])
+    grid = np.array([c * cell_size for c in range(matrix_size)])
 
+    # Coordinates of cells > 0.5
     matrix_r, matrix_c = np.round(matrix[..., 0]).nonzero()
     for r, c in zip(matrix_r, matrix_c):
 

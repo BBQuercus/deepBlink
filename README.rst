@@ -54,41 +54,20 @@ interface.
 Installation
 ============
 
-::
+This package is built for `Python <https://www.python.org/downloads/>`_ versions newer than 3.6.
+
+DeepBlink can easily be installed with pip: ::
 
     pip install deepblink
 
-You can also install the in-development version with::
+Additionally for GPU support, install ``tensorflow-gpu`` through pip and with the
+appropriate ``CUDA`` and ``cuDNN`` verions matching your `GPU setup <https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html>`_.
 
-    pip install git+ssh://git@github.com/bbquercus/deepblink/bbquercus/deepblink.git@master
-
-Documentation
+Usage
 =============
 
+Inferencing on deepBlink is performed at the command line as follows: ::
 
-https://deepblink.readthedocs.io/
+    deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT
 
-
-Development
-===========
-
-To run the all tests run::
-
-    tox
-
-Note, to combine the coverage data from all the tox environments run:
-
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
-
-    - - Windows
-      - ::
-
-            set PYTEST_ADDOPTS=--cov-append
-            tox
-
-    - - Other
-      - ::
-
-            PYTEST_ADDOPTS=--cov-append tox
+More detailed information is availabe in our `documentation <https://deepblink.readthedocs.io/>`_.
