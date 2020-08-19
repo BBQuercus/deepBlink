@@ -6,7 +6,6 @@ import platform
 import time
 
 import matplotlib.pyplot as plt
-import numpy as np
 import tensorflow as tf
 import wandb
 
@@ -16,6 +15,7 @@ from .models import Model
 from .util import get_from_module
 
 
+# TODO(after ) refactor with log image function
 class WandbImageLogger(tf.keras.callbacks.Callback):
     """Custom image prediction logger callback in wandb.
 
@@ -44,35 +44,51 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self.cell_size = cell_size
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
 
-    def plot_scatter(
-        self, title: str, images: np.ndarray, masks: np.ndarray = None
-    ) -> None:
-        """Plot one set of images to wandb."""
-        plots = []
-        for i, image in enumerate(images):
-            # Mask predictions if not given
-            if masks is not None:
-                mask = masks[i]
-            else:
-                mask = self.model_wrapper.predict_on_image(image)  # type: ignore[attr-defined]
-            coords = get_coordinate_list(mask, image_size=self.image_size)
-
-            plt.figure()
-            plt.imshow(image)
-            plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
-            plots.append(wandb.Image(plt, caption=f"{title}: {i}"))
-        wandb.log({title: images}, commit=False)
-        plt.close(fig="all")
-
     def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613,W0221
         """Logs the ground truth at train_begin."""
-        self.plot_scatter("Train ground truth", self.train_images, self.train_masks)
-        self.plot_scatter("Valid ground truth", self.valid_images, self.valid_masks)
+        ground_truth = []
+        for i, mask in enumerate(self.train_masks):
+            plt.figure()
+            plt.imshow(self.train_images[i])
+            coords = get_coordinate_list(matrix=mask, image_size=self.image_size)
+            plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
+            ground_truth.append(wandb.Image(plt, caption=f"Ground truth: {i}"))
+        wandb.log({"Train ground truth": ground_truth}, commit=False)
+
+        ground_truth_valid = []
+        for i, mask in enumerate(self.valid_masks):
+            plt.figure()
+            plt.imshow(self.valid_images[i])
+            coords = get_coordinate_list(matrix=mask, image_size=self.image_size)
+            plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
+            ground_truth_valid.append(wandb.Image(plt, caption=f"Ground truth: {i}"))
+        wandb.log({"Valid ground truth": ground_truth_valid}, commit=False)
+
+        plt.close(fig="all")
 
     def on_epoch_end(self, epoch, logs=None):  # pylint: disable=W0613
         """Logs predictions on epoch_end."""
-        self.plot_scatter("Train predictions", self.train_images)
-        self.plot_scatter("Valid predictions", self.valid_images)
+        predictions_train = []
+        for i, image in enumerate(self.train_images):
+            plt.figure()
+            plt.imshow(image)
+            pred_mask = self.model_wrapper.predict_on_image(image)
+            coords = get_coordinate_list(matrix=pred_mask, image_size=self.image_size)
+            plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
+            predictions_train.append(wandb.Image(plt, caption=f"Prediction: {i}"))
+        wandb.log({"Train predictions": predictions_train}, commit=False)
+
+        predictions_valid = []
+        for i, image in enumerate(self.valid_images):
+            plt.figure()
+            plt.imshow(image)
+            pred_mask = self.model_wrapper.predict_on_image(image)
+            coords = get_coordinate_list(matrix=pred_mask, image_size=self.image_size)
+            plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
+            predictions_valid.append(wandb.Image(plt, caption=f"Prediction: {i}"))
+        wandb.log({"Valid predictions": predictions_valid}, commit=False)
+
+        plt.close(fig="all")
 
 
 def train_model(
