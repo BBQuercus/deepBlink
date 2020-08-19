@@ -5,7 +5,7 @@ Because the model is loaded into memory for every run, it is faster to
 run multiple images at once by passing a directory as input.
 
 Usage:
-    ``$ deepblink MODEL INPUT [-o, --output] OUTPUT [-t, --type] TYPE [-v, --verbose]``
+    ``$ deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT``
     ``$ deepblink --help``
 
 Positional Arguments:
@@ -45,11 +45,11 @@ from .losses import f1_l2_combined_loss
 from .losses import f1_score
 from .losses import l2_norm
 
+# Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-"""Removes tensorflow's information on CPU / GPU availablity."""
 
+# List of currently supported image file extensions.
 EXTENSIONS = ["tif", "jpeg", "jpg", "png"]
-"""List[str]: List of currently supported image file extensions."""
 
 
 class FileFolderType:
@@ -59,6 +59,7 @@ class FileFolderType:
         pass
 
     def __call__(self, value):  # noqa: D102
+        """Python type internal function called by argparse to check input."""
         if not any((os.path.isdir(value), os.path.isfile(value))):
             raise argparse.ArgumentTypeError(
                 f"Input value must be file or folder. '{value}' is not."

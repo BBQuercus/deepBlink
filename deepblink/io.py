@@ -15,9 +15,9 @@ def remove_zeros(lst: list) -> list:
 
 
 def extract_basename(path: str) -> str:
-    """Old, to be depreciated name. See basename."""
+    """Depreciated name: Returns the basename removing path and extension."""
     warnings.warn(
-        "Will be renamed to basename in the next release.", DeprecationWarning
+        'Will be renamed to "basename" in the next release.', DeprecationWarning
     )
     return basename(path)
 
@@ -37,7 +37,7 @@ def load_npz(fname: str, test_only: bool = False) -> List[Any]:
         test_only: Only return testing images and labels.
 
     Returns:
-        A list of the required numpy arrays. If no "only_" arguments were passed,
+        A list of the required numpy arrays. If no "test_only" arguments were passed,
         returns [x_train, y_train, x_valid, y_valid, x_test, y_test].
 
     Raises:
