@@ -1,11 +1,12 @@
 """Training functions."""
 
+from typing import Dict
 import os
 import platform
 import time
-from typing import Dict
 
 import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 import wandb
 
@@ -20,7 +21,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
 
     Expects segmentation images and the model class to have a predict_on_image method.
 
-    Args:
+    Attributes:
         model_wrapper: Model used for predictions.
         dataset: Dataset class containing data.
         cell_size: Size of one cell in the grid.
@@ -43,65 +44,34 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self.cell_size = cell_size
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
 
+    def plot_scatter(
+        self, title: str, images: np.ndarray, masks: np.ndarray = None
+    ) -> None:
+        """Plot one set of images to wandb."""
+        plots = []
+        for i, image in enumerate(images):
+            if masks is not None:
+                mask = masks[i]
+            else:
+                mask = self.model_wrapper.predict_on_image(image)  # type: ignore[attr-defined]
+            coords = get_coordinate_list(mask, image_size=self.image_size)
+
+            plt.figure()
+            plt.imshow(image)
+            plt.scatter(coords[..., 1], coords[..., 0], marker="+", color="r", s=10)
+            plots.append(wandb.Image(plt, caption=f"{title}: {i}"))
+        wandb.log({title: plots}, commit=False)
+        plt.close(fig="all")
+
     def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613,W0221
         """Logs the ground truth at train_begin."""
-        ground_truth = []
-        for i, mask in enumerate(self.train_masks):
-            plt.figure()
-            plt.imshow(self.train_images[i])
-            coord_list = get_coordinate_list(matrix=mask, size_image=self.image_size,)
-            plt.scatter(
-                coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
-            )
-            ground_truth.append(wandb.Image(plt, caption=f"Ground truth train: {i}"))
-        wandb.log({"Train ground truth": ground_truth}, commit=False)
-
-        ground_truth_valid = []
-        for i, mask in enumerate(self.valid_masks):
-            plt.figure()
-            plt.imshow(self.valid_images[i])
-            coord_list = get_coordinate_list(matrix=mask, size_image=self.image_size,)
-            plt.scatter(
-                coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
-            )
-            ground_truth_valid.append(
-                wandb.Image(plt, caption=f"Ground truth valid: {i}")
-            )
-        wandb.log({"Valid ground truth": ground_truth_valid}, commit=False)
-
-        plt.close(fig="all")
+        self.plot_scatter("Train ground truth", self.train_images, self.train_masks)
+        self.plot_scatter("Valid ground truth", self.valid_images, self.valid_masks)
 
     def on_epoch_end(self, epoch, logs=None):  # pylint: disable=W0613
         """Logs predictions on epoch_end."""
-        predictions_valid = []
-        for i, image in enumerate(self.valid_images):
-            plt.figure()
-            plt.imshow(image)
-            pred_mask = self.model_wrapper.predict_on_image(image)
-            coord_list = get_coordinate_list(
-                matrix=pred_mask, size_image=self.image_size,
-            )
-            plt.scatter(
-                coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
-            )
-            predictions_valid.append(wandb.Image(plt, caption=f"Prediction: {i}"))
-        wandb.log({"Predictions valid dataset": predictions_valid}, commit=False)
-
-        predictions_train = []
-        for i, image in enumerate(self.train_images):
-            plt.figure()
-            plt.imshow(image)
-            pred_mask = self.model_wrapper.predict_on_image(image)
-            coord_list = get_coordinate_list(
-                matrix=pred_mask, size_image=self.image_size,
-            )
-            plt.scatter(
-                coord_list[..., 0], coord_list[..., 1], marker="+", color="r", s=10
-            )
-            predictions_train.append(wandb.Image(plt, caption=f"Prediction: {i}"))
-        wandb.log({"Predictions train dataset": predictions_train}, commit=False)
-
-        plt.close(fig="all")
+        self.plot_scatter("Train data predictions", self.train_images)
+        self.plot_scatter("Valid data predictions", self.valid_images)
 
 
 def train_model(
@@ -117,11 +87,11 @@ def train_model(
     callbacks.append(cb_saver)
 
     if use_wandb:
-        cb_image = WandbImageLogger(model, dataset, cfg["dataset_args"]["cell_size"])
-        callbacks.append(cb_image)
-
+        cb_image = WandbImageLogger(
+            model, dataset, cell_size=cfg["dataset_args"]["cell_size"]
+        )
         cb_wandb = wandb.keras.WandbCallback()
-        callbacks.append(cb_wandb)
+        callbacks.extend([cb_image, cb_wandb])
 
     model.fit(dataset=dataset, callbacks=callbacks)
 
@@ -156,13 +126,14 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
                 network (str): Name of the network architecture, e.g. "resnet"
                 network_args:
                     Arguments passed to the network function.
-                    *dropout (int): Percentage of dropout only for resnet architecture.
+                    *dropout (float): Percentage of dropout only for resnet architecture.
                 loss (str): Primary loss, e.g. "binary_crossentropy"
                 optimizer (str): Optimizer, e.g. "adam"
                 train_args:
                     batch_size (int): Number of images per mini-batch.
                     epochs (int): Total rounds of training.
                     learning_rate (float): Learning rate, e.g. 1e-4
+                    overfit (bool): If model should overfit to one batch.
                     pretrained (str): Optional weights file to jumpstart training.
 
 

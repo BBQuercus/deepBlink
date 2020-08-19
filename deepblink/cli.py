@@ -144,7 +144,7 @@ def predict_baseline(
         model: Model used to predict the image.
 
     Returns:
-        List of coordinates [x,y].
+        List of coordinates [r, c].
     """
     input_size = model.layers[0].output_shape[0][1]
 
@@ -158,19 +158,19 @@ def predict_baseline(
     crops = skimage.util.view_as_windows(
         image, (input_size, input_size), step=input_size
     )
-    coords_x = []
-    coords_y = []
+    coords_r = []
+    coords_c = []
 
     for i in range(crops.shape[0]):
         for j in range(crops.shape[1]):
-            x, y = _predict(crops[i, j], model)
-            abs_coord_x = x + (j * input_size)
-            abs_coord_y = y + (i * input_size)
+            r, c = _predict(crops[i, j], model)
+            abs_coord_r = r + (j * input_size)
+            abs_coord_c = c + (i * input_size)
 
-            coords_x.extend(abs_coord_x)
-            coords_y.extend(abs_coord_y)
+            coords_r.extend(abs_coord_r)
+            coords_c.extend(abs_coord_c)
 
-    coords = np.array([coords_x, coords_y])
+    coords = np.array([coords_r, coords_c])
     coords = np.where(
         (coords[0] < image.shape[1]) & (coords[1] < image.shape[0]), coords, None
     )
@@ -215,7 +215,7 @@ def main():
     else:
         outpath = inpath
     delimeter = " " if args.type == "txt" else ","
-    header = "x y" if args.type == "txt" else "x,y"
+    header = "r c" if args.type == "txt" else "r,c"
 
     for file in files:
         # Image import

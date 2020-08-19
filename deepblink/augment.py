@@ -132,10 +132,10 @@ def rotate(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]
 
         image = np.rot90(image)  # rotate image -90 degrees
         mask = np.rot90(mask)  # rotate mask -90 degrees
-        x_coord = mask[..., 1].copy()
-        y_coord = mask[..., 2].copy()
-        mask[..., 1] = 1 - y_coord  # rotation coordinates +90 degrees + translation
-        mask[..., 2] = x_coord  # rotation coordinates +90 degrees
+        r_coord = mask[..., 1].copy()
+        c_coord = mask[..., 2].copy()
+        mask[..., 1] = 1 - c_coord  # rotation coordinates +90 degrees + translation
+        mask[..., 2] = r_coord  # rotation coordinates +90 degrees
         mask[..., 1][mask[..., 0] == 0] = 0
         mask[..., 2][mask[..., 0] == 0] = 0
 

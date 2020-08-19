@@ -34,33 +34,36 @@ def test_normalize_images(matrix):
 
 def test_get_coordinate_list():
     grid_size = 4
-    img_size = 512
+    image_size = 512
 
-    mat = np.zeros((grid_size, grid_size, 3))
-    mat[0, 1, ...] = [1, 0.5, 0.5]
+    matrix = np.zeros((grid_size, grid_size, 3))
+    matrix[0, 1, ...] = [1, 0.5, 0.5]
 
     theoretical_result = np.array(
-        [img_size // grid_size * (1 + 0.5), img_size // grid_size * 0.5]
+        [image_size // grid_size * 0.5, image_size // grid_size * (1 + 0.5)]
     )
-    assert (get_coordinate_list(mat, size_image=img_size) == theoretical_result).all()
+    output = get_coordinate_list(matrix, image_size=image_size)
+    assert (theoretical_result == output).all()
 
 
 def test_get_prediction_matrix():
-    img_size = 12
+    image_size = 12
     cell_size = 4
-    x = 5
-    y = 8
-    xy = np.array([[x, y]])
-    grid_size = img_size // cell_size
+    grid_size = image_size // cell_size
+
+    r = 5
+    c = 8
+    rc = np.array([[r, c]])
 
     theoretical_result = np.zeros((grid_size, grid_size, 3))
 
-    posx = x // cell_size
-    posy = y // cell_size
+    pos_r = r // cell_size
+    pos_c = c // cell_size
 
-    theoretical_result[posx, posy, ...] = [
+    theoretical_result[pos_r, pos_c] = (
         1,
-        (x - posx * cell_size) / cell_size,
-        (y - posy * cell_size) / cell_size,
-    ]
-    assert (theoretical_result == get_prediction_matrix(xy, img_size, cell_size)).all()
+        (r - pos_r * cell_size) / cell_size,
+        (c - pos_c * cell_size) / cell_size,
+    )
+    output = get_prediction_matrix(rc, image_size=image_size, cell_size=cell_size)
+    assert (theoretical_result == output).all()

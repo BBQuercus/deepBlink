@@ -23,8 +23,8 @@ def precision_score(pred: np.ndarray, true: np.ndarray) -> float:
     NOTE – direction dependent, arguments cant be switched!!
 
     Args:
-        pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
+        pred: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
+        true: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
     """
     selection = pred[..., 0] == 1
     precision = np.mean(true[selection, 0])
@@ -41,8 +41,8 @@ def recall_score(pred: np.ndarray, true: np.ndarray) -> float:
     NOTE – direction dependent, arguments cant be switched!!
 
     Args:
-        pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
+        pred: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
+        true: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
     """
     selection = true[..., 0] == 1
     recall = np.mean(pred[selection, 0])
@@ -61,8 +61,8 @@ def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
     NOTE – direction dependent, arguments cant be switched!!
 
     Args:
-        pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
+        pred: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
+        true: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
     """
     recall = recall_score(pred, true)
     precision = precision_score(pred, true)
@@ -84,8 +84,8 @@ def error_on_coordinates(
     If cell_size = 1, F1 score will be measured at resolution of pixel.
 
     Args:
-        pred: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
-        true: np.ndarray of shape (n, n, 3): p, x, y format for each cell.
+        pred: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
+        true: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
         cell_size: Size of cell used to calculate F1 score, precision and recall.
 
     Returns:
@@ -96,9 +96,6 @@ def error_on_coordinates(
     counter = 0
     assert pred.shape == true.shape
 
-    # for i in range(len(pred)):
-    #     for j in range(len(pred)):
-    #         if spot[i, j]:
     row, col = np.asarray(spot).nonzero()
     for i, j in zip(row, col):
         x1 = true[i, j, 1] * cell_size
