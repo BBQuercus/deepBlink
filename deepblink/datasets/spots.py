@@ -12,7 +12,12 @@ DATA_DIRNAME = Dataset.data_dirname()
 
 
 class SpotsDataset(Dataset):
-    """Class used to load all spots data."""
+    """Class used to load all spots data.
+
+    Args:
+        cell_size: Number of pixels (from original image) constituting
+            one cell in the prediction matrix.
+    """
 
     def __init__(self, name: str, cell_size: int):
         super().__init__(name)
@@ -42,13 +47,16 @@ class SpotsDataset(Dataset):
         this format cannot be used for training. Here, this format is converted into
         prediction matrices.
         """
-        size = self.x_train[0].shape[0]  # type: ignore
+        image_size = self.x_train[0].shape[0]  # type: ignore
 
-        def __conversion(dataset, size, cell_size):
+        def __conversion(dataset, image_size, cell_size):
             return np.array(
-                [get_prediction_matrix(coords, size, cell_size) for coords in dataset]
+                [
+                    get_prediction_matrix(coords, image_size, cell_size)
+                    for coords in dataset
+                ]
             )
 
-        self.y_train = __conversion(self.y_train, size, self.cell_size)
-        self.y_valid = __conversion(self.y_valid, size, self.cell_size)
-        self.y_test = __conversion(self.y_test, size, self.cell_size)
+        self.y_train = __conversion(self.y_train, image_size, self.cell_size)
+        self.y_valid = __conversion(self.y_valid, image_size, self.cell_size)
+        self.y_test = __conversion(self.y_test, image_size, self.cell_size)

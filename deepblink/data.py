@@ -121,6 +121,7 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     # Top left coordinates of every cell
     grid = np.array([c * cell_size for c in range(size_grid)])
 
+    # Coordinates of cells > 0.5
     matrix_r, matrix_c = np.round(matrix[..., 0]).nonzero()
     for r, c in zip(matrix_r, matrix_c):
 

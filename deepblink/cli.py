@@ -27,12 +27,11 @@ Why does this file exist, and why not put this in __main__?
       ``deepblink.__main__`` in ``sys.modules``.
     - Therefore, to avoid double excecution of the code, this split-up way is safer.
 """
+from typing import List, Tuple
 import argparse
 import glob
 import math
 import os
-from typing import List
-from typing import Tuple
 
 import numpy as np
 import skimage.util
@@ -53,6 +52,20 @@ EXTENSIONS = ["tif", "jpeg", "jpg", "png"]
 """List[str]: List of currently supported image file extensions."""
 
 
+class FileFolderType:
+    """Custom type supporting folders or files."""
+
+    def __init__(self):
+        pass
+
+    def __call__(self, value):  # noqa: D102
+        if not any((os.path.isdir(value), os.path.isfile(value))):
+            raise argparse.ArgumentTypeError(
+                f"Input value must be file or folder. '{value}' is not."
+            )
+        return value
+
+
 def _parse_args():
     """Argument parser."""
     parser = argparse.ArgumentParser(
@@ -61,19 +74,20 @@ def _parse_args():
     )
 
     # Positional arguments
-    # TODO Find type to allow for file and folder
     parser.add_argument(
         "MODEL", type=argparse.FileType("r"), help="model .h5 file location"
     )
     parser.add_argument(
-        "INPUT", type=str, help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+        "INPUT",
+        type=FileFolderType(),
+        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
 
     # Optional arguments
     parser.add_argument(
         "-o",
         "--output",
-        type=str,
+        type=FileFolderType(),
         help="output file/folder location [default: input location]",
     )
     parser.add_argument(
@@ -178,7 +192,6 @@ def predict_baseline(
     return coords.T  # Transposition to save as rows
 
 
-# TODO rename functions
 def main():
     """Entrypoint for the CLI."""
     args = _parse_args()

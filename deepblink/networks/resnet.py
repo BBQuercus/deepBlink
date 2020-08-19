@@ -13,8 +13,8 @@ def resnet(dropout: float = 0.2, cell_size: int = 4) -> tf.keras.models.Model:
     """Residual network with interspersed dropout."""
     i = 6  # 64
 
-    if not math.log(cell_size, 2).is_integer():
-        raise ValueError(f"cell_size must be a power of 2, but was given {cell_size}")
+    if not isinstance(math.log(cell_size, 2), int):
+        raise ValueError(f"cell_size must be a power of 2, but is {cell_size}.")
 
     inputs = tf.keras.layers.Input(shape=(None, None, 1))
     skip_layers = []
@@ -35,7 +35,7 @@ def resnet(dropout: float = 0.2, cell_size: int = 4) -> tf.keras.models.Model:
     skip_layers.append(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(2, 2))(x)
 
-    # Dynamic down sampling; if cell_size is higher than 4, to get the correct network output shape,
+    # Dynamic down sampling: if cell_size is higher than 4, to get the correct network output shape,
     # we need to further down-sample by math.log(cell_size, 2) - 2 times.
     # The -2 corresponds to the 2 halvings already done
     ndown = max(0, math.log(cell_size, 2) - 2)
@@ -56,7 +56,9 @@ def resnet(dropout: float = 0.2, cell_size: int = 4) -> tf.keras.models.Model:
         x = residual_block(inputs=x, filters=2 ** (i + 1 - n))
         x = conv_block(inputs=x, filters=2 ** (i + 1 - n), n_convs=3, dropout=dropout)
         x = tf.keras.layers.Dropout(dropout)(x)
-        x = upconv_block(inputs=x, skip=skip_layers[-(n + 1)], filters=2 ** (i + 1), n_convs=1)
+        x = upconv_block(
+            inputs=x, skip=skip_layers[-(n + 1)], filters=2 ** (i + 1), n_convs=1
+        )
 
     # Connected
     x = conv_block(inputs=x, filters=2 ** (i + 2), n_convs=3, dropout=dropout)

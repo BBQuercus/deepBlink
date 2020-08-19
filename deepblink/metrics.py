@@ -1,8 +1,7 @@
 """Functions to calculate training loss on single image."""
 
+from typing import Optional, Tuple
 import warnings
-from typing import Optional
-from typing import Tuple
 
 import numpy as np
 import scipy.optimize

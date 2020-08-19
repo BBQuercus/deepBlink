@@ -1,10 +1,8 @@
 """Model class, to be extended by specific types of models."""
 
+from typing import Callable, Dict, List
 import datetime
 import pathlib
-from typing import Callable
-from typing import Dict
-from typing import List
 
 import numpy as np
 
@@ -96,6 +94,7 @@ class Model:
             self.train_args["batch_size"],
             format_fn=self.batch_format_fn,
             augment_fn=self.batch_augment_fn,
+            overfit=self.train_args["overfit"],
         )
         valid_sequence = SequenceDataset(
             dataset.x_valid,

@@ -1,19 +1,18 @@
 """SequenceDataset class."""
 
-from typing import Callable
-from typing import Tuple
+from typing import Callable, Tuple
+import warnings
 
 import numpy as np
 import tensorflow as tf
 
 
 def _shuffle(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """Shuffle x and y maintaining their association."""
+    """Shuffle x and y maintaining their items relative order."""
     shuffled_indices = np.random.permutation(x.shape[0])
     return x[shuffled_indices], y[shuffled_indices]
 
 
-# TODO add overfitting flag option
 class SequenceDataset(tf.keras.utils.Sequence):
     """Custom Sequence class used to feed data into model.fit.
 
@@ -23,6 +22,7 @@ class SequenceDataset(tf.keras.utils.Sequence):
         batch_size: Size of one mini-batch.
         augment_fn: Function to augment one mini-batch of x and y.
         format_fn: Function to format raw data to model input.
+        overfit: If only one batch should be used thereby causing overfitting.
     """
 
     def __init__(
@@ -32,18 +32,21 @@ class SequenceDataset(tf.keras.utils.Sequence):
         batch_size: int = 16,
         augment_fn: Callable = None,
         format_fn: Callable = None,
+        overfit: bool = False,
     ):
         self.x = x
         self.y = y
         self.batch_size = batch_size
         self.augment_fn = augment_fn
         self.format_fn = format_fn
+        self.overfit = overfit
 
     def __len__(self) -> int:
         """Return length of the dataset in unit of batch size."""
         if len(self.x) <= self.batch_size:
-            print(
-                "Warning! barch size larger than dataset, setting batch size to length of dataset"
+            warnings.warn(
+                "Batch size larger than dataset, setting batch size to match length of dataset",
+                RuntimeWarning,
             )
             self.batch_size = len(self.x)
 
@@ -51,7 +54,8 @@ class SequenceDataset(tf.keras.utils.Sequence):
 
     def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
         """Return a single batch."""
-        # idx = 0  # Uncomment to overfit to just one batch
+        if self.overfit:
+            idx = 0
         begin = idx * self.batch_size
         end = (idx + 1) * self.batch_size
 
@@ -73,4 +77,5 @@ class SequenceDataset(tf.keras.utils.Sequence):
 
     def on_epoch_end(self) -> None:
         """Shuffle data after every epoch."""
-        self.x, self.y = _shuffle(self.x, self.y)
+        if not self.overfit:
+            self.x, self.y = _shuffle(self.x, self.y)
