@@ -43,7 +43,7 @@ from .io import extract_basename
 from .io import load_image
 from .losses import f1_l2_combined_loss
 from .losses import f1_score
-from .losses import l2_norm
+from .losses import _rmse
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -203,7 +203,7 @@ def main():
         model,
         custom_objects={
             "f1_score": f1_score,
-            "l2_norm": l2_norm,
+            "_rmse": _rmse,
             "f1_l2_combined_loss": f1_l2_combined_loss,
         },
     )
