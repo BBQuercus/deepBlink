@@ -18,12 +18,11 @@ def resnet(
 ) -> tf.keras.models.Model:
     """Residual network with interspersed dropout.
 
-    network_args:
-        Arguments passed to the network function.
+    Arguments:
         dropout: Percentage of dropout only for resnet architecture.
-        cell_size: Size of one cell in the grid.
-        filters: log2 number of filters in the first convolution layers.
-        n_convs: number of convolution layers in each convolution block.
+        cell_size: Size of one cell in the prediction matrix.
+        filters: Log2 number of filters in the first convolution layers.
+        n_convs: Number of convolution layers in each convolution block.
         conv_after_res: If True, adds additional convolution block after residual block.
     """
     if not math.log(cell_size, 2).is_integer():
