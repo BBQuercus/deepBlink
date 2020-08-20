@@ -126,7 +126,11 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
                 network (str): Name of the network architecture, e.g. "resnet"
                 network_args:
                     Arguments passed to the network function.
-                    *dropout (float): Percentage of dropout only for resnet architecture.
+                    dropout (float): Percentage of dropout only for resnet architecture, default 0.2.
+                    cell_size (int): Size of one cell in the grid, default 4.
+                    filters (int): log2 number of filters in the first convolution layers, default 6.
+                    n_convs (int): number of convolution layers in each convolution block, default 3.
+                    conv_after_res: If True, adds additional convolution block after residual block, default True.
                 loss (str): Primary loss, e.g. "binary_crossentropy"
                 optimizer (str): Optimizer, e.g. "adam"
                 train_args:

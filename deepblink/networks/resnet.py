@@ -16,15 +16,7 @@ def resnet(
     n_convs: int = 3,
     conv_after_res: bool = True,
 ) -> tf.keras.models.Model:
-    """Residual network with interspersed dropout.
-
-    Args:
-        dropout (float): Percentage of dropout.
-        cell_size (int): Size of one cell in the grid.
-        filters (int): log2 number of filters in the first convolution layers.
-        n_convs (int): number of convolution layers in each convolution block.
-        conv_after_res: If True, adds additional convolution block after residual block.
-    """
+    """Residual network with interspersed dropout."""
     if not math.log(cell_size, 2).is_integer():
         raise ValueError(f"cell_size must be a power of 2, but is {cell_size}.")
 
@@ -34,8 +26,8 @@ def resnet(
 
     # Dynamic down sampling: minimum 2 down sampling blocks. Depending on cell_size,
     # add more down sampling blocks to get the correct output shape
-    ndown = max(2, math.log(cell_size, 2))
-    for n in range(int(ndown)):
+    n_down = int(max(2, math.log(cell_size, 2)))
+    for n in range(n_down):
         x = conv_block(
             inputs=x, filters=2 ** (filters + n), n_convs=n_convs, dropout=dropout
         )
@@ -52,7 +44,8 @@ def resnet(
     # we need to upsample int(2 // cell_size) times
     # If cell_size is 1, we need to upsample 2 == int(2 // cell_size)
     # If cell_size is 2, we need to upsample 1 == int(2 // 2)
-    for n in range(int(2 // cell_size)):
+    n_up = int(2 // cell_size)
+    for n in range(n_up):
         x = conv_block(
             inputs=x, filters=2 ** (filters + 1 - n), n_convs=n_convs, dropout=dropout
         )
