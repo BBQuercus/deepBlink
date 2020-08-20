@@ -41,7 +41,7 @@ from .data import get_coordinate_list
 from .data import next_multiple
 from .io import extract_basename
 from .io import load_image
-from .losses import f1_l2_combined_loss
+from .losses import combined_f1_rsme
 from .losses import f1_score
 from .losses import _rmse
 
@@ -197,7 +197,7 @@ def main():
         custom_objects={
             "f1_score": f1_score,
             "_rmse": _rmse,
-            "f1_l2_combined_loss": f1_l2_combined_loss,
+            "combined_f1_rsme": combined_f1_rsme,
         },
     )
     if args.verbose:

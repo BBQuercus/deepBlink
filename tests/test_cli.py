@@ -10,7 +10,7 @@ import tensorflow as tf
 from deepblink.cli import _grab_files
 from deepblink.cli import _predict
 from deepblink.cli import predict_baseline
-from deepblink.losses import f1_l2_combined_loss
+from deepblink.losses import combined_f1_rsme
 from deepblink.losses import f1_score
 from deepblink.losses import _rmse
 
@@ -28,7 +28,7 @@ def db_model(data_dir):
         custom_objects={
             "f1_score": f1_score,
             "_rmse": _rmse,
-            "f1_l2_combined_loss": f1_l2_combined_loss,
+            "combined_f1_rsme": combined_f1_rsme,
         },
     )
 

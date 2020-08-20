@@ -95,8 +95,7 @@ def f1_loss(y_true, y_pred):
 
 
 def _rmse(y_true, y_pred):
-    """Calculate root mean square error (rmse) between true and predicted coordinates.
-    """
+    """Calculate root mean square error (rmse) between true and predicted coordinates."""
     coord_true = y_true[..., 1:]
     coord_pred = y_pred[..., 1:]
 
@@ -116,7 +115,10 @@ def _rmse(y_true, y_pred):
     return rmse
 
 
-# TODO rename to f1_l2_loss
-def f1_l2_combined_loss(y_true, y_pred):
-    """Sum of F1 loss and L2 norm."""
-    return f1_loss(y_true, y_pred) + _rmse(y_true, y_pred)
+def combined_f1_rsme(y_true, y_pred):
+    """Difference between F1 score and root mean square error (rmse).
+
+    Optimal value for F1 score is 1 and for rmse is 0.
+    Optimal value for the combined score is 1.
+    """
+    return f1_score(y_true, y_pred) - _rmse(y_true, y_pred)

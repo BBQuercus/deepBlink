@@ -5,7 +5,7 @@ import functools
 import numpy as np
 
 from ..augment import augment_batch_baseline
-from ..losses import f1_l2_combined_loss
+from ..losses import combined_f1_rsme
 from ..losses import f1_score
 from ..losses import _rmse
 from ._models import Model
@@ -35,7 +35,7 @@ class SpotsModel(Model):
             "mse",
             f1_score,
             _rmse,
-            f1_l2_combined_loss,
+            combined_f1_rsme,
         ]
 
     def predict_on_image(self, image: np.ndarray) -> np.ndarray:
