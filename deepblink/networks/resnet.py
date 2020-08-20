@@ -25,7 +25,7 @@ def resnet(
         n_convs (int): number of convolution layers in each convolution block.
         conv_after_res: If True, performs additional convolution block after residual block.
     """
-    i = filters # 2 ** filters represent the number of filters
+    i = filters  # 2 ** filters represent the number of filters
 
     if not math.log(cell_size, 2).is_integer():
         raise ValueError(f"cell_size must be a power of 2, but is {cell_size}.")
