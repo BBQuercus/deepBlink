@@ -12,7 +12,7 @@ from deepblink.cli import _predict
 from deepblink.cli import predict_baseline
 from deepblink.losses import combined_f1_rsme
 from deepblink.losses import f1_score
-from deepblink.losses import _rmse
+from deepblink.losses import rmse
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def db_model(data_dir):
         fname,
         custom_objects={
             "f1_score": f1_score,
-            "_rmse": _rmse,
+            "rmse": rmse,
             "combined_f1_rsme": combined_f1_rsme,
         },
     )

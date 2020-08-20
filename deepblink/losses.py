@@ -94,7 +94,7 @@ def f1_loss(y_true, y_pred):
     return 1 - f1_score(y_true, y_pred)
 
 
-def _rmse(y_true, y_pred):
+def rmse(y_true, y_pred):
     """Calculate root mean square error (rmse) between true and predicted coordinates."""
     coord_true = y_true[..., 1:]
     coord_pred = y_pred[..., 1:]
@@ -110,9 +110,9 @@ def _rmse(y_true, y_pred):
     squared_displacement_xy_summed = K.sum(
         K.square(coord_true_new - coord_pred_new), axis=-1
     )
-    rmse = K.sqrt(K.sum(squared_displacement_xy_summed) / n_true_spots)
+    rmse_value = K.sqrt(K.sum(squared_displacement_xy_summed) / n_true_spots)
 
-    return rmse
+    return rmse_value
 
 
 def combined_f1_rsme(y_true, y_pred):
@@ -121,4 +121,4 @@ def combined_f1_rsme(y_true, y_pred):
     Optimal value for F1 score is 1 and for rmse is 0.
     Optimal value for the combined score is 1.
     """
-    return f1_score(y_true, y_pred) - _rmse(y_true, y_pred)
+    return f1_score(y_true, y_pred) - rmse(y_true, y_pred)

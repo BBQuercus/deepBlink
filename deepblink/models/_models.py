@@ -9,7 +9,7 @@ import numpy as np
 from ..datasets import Dataset
 from ..datasets import SequenceDataset
 from ..losses import f1_score
-from ..losses import _rmse
+from ..losses import rmse
 
 DIRNAME = pathlib.Path(__file__).parents[1].resolve() / "weights"
 DATESTRING = datetime.datetime.now().strftime("%Y%d%m_%H%M")
@@ -123,10 +123,10 @@ class Model:
         preds = np.float32(preds)
         y_float32 = np.float32(y)
 
-        _rmse_ = _rmse(y_float32, preds) * self.dataset_args["cell_size"]
+        rmse_ = rmse(y_float32, preds) * self.dataset_args["cell_size"]
         f1_score_ = f1_score(y_float32, preds)
 
-        return [f1_score_.numpy(), _rmse_.numpy()]
+        return [f1_score_.numpy(), rmse_.numpy()]
 
     def load_weights(self) -> None:
         """Load model weights from file."""

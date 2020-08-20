@@ -44,7 +44,7 @@ from .io import extract_basename
 from .io import load_image
 from .losses import combined_f1_rsme
 from .losses import f1_score
-from .losses import _rmse
+from .losses import rmse
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -204,7 +204,7 @@ def main():
         model,
         custom_objects={
             "f1_score": f1_score,
-            "_rmse": _rmse,
+            "rmse": rmse,
             "combined_f1_rsme": combined_f1_rsme,
         },
     )

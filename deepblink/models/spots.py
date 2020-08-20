@@ -7,7 +7,7 @@ import numpy as np
 from ..augment import augment_batch_baseline
 from ..losses import combined_f1_rsme
 from ..losses import f1_score
-from ..losses import _rmse
+from ..losses import rmse
 from ._models import Model
 
 
@@ -34,7 +34,7 @@ class SpotsModel(Model):
             "accuracy",
             "mse",
             f1_score,
-            _rmse,
+            rmse,
             combined_f1_rsme,
         ]
 
