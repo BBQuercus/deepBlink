@@ -5,7 +5,7 @@ Because the model is loaded into memory for every run, it is faster to
 run multiple images at once by passing a directory as input.
 
 Usage:
-    ``$ deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT``
+    ``$ deepblink [-h] [-c CROP_SIZE] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT``
     ``$ deepblink --help``
 
 Positional Arguments:
@@ -15,6 +15,7 @@ Positional Arguments:
 Optional Arguments:
     -h, --help      show this help screen
 
+    -c, --crop_size size of image crop to be fed to the network
     -o, --output    output file/folder location [default: input location]
     -t, --type      output file type [options: csv, txt] [default: csv]
     -v, --verbose   set program output to verbose [default: quiet]
@@ -85,6 +86,13 @@ def _parse_args():
     )
 
     # Optional arguments
+    parser.add_argument(
+        "-c",
+        "--crop_size",
+        type=int,
+        default=512,
+        help="size of the image crop to be fed in the model",
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -229,7 +237,7 @@ def main():
         image = load_image(file)
 
         # Prediction
-        coord = predict_baseline(image, model)
+        coord = predict_baseline(image, model, args.crop_size)
 
         # Save coord list
         fname = os.path.join(outpath, f"{extract_basename(file)}.{args.type}")
