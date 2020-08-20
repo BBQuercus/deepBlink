@@ -13,7 +13,7 @@ def resnet(dropout: float = 0.2, cell_size: int = 4) -> tf.keras.models.Model:
     """Residual network with interspersed dropout."""
     i = 6  # 64
 
-    if not isinstance(math.log(cell_size, 2), int):
+    if not math.log(cell_size, 2).is_integer():
         raise ValueError(f"cell_size must be a power of 2, but is {cell_size}.")
 
     inputs = tf.keras.layers.Input(shape=(None, None, 1))
