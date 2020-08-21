@@ -29,3 +29,6 @@ class Dataset:
 
     def prepare_data(self):
         """Empty method to prepare or convert data."""
+
+    def normalize_dataset(self):
+        """Empty method to normalise images in the dataset."""

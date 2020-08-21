@@ -37,6 +37,7 @@ import tensorflow as tf
 
 from .data import get_coordinate_list
 from .data import next_power
+from .data import normalize_image
 from .io import extract_basename
 from .io import load_image
 from .losses import combined_f1_rsme
@@ -86,7 +87,7 @@ def _parse_args():
     parser.add_argument(
         "-o",
         "--output",
-        type=FileFolderType(),
+        type=str,
         help="output file/folder location [default: input location]",
     )
     parser.add_argument(
@@ -144,7 +145,7 @@ def _predict(
         List of coordinates [r, c].
     """
     # Normalisation and padding
-    image /= np.max(image)
+    image = normalize_image(image)
     pad_bottom = next_power(image.shape[0], 2) - image.shape[0]
     pad_right = next_power(image.shape[1], 2) - image.shape[1]
     image = np.pad(image, ((0, pad_bottom), (0, pad_right)), "reflect")
