@@ -66,6 +66,21 @@ class FileFolderType:
         return value
 
 
+class FolderType:
+    """Custom type supporting folders."""
+
+    def __init__(self):
+        pass
+
+    def __call__(self, value):  # noqa: D102
+        """Python type internal function called by argparse to check input."""
+        if not os.path.isdir(value):
+            raise argparse.ArgumentTypeError(
+                f"Input value must be folder and must exist. '{value}' is not."
+            )
+        return value
+
+
 def _parse_args():
     """Argument parser."""
     parser = argparse.ArgumentParser(
@@ -87,7 +102,7 @@ def _parse_args():
     parser.add_argument(
         "-o",
         "--output",
-        type=str,
+        type=FolderType(),
         help="output file/folder location [default: input location]",
     )
     parser.add_argument(
@@ -98,12 +113,7 @@ def _parse_args():
         default="csv",
         help="output file type [options: csv, txt] [default: csv]",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="output file/folder location [default: input location]",
-    )
+    parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.5")
     args = parser.parse_args()
 
