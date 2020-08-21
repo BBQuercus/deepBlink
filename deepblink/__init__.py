@@ -26,4 +26,5 @@ from . import metrics
 from . import models
 from . import networks
 from . import optimizers
+from . import training
 from . import util
