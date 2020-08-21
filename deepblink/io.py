@@ -65,4 +65,4 @@ def load_image(fname: str):
             f"File must be in the format (x, y) or (x, y, 3) but is {image.shape}."
         )
     except ValueError:
-        raise ImportError(f"File '{fname}' could not be imported.")
+        raise ImportError(f"File '{fname}' could not be imported. WTF?")

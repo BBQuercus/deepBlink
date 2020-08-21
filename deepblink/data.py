@@ -75,7 +75,7 @@ def random_cropping(
 
 
 def normalize_image(image: np.ndarray) -> np.ndarray:
-    """Normalizes image based on mean and standard deviation.
+    """Normalizes image based to have zero mean and one standard deviation.
 
     Args:
         image: Input image.
