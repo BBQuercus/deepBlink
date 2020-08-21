@@ -30,20 +30,19 @@ Why does this file exist, and why not put this in __main__?
 from typing import List, Tuple
 import argparse
 import glob
-import math
 import os
 
 import numpy as np
-import skimage.util
 import tensorflow as tf
 
 from .data import get_coordinate_list
-from .data import next_multiple
+from .data import next_power
+from .data import normalize_image
 from .io import extract_basename
 from .io import load_image
-from .losses import f1_l2_combined_loss
+from .losses import combined_f1_rsme
 from .losses import f1_score
-from .losses import l2_norm
+from .losses import rmse
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -63,6 +62,21 @@ class FileFolderType:
         if not any((os.path.isdir(value), os.path.isfile(value))):
             raise argparse.ArgumentTypeError(
                 f"Input value must be file or folder. '{value}' is not."
+            )
+        return value
+
+
+class FolderType:
+    """Custom type supporting folders."""
+
+    def __init__(self):
+        pass
+
+    def __call__(self, value):  # noqa: D102
+        """Python type internal function called by argparse to check input."""
+        if not os.path.isdir(value):
+            raise argparse.ArgumentTypeError(
+                f"Input value must be folder and must exist. '{value}' is not."
             )
         return value
 
@@ -88,7 +102,7 @@ def _parse_args():
     parser.add_argument(
         "-o",
         "--output",
-        type=FileFolderType(),
+        type=FolderType(),
         help="output file/folder location [default: input location]",
     )
     parser.add_argument(
@@ -99,12 +113,7 @@ def _parse_args():
         default="csv",
         help="output file type [options: csv, txt] [default: csv]",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="output file/folder location [default: input location]",
-    )
+    parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.5")
     args = parser.parse_args()
 
@@ -133,23 +142,7 @@ def _grab_files(path: str, extensions: List[str]) -> List[str]:
     return sorted(files)
 
 
-def _predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
-    """Predict on a image of size needed for the network and return coordinates."""
-    if not image.shape[0] == image.shape[1]:
-        raise ValueError(f"Image shape must be square but is {image.shape}")
-    if not math.log(image.shape[0], 2).is_integer():
-        raise ValueError(f"Image shape must a power of two but is {image.shape}")
-    if image.shape[0] != model.input_shape[1]:
-        raise ValueError(
-            f"Image shape must match model {image.shape} != {model.input_shape[1:3]}"
-        )
-
-    pred = model.predict(image[None, ..., None]).squeeze()
-    coord = get_coordinate_list(pred, model.input_shape[1])
-    return coord[..., 0], coord[..., 1]
-
-
-def predict_baseline(
+def _predict(
     image: np.ndarray, model: tf.keras.models.Model
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Returns a binary or categorical model based prediction of an image.
@@ -161,31 +154,18 @@ def predict_baseline(
     Returns:
         List of coordinates [r, c].
     """
-    input_size = model.layers[0].output_shape[0][1]
-
     # Normalisation and padding
-    image /= np.max(image)
-    pad_bottom = next_multiple(image.shape[0], input_size) - image.shape[0]
-    pad_right = next_multiple(image.shape[1], input_size) - image.shape[1]
+    image = normalize_image(image)
+    pad_bottom = next_power(image.shape[0], 2) - image.shape[0]
+    pad_right = next_power(image.shape[1], 2) - image.shape[1]
     image = np.pad(image, ((0, pad_bottom), (0, pad_right)), "reflect")
 
-    # Predict on patches of the image and combine all the patches
-    crops = skimage.util.view_as_windows(
-        image, (input_size, input_size), step=input_size
-    )
-    coords_r = []
-    coords_c = []
+    # Predict on image
+    pred = model.predict(image[None, ..., None]).squeeze()
+    coords = get_coordinate_list(pred, image.shape[0])
 
-    for i in range(crops.shape[0]):
-        for j in range(crops.shape[1]):
-            r, c = _predict(crops[i, j], model)
-            abs_coord_r = r + (j * input_size)
-            abs_coord_c = c + (i * input_size)
-
-            coords_r.extend(abs_coord_r)
-            coords_c.extend(abs_coord_c)
-
-    coords = np.array([coords_r, coords_c])
+    # Remove spots in padded part of image
+    coords = np.array([coords[..., 0], coords[..., 1]])
     coords = np.where(
         (coords[0] < image.shape[1]) & (coords[1] < image.shape[0]), coords, None
     )
@@ -203,8 +183,8 @@ def main():
         model,
         custom_objects={
             "f1_score": f1_score,
-            "l2_norm": l2_norm,
-            "f1_l2_combined_loss": f1_l2_combined_loss,
+            "rmse": rmse,
+            "combined_f1_rsme": combined_f1_rsme,
         },
     )
     if args.verbose:
@@ -236,7 +216,7 @@ def main():
         image = load_image(file)
 
         # Prediction
-        coord = predict_baseline(image, model)
+        coord = _predict(image, model)
 
         # Save coord list
         fname = os.path.join(outpath, f"{extract_basename(file)}.{args.type}")

@@ -8,10 +8,10 @@ from deepblink.losses import binary_crossentropy
 from deepblink.losses import categorical_crossentropy
 from deepblink.losses import dice_loss
 from deepblink.losses import dice_score
-from deepblink.losses import f1_l2_combined_loss
+from deepblink.losses import combined_f1_rsme
 from deepblink.losses import f1_loss
 from deepblink.losses import f1_score
-from deepblink.losses import l2_norm
+from deepblink.losses import rmse
 from deepblink.losses import precision_score
 from deepblink.losses import recall_score
 
@@ -66,13 +66,13 @@ def test_f1_loss(tensor_true, tensor_pred):
     assert tf.is_tensor(f1_loss(tensor_true, tensor_pred))
 
 
-def test_l2_norm():
-    true_l2_norm = tf.constant([[[1, 0, 0], [1, 0.5, 0]], [[0, 0, 0], [1, 0.5, 0.5]]])
-    pred_l2_norm = tf.constant(
+def test_rmse():
+    true_rmse = tf.constant([[[1, 0, 0], [1, 0.5, 0]], [[0, 0, 0], [1, 0.5, 0.5]]])
+    pred_rmse = tf.constant(
         [[[1, 0, 0], [1, 0.5, 0]], [[1, 0.5, 0.5], [0, 0.5, 0.5]]]
     )
-    assert l2_norm(true_l2_norm, pred_l2_norm) == tf.constant(0, dtype=tf.float32)
+    assert rmse(true_rmse, pred_rmse) == tf.constant(0, dtype=tf.float32)
 
 
-def test_f1_l2_combined_loss(tensor_true, tensor_pred):
-    assert tf.is_tensor(f1_l2_combined_loss(tensor_true, tensor_pred))
+def test_combined_f1_rsme(tensor_true, tensor_pred):
+    assert tf.is_tensor(combined_f1_rsme(tensor_true, tensor_pred))

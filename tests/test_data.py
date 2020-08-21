@@ -10,9 +10,12 @@ import pytest
 
 from deepblink.data import next_power
 from deepblink.data import next_multiple
-from deepblink.data import normalize_images
+from deepblink.data import normalize_image
 from deepblink.data import get_coordinate_list
 from deepblink.data import get_prediction_matrix
+
+
+EPSILON = 1e-10
 
 
 @pytest.mark.parametrize("value, base, expected", [(5, 2, 8), (6, 3, 9), (12, 7, 49)])
@@ -28,8 +31,11 @@ def test_next_multiple(value, dividend, expected):
 
 
 @given(arrays(np.float, (5, 5), elements=floats(0, 100)))
-def test_normalize_images(matrix):
-    assert ((normalize_images(matrix) <= 1)).all()
+def test_normalize_image(matrix):
+    matrix = matrix + np.random.rand(5, 5)
+    normalized_image = normalize_image(matrix)
+    assert np.abs(np.mean(normalized_image)) < EPSILON
+    assert np.abs(np.std(normalized_image) -1) < EPSILON
 
 
 def test_get_coordinate_list():

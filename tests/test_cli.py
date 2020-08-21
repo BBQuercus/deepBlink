@@ -9,10 +9,9 @@ import tensorflow as tf
 
 from deepblink.cli import _grab_files
 from deepblink.cli import _predict
-from deepblink.cli import predict_baseline
-from deepblink.losses import f1_l2_combined_loss
+from deepblink.losses import combined_f1_rsme
 from deepblink.losses import f1_score
-from deepblink.losses import l2_norm
+from deepblink.losses import rmse
 
 
 @pytest.fixture
@@ -27,8 +26,8 @@ def db_model(data_dir):
         fname,
         custom_objects={
             "f1_score": f1_score,
-            "l2_norm": l2_norm,
-            "f1_l2_combined_loss": f1_l2_combined_loss,
+            "rmse": rmse,
+            "combined_f1_rsme": combined_f1_rsme,
         },
     )
 
@@ -40,15 +39,7 @@ def test_grab_files(data_dir):
 
 
 def test_predict(db_model):
-    """Test the function that given model and image, returns the predicted coordinates."""
-    img = np.random.rand(512, 512)
-    xcoord, ycoord = _predict(img, db_model)
-    assert isinstance(xcoord, np.ndarray)
-    assert isinstance(ycoord, np.ndarray)
-
-
-def test_predict_baseline(db_model):
     """Test the function that given model and image, returns the prediction on image."""
     img = np.random.rand(512, 512)
-    pred = predict_baseline(img, db_model)
+    pred = _predict(img, db_model)
     assert isinstance(pred, np.ndarray)

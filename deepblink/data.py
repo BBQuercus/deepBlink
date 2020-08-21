@@ -74,23 +74,18 @@ def random_cropping(
     return cropped_image, cropped_mask
 
 
-def normalize_images(images: np.ndarray) -> np.ndarray:
-    """Normalizes images based on bit depth.
+def normalize_image(image: np.ndarray) -> np.ndarray:
+    """Normalizes image based to have zero mean and one standard deviation.
 
     Args:
-        images: Input image with uint8 or uint16 formatting.
+        image: Input image.
 
     Returns:
         Image normalized to 0-1 as float32.
     """
-    if images.dtype == np.uint8:
-        return (images / 255).astype(np.float32)
-    if images.dtype == np.uint16:
-        return (images / 65535).astype(np.float32)
-    if np.nanmax(images) != 0:
-        return (images / np.nanmax(images)).astype(np.float32)
+    image = (image - np.mean(image)) / np.std(image)
 
-    return images
+    return image
 
 
 def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray:

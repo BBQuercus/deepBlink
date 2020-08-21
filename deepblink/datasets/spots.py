@@ -7,6 +7,7 @@ import numpy as np
 from ..data import get_prediction_matrix
 from ..io import load_npz
 from ._datasets import Dataset
+from ..data import normalize_image
 
 DATA_DIRNAME = Dataset.data_dirname()
 
@@ -39,6 +40,7 @@ class SpotsDataset(Dataset):
             self.y_test,
         ) = load_npz(self.data_filename)
         self.prepare_data()
+        self.normalize_dataset()
 
     def prepare_data(self) -> None:
         """Convert raw labels into labels usable for training.
@@ -60,3 +62,13 @@ class SpotsDataset(Dataset):
         self.y_train = __conversion(self.y_train, image_size, self.cell_size)
         self.y_valid = __conversion(self.y_valid, image_size, self.cell_size)
         self.y_test = __conversion(self.y_test, image_size, self.cell_size)
+
+    def normalize_dataset(self) -> None:
+        """Normalize all the images to have zero mean and standard deviation 1."""
+
+        def __normalization(dataset):
+            return np.array([normalize_image(image) for image in dataset])
+
+        self.x_train = __normalization(self.x_train)
+        self.x_valid = __normalization(self.x_valid)
+        self.x_test = __normalization(self.x_test)

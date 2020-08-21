@@ -94,12 +94,8 @@ def f1_loss(y_true, y_pred):
     return 1 - f1_score(y_true, y_pred)
 
 
-def l2_norm(y_true, y_pred):
-    """Calculate L2 norm between true and predicted coordinates.
-
-    Also known as the euclidean norm.
-    Defined as the square root of the sum of the squared vector values.
-    """
+def rmse(y_true, y_pred):
+    """Calculate root mean square error (rmse) between true and predicted coordinates."""
     coord_true = y_true[..., 1:]
     coord_pred = y_pred[..., 1:]
 
@@ -108,12 +104,21 @@ def l2_norm(y_true, y_pred):
     coord_true_new = tf.where(comparison, tf.zeros_like(coord_true), coord_true)
     coord_pred_new = tf.where(comparison, tf.zeros_like(coord_pred), coord_pred)
 
-    l2_value = K.sqrt(K.mean(K.sum(K.square(coord_true_new - coord_pred_new), axis=-1)))
+    sum_rc_coords = K.sum(coord_true, axis=-1)
+    n_true_spots = tf.math.count_nonzero(sum_rc_coords, dtype=tf.float32)
 
-    return l2_value
+    squared_displacement_xy_summed = K.sum(
+        K.square(coord_true_new - coord_pred_new), axis=-1
+    )
+    rmse_value = K.sqrt(K.sum(squared_displacement_xy_summed) / n_true_spots)
+
+    return rmse_value
 
 
-# TODO rename to f1_l2_loss
-def f1_l2_combined_loss(y_true, y_pred):
-    """Sum of F1 loss and L2 norm."""
-    return f1_loss(y_true, y_pred) + l2_norm(y_true, y_pred)
+def combined_f1_rsme(y_true, y_pred):
+    """Difference between F1 score and root mean square error (rmse).
+
+    Optimal value for F1 score is 1 and for rmse is 0.
+    Optimal value for the combined score is 1.
+    """
+    return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
