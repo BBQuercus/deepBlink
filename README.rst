@@ -10,6 +10,8 @@
 .. image:: https://img.shields.io/badge/license-MIT-brightgreen.svg
     :target: https://raw.githubusercontent.com/BBQuercus/deepBlink/master/LICENSE
     :alt: GitHub code licence is MIT.
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3992543.svg
+   :target: https://doi.org/10.5281/zenodo.3992543
 .. .. image:: https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg
 ..     :target: https://codecov.io/gh/BBQuercus/deepBlink
 ..     :alt: Codecov test coverage.
@@ -68,6 +70,6 @@ Usage
 
 Inferencing on deepBlink is performed at the command line as follows: ::
 
-    deepblink [-h] [-c CROP_SIZE] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT
+    deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT
 
 More detailed information is availabe in our `documentation <https://deepblink.readthedocs.io/>`_.

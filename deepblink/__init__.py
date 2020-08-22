@@ -11,6 +11,7 @@ Modules are arranged as follows:
 - models: Training loop containing classes for each type of model.
 - networks: Architecture / building of model structure.
 - optimizers: Simple functions returning model optimizers.
+- training: Core training loop and callbacks.
 - util: Basic utility functions not fitting into a category.
 """
 
@@ -26,4 +27,5 @@ from . import metrics
 from . import models
 from . import networks
 from . import optimizers
+from . import training
 from . import util
