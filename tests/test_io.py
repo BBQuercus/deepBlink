@@ -48,7 +48,12 @@ def test_load_npz():
             y_test=arr,
         )
 
+        # Load all datasets
         data = load_npz(fname)
         assert len(data) == 6
         for d in data:
             assert d.shape == arr.shape
+
+        # Load only test dataset
+        data = load_npz(fname, test_only=True)
+        assert len(data) == 6
