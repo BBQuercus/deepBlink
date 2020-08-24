@@ -15,7 +15,7 @@ from deepblink.data import get_coordinate_list
 from deepblink.data import get_prediction_matrix
 
 
-EPSILON = 1e-10
+EPSILON = 1e-5
 
 
 @pytest.mark.parametrize("value, base, expected", [(5, 2, 8), (6, 3, 9), (12, 7, 49)])
@@ -35,7 +35,7 @@ def test_normalize_image(matrix):
     matrix = matrix + np.random.rand(5, 5)
     normalized_image = normalize_image(matrix)
     assert np.abs(np.mean(normalized_image)) < EPSILON
-    assert np.abs(np.std(normalized_image) -1) < EPSILON
+    assert np.abs(np.std(normalized_image) - 1) < EPSILON
 
 
 def test_get_coordinate_list():
