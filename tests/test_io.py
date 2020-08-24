@@ -56,4 +56,4 @@ def test_load_npz():
 
         # Load only test dataset
         data = load_npz(fname, test_only=True)
-        assert len(data) == 6
+        assert len(data) == 2
