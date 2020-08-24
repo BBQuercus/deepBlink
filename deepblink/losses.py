@@ -122,3 +122,8 @@ def combined_f1_rsme(y_true, y_pred):
     Optimal value for the combined score is 1.
     """
     return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
+
+
+def combined_bce_rsme(y_true, y_pred):
+    """Loss that combines binary cross entropy for probability and rmse for coordinates."""
+    return binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
