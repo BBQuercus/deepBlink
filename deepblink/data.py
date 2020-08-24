@@ -75,17 +75,9 @@ def random_cropping(
 
 
 def normalize_image(image: np.ndarray) -> np.ndarray:
-    """Normalizes image based to have zero mean and one standard deviation.
-
-    Args:
-        image: Input image.
-
-    Returns:
-        Image normalized to 0-1 as float32.
-    """
-    image = (image - np.mean(image)) / np.std(image)
-
-    return image
+    """Normalize image to a mean of zero and a standard deviation of one."""
+    image = (image - image.mean()) / image.std()
+    return image.astype(np.float32)
 
 
 def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray:
