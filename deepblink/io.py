@@ -48,7 +48,7 @@ def load_npz(fname: str, test_only: bool = False) -> List[Any]:
         expected = expected[-2:]
 
     with np.load(fname, allow_pickle=True) as data:
-        if not all([f in expected for f in data.files]):
+        if not all([e in data.files for e in expected]):
             raise ValueError(f"{expected} must be present. Only found {data.files}.")
         return [data[f] for f in expected]
 
