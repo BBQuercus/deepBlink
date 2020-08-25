@@ -115,15 +115,23 @@ def rmse(y_true, y_pred):
     return rmse_value
 
 
-def combined_f1_rsme(y_true, y_pred):
+def combined_f1_rmse(y_true, y_pred):
     """Difference between F1 score and root mean square error (rmse).
 
     Optimal value for F1 score is 1 and for rmse is 0.
     Optimal value for the combined score is 1.
+    Therefore, optimal value for combined_f1_rmse is 1.
     """
     return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
 
 
-def combined_bce_rsme(y_true, y_pred):
-    """Loss that combines binary cross entropy for probability and rmse for coordinates."""
+def combined_bce_rmse(y_true, y_pred):
+    """Loss that combines binary cross entropy for probability and rmse for coordinates.
+
+    Optimal value for binary crossentropy (bce) is 0.
+    Optimal value for rmse is 0.
+    Therefore, optimal value for combined_bce_rmse is 0.
+
+    rmse is rescaled with 1/10 to weigh more bce in the calculation of the loss.
+    """
     return binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
