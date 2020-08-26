@@ -183,7 +183,7 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
 
     if use_wandb:
         score = model.evaluate(dataset.x_valid, dataset.y_valid)
-        wandb.log({"valid_metric": score})
+        wandb.log({"valid_metric": score[0]})  # score[0] corresponds to f1_score
         wandb.join()
 
     if save_weights:
