@@ -1,7 +1,7 @@
 """Functions to calculate training loss on batches of images.
 
-While functions are comparable to metrics, these rely on keras' backend
-and do not take raw numpy as input.
+While functions are comparable to the ones found in the module metrics,
+these rely on keras' backend and do not take raw numpy as input.
 """
 
 import tensorflow as tf
@@ -9,10 +9,11 @@ import tensorflow.keras.backend as K
 
 
 def binary_crossentropy(y_true, y_pred):
-    """Keras' binary crossentropy loss."""
-    # Binary cross entropy reduces the last dimension by taking the average over last dimension
-    # We want to avoid the reduction so that we can control the reductions ourself
-    # To achieve this, we expand the tensor.
+    """Keras' binary crossentropy loss.
+
+    Binary cross entropy reduces the last dimension by taking the average over last dimension.
+    We expand both input tensors to avoid this dimensionality reduction along the column axis.
+    """
     y_pred = tf.expand_dims(y_pred, axis=-1)
     y_true = tf.expand_dims(y_true, axis=-1)
 
@@ -23,10 +24,11 @@ def binary_crossentropy(y_true, y_pred):
 
 
 def categorical_crossentropy(y_true, y_pred):
-    """Keras' categorical crossentropy loss."""
-    # Categorical cross entropy reduces the last dimension by taking the average over last dimension
-    # We want to avoid the reduction so that we can control the reductions ourself
-    # To achieve this, we expand the tensor.
+    """Keras' categorical crossentropy loss.
+
+    Categorical cross entropy reduces the last dimension by taking the average over last dimension.
+    We expand both input tensors to avoid this dimensionality reduction along the column axis.
+    """
     y_pred = tf.expand_dims(y_pred, axis=-1)
     y_true = tf.expand_dims(y_true, axis=-1)
 
@@ -128,9 +130,8 @@ def rmse(y_true, y_pred):
 def combined_f1_rmse(y_true, y_pred):
     """Difference between F1 score and root mean square error (rmse).
 
-    Optimal value for F1 score is 1 and for rmse is 0.
-    Optimal value for the combined score is 1.
-    Therefore, optimal value for combined_f1_rmse is 1.
+    The optimal values for F1 score and rmse are 1 and 0 respectively.
+    Therefore, the combined optimal value is 1.
     """
     return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
 
@@ -138,11 +139,8 @@ def combined_f1_rmse(y_true, y_pred):
 def combined_bce_rmse(y_true, y_pred):
     """Loss that combines binary cross entropy for probability and rmse for coordinates.
 
-    Optimal value for binary crossentropy (bce) is 0.
-    Optimal value for rmse is 0.
-    Therefore, optimal value for combined_bce_rmse is 0.
-
-    rmse is rescaled with 1/10 to weigh more bce in the calculation of the loss.
+    The optimal values for binary crossentropy (bce) and rmse are both 0.
+    Bce is considered more important so we weighted rmse with 1/10.
     """
     return (
         binary_crossentropy(y_true[..., 0], y_pred[..., 0])
