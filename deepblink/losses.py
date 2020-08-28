@@ -10,7 +10,7 @@ import tensorflow.keras.backend as K
 
 def binary_crossentropy(y_true, y_pred):
     """Keras' binary crossentropy loss.
-    
+
     Binary cross entropy reduces the last dimension by taking the average over last dimension.
     We expand both input tensors to avoid this dimensionality reduction along the column axis.
     """
@@ -25,7 +25,7 @@ def binary_crossentropy(y_true, y_pred):
 
 def categorical_crossentropy(y_true, y_pred):
     """Keras' categorical crossentropy loss.
-    
+
     Categorical cross entropy reduces the last dimension by taking the average over last dimension.
     We expand both input tensors to avoid this dimensionality reduction along the column axis.
     """
