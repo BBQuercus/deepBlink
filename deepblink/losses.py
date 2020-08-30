@@ -1,7 +1,7 @@
 """Functions to calculate training loss on batches of images.
 
-While functions are comparable to metrics, these rely on keras' backend
-and do not take raw numpy as input.
+While functions are comparable to the ones found in the module metrics,
+these rely on keras' backend and do not take raw numpy as input.
 """
 
 import tensorflow as tf
@@ -9,13 +9,34 @@ import tensorflow.keras.backend as K
 
 
 def binary_crossentropy(y_true, y_pred):
-    """Keras' binary crossentropy loss."""
-    return tf.keras.losses.binary_crossentropy(y_true=y_true, y_pred=y_pred)
+    """Keras' binary crossentropy loss.
+
+    Binary cross entropy reduces the last dimension by taking the average over last dimension.
+    We expand both input tensors to avoid this dimensionality reduction along the column axis.
+    """
+    y_pred = tf.expand_dims(y_pred, axis=-1)
+    y_true = tf.expand_dims(y_true, axis=-1)
+
+    bce_no_reduction = tf.keras.losses.binary_crossentropy(y_true=y_true, y_pred=y_pred)
+
+    # The outer K.mean is used instead of K.sum because the difference is just a rescaling factor
+    return K.mean(K.mean(bce_no_reduction, axis=0))
 
 
 def categorical_crossentropy(y_true, y_pred):
-    """Keras' categorical crossentropy loss."""
-    return tf.keras.losses.categorical_crossentropy(y_true=y_true, y_pred=y_pred)
+    """Keras' categorical crossentropy loss.
+
+    Categorical cross entropy reduces the last dimension by taking the average over last dimension.
+    We expand both input tensors to avoid this dimensionality reduction along the column axis.
+    """
+    y_pred = tf.expand_dims(y_pred, axis=-1)
+    y_true = tf.expand_dims(y_true, axis=-1)
+
+    cce_no_reduction = tf.keras.losses.categorical_crossentropy(
+        y_true=y_true, y_pred=y_pred
+    )
+
+    return tf.reduce_sum(K.mean(cce_no_reduction, axis=0))
 
 
 def dice_score(y_true, y_pred, smooth: int = 1):
@@ -51,8 +72,6 @@ def recall_score(y_true, y_pred):
     Can be interpreted as the accuracy of finding positive samples or how many relevant samples were selected.
     The best value is 1 and the worst value is 0.
     """
-    y_true = y_true[..., 0]
-    y_pred = y_pred[..., 0]
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
     recall = true_positives / (possible_positives + K.epsilon())
@@ -66,8 +85,6 @@ def precision_score(y_true, y_pred):
     Can be interpreted as the accuracy to not mislabel samples or how many selected items are relevant.
     The best value is 1 and the worst value is 0.
     """
-    y_true = y_true[..., 0]
-    y_pred = y_pred[..., 0]
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
     precision = true_positives / (predicted_positives + K.epsilon())
@@ -83,8 +100,8 @@ def f1_score(y_true, y_pred):
     The equally weighted average of precision and recall.
     The best value is 1 and the worst value is 0.
     """
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
+    precision = precision_score(y_true[..., 0], y_pred[..., 0])
+    recall = recall_score(y_true[..., 0], y_pred[..., 0])
     f1_value = 2 * ((precision * recall) / (precision + recall + K.epsilon()))
     return f1_value
 
@@ -96,20 +113,15 @@ def f1_loss(y_true, y_pred):
 
 def rmse(y_true, y_pred):
     """Calculate root mean square error (rmse) between true and predicted coordinates."""
-    coord_true = y_true[..., 1:]
-    coord_pred = y_pred[..., 1:]
+    comparison = tf.equal(y_true, tf.constant(0, dtype=tf.float32))
 
-    comparison = tf.equal(coord_true, tf.constant(0, dtype=tf.float32))
+    y_true_new = tf.where(comparison, tf.zeros_like(y_true), y_true)
+    y_pred_new = tf.where(comparison, tf.zeros_like(y_pred), y_pred)
 
-    coord_true_new = tf.where(comparison, tf.zeros_like(coord_true), coord_true)
-    coord_pred_new = tf.where(comparison, tf.zeros_like(coord_pred), coord_pred)
-
-    sum_rc_coords = K.sum(coord_true, axis=-1)
+    sum_rc_coords = K.sum(y_true, axis=-1)
     n_true_spots = tf.math.count_nonzero(sum_rc_coords, dtype=tf.float32)
 
-    squared_displacement_xy_summed = K.sum(
-        K.square(coord_true_new - coord_pred_new), axis=-1
-    )
+    squared_displacement_xy_summed = K.sum(K.square(y_true_new - y_pred_new), axis=-1)
     rmse_value = K.sqrt(K.sum(squared_displacement_xy_summed) / n_true_spots)
 
     return rmse_value
@@ -118,9 +130,8 @@ def rmse(y_true, y_pred):
 def combined_f1_rmse(y_true, y_pred):
     """Difference between F1 score and root mean square error (rmse).
 
-    Optimal value for F1 score is 1 and for rmse is 0.
-    Optimal value for the combined score is 1.
-    Therefore, optimal value for combined_f1_rmse is 1.
+    The optimal values for F1 score and rmse are 1 and 0 respectively.
+    Therefore, the combined optimal value is 1.
     """
     return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
 
@@ -128,10 +139,10 @@ def combined_f1_rmse(y_true, y_pred):
 def combined_bce_rmse(y_true, y_pred):
     """Loss that combines binary cross entropy for probability and rmse for coordinates.
 
-    Optimal value for binary crossentropy (bce) is 0.
-    Optimal value for rmse is 0.
-    Therefore, optimal value for combined_bce_rmse is 0.
-
-    rmse is rescaled with 1/10 to weigh more bce in the calculation of the loss.
+    The optimal values for binary crossentropy (bce) and rmse are both 0.
+    Bce is considered more important so we weighted rmse with 1/10.
     """
-    return binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
+    return (
+        binary_crossentropy(y_true[..., 0], y_pred[..., 0])
+        + rmse(y_true[..., 1:], y_pred[..., 1:]) / 10
+    )
