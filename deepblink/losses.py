@@ -9,34 +9,17 @@ import tensorflow.keras.backend as K
 
 
 def binary_crossentropy(y_true, y_pred):
-    """Keras' binary crossentropy loss.
-
-    Binary cross entropy reduces the last dimension by taking the average over last dimension.
-    We expand both input tensors to avoid this dimensionality reduction along the column axis.
-    """
-    y_pred = tf.expand_dims(y_pred, axis=-1)
-    y_true = tf.expand_dims(y_true, axis=-1)
-
-    bce_no_reduction = tf.keras.losses.binary_crossentropy(y_true=y_true, y_pred=y_pred)
-
-    # The outer K.mean is used instead of K.sum because the difference is just a rescaling factor
-    return K.mean(K.mean(bce_no_reduction, axis=0))
+    """Keras' binary crossentropy loss."""
+    return tf.keras.losses.binary_crossentropy(
+        y_true=K.flatten(y_true), y_pred=K.flatten(y_pred)
+    )
 
 
 def categorical_crossentropy(y_true, y_pred):
-    """Keras' categorical crossentropy loss.
-
-    Categorical cross entropy reduces the last dimension by taking the average over last dimension.
-    We expand both input tensors to avoid this dimensionality reduction along the column axis.
-    """
-    y_pred = tf.expand_dims(y_pred, axis=-1)
-    y_true = tf.expand_dims(y_true, axis=-1)
-
-    cce_no_reduction = tf.keras.losses.categorical_crossentropy(
-        y_true=y_true, y_pred=y_pred
+    """Keras' categorical crossentropy loss."""
+    return tf.keras.losses.categorical_crossentropy(
+        y_true=K.flatten(y_true), y_pred=K.flatten(y_pred)
     )
-
-    return tf.reduce_sum(K.mean(cce_no_reduction, axis=0))
 
 
 def dice_score(y_true, y_pred, smooth: int = 1):
