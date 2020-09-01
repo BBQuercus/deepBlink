@@ -10,7 +10,6 @@ from ._networks import logit_block
 from ._networks import residual_block
 from ._networks import upconv_block
 from .fcn import fcn
-from .fcn import fcn_dropout
 from .resnet import resnet
 
 __all__ = [
@@ -21,6 +20,5 @@ __all__ = [
     "residual_block",
     "upconv_block",
     "fcn",
-    "fcn_dropout",
     "resnet",
 ]
