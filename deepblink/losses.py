@@ -9,34 +9,17 @@ import tensorflow.keras.backend as K
 
 
 def binary_crossentropy(y_true, y_pred):
-    """Keras' binary crossentropy loss.
-
-    Binary cross entropy reduces the last dimension by taking the average over last dimension.
-    We expand both input tensors to avoid this dimensionality reduction along the column axis.
-    """
-    y_pred = tf.expand_dims(y_pred, axis=-1)
-    y_true = tf.expand_dims(y_true, axis=-1)
-
-    bce_no_reduction = tf.keras.losses.binary_crossentropy(y_true=y_true, y_pred=y_pred)
-
-    # The outer K.mean is used instead of K.sum because the difference is just a rescaling factor
-    return K.mean(K.mean(bce_no_reduction, axis=0))
+    """Keras' binary crossentropy loss."""
+    return tf.keras.losses.binary_crossentropy(
+        y_true=K.flatten(y_true), y_pred=K.flatten(y_pred)
+    )
 
 
 def categorical_crossentropy(y_true, y_pred):
-    """Keras' categorical crossentropy loss.
-
-    Categorical cross entropy reduces the last dimension by taking the average over last dimension.
-    We expand both input tensors to avoid this dimensionality reduction along the column axis.
-    """
-    y_pred = tf.expand_dims(y_pred, axis=-1)
-    y_true = tf.expand_dims(y_true, axis=-1)
-
-    cce_no_reduction = tf.keras.losses.categorical_crossentropy(
-        y_true=y_true, y_pred=y_pred
+    """Keras' categorical crossentropy loss."""
+    return tf.keras.losses.categorical_crossentropy(
+        y_true=K.flatten(y_true), y_pred=K.flatten(y_pred)
     )
-
-    return tf.reduce_sum(K.mean(cce_no_reduction, axis=0))
 
 
 def dice_score(y_true, y_pred, smooth: int = 1):
@@ -100,6 +83,8 @@ def f1_score(y_true, y_pred):
     The equally weighted average of precision and recall.
     The best value is 1 and the worst value is 0.
     """
+    # f1_score, when used as metrics, takes as input the full y_true, y_pred.
+    # therefore, do not move the selection outside the function.
     precision = precision_score(y_true[..., 0], y_pred[..., 0])
     recall = recall_score(y_true[..., 0], y_pred[..., 0])
     f1_value = 2 * ((precision * recall) / (precision + recall + K.epsilon()))
@@ -108,11 +93,21 @@ def f1_score(y_true, y_pred):
 
 def f1_loss(y_true, y_pred):
     """F1 score loss corresponding to deepblink.losses.f1_score."""
+    if not (
+        y_true.ndim == y_pred.ndim == 3 and y_true.shape[2] == y_pred.shape[2] == 3
+    ):
+        raise ValueError(
+            f"Tensors must have shape n*n*3. Tensors has shape y_true:{y_true.shape}, y_pred:{y_pred.shape}."
+        )
     return 1 - f1_score(y_true, y_pred)
 
 
 def rmse(y_true, y_pred):
     """Calculate root mean square error (rmse) between true and predicted coordinates."""
+    # rmse, when used as metrics, takes as input the full y_true, y_pred.
+    # therefore, do not move the selection outside the function.
+    y_true = y_true[..., 1:]
+    y_pred = y_pred[..., 1:]
     comparison = tf.equal(y_true, tf.constant(0, dtype=tf.float32))
 
     y_true_new = tf.where(comparison, tf.zeros_like(y_true), y_true)
@@ -143,6 +138,5 @@ def combined_bce_rmse(y_true, y_pred):
     Bce is considered more important so we weighted rmse with 1/10.
     """
     return (
-        binary_crossentropy(y_true[..., 0], y_pred[..., 0])
-        + rmse(y_true[..., 1:], y_pred[..., 1:]) / 10
+        binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
     )

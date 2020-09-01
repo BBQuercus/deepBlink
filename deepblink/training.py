@@ -1,9 +1,9 @@
 """Training functions."""
 
 from typing import Dict
+import datetime
 import os
 import platform
-import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,14 +75,25 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
 
 
 def train_model(
-    model: Model, dataset: Dataset, cfg: Dict, use_wandb: bool = True
+    model: Model,
+    dataset: Dataset,
+    cfg: Dict,
+    run_name: str = "model",
+    use_wandb: bool = True,
 ) -> Model:
-    """Model training loop with callbacks."""
+    """Model training loop with callbacks.
+
+    Args:
+        model: Model class with the .fit method.
+        dataset: Dataset class with access to train and validation images.
+        cfg: Configuration file equivalent to the one used in pink.training.run_experiment.
+        run_name: Name given to the model.h5 file saved.
+        use_wandb: If Wandb should be used.
+    """
     callbacks = []
 
     cb_saver = tf.keras.callbacks.ModelCheckpoint(
-        os.path.join(cfg["savedir"], f"{cfg['name']}_{int(time.time())}.h5"),
-        save_best_only=True,
+        os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
     )
     callbacks.append(cb_saver)
 
@@ -176,10 +187,15 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
         "platform": platform.platform(),
     }
 
-    if use_wandb:
-        wandb.init(project=cfg["name"], config=cfg)
+    now = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+    run_name = f"{now}_{cfg['name']}"
 
-    model = train_model(model, dataset, cfg, use_wandb)
+    if use_wandb:
+        wandb.init(
+            name=run_name, notes=cfg["comments"], project=cfg["name"], config=cfg
+        )
+
+    model = train_model(model, dataset, cfg, run_name, use_wandb)
 
     if use_wandb:
         score = model.evaluate(dataset.x_valid, dataset.y_valid)
