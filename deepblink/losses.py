@@ -83,8 +83,10 @@ def f1_score(y_true, y_pred):
     The equally weighted average of precision and recall.
     The best value is 1 and the worst value is 0.
     """
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
+    # f1_score, when used as metrics, takes as input the full y_true, y_pred.
+    # therefore, do not move the selection outside the function.
+    precision = precision_score(y_true[..., 0], y_pred[..., 0])
+    recall = recall_score(y_true[..., 0], y_pred[..., 0])
     f1_value = 2 * ((precision * recall) / (precision + recall + K.epsilon()))
     return f1_value
 
@@ -97,11 +99,15 @@ def f1_loss(y_true, y_pred):
         raise ValueError(
             f"Tensors must have shape n*n*3. Tensors has shape y_true:{y_true.shape}, y_pred:{y_pred.shape}."
         )
-    return 1 - f1_score(y_true[..., 0], y_pred[..., 0])
+    return 1 - f1_score(y_true, y_pred)
 
 
 def rmse(y_true, y_pred):
     """Calculate root mean square error (rmse) between true and predicted coordinates."""
+    # rmse, when used as metrics, takes as input the full y_true, y_pred.
+    # therefore, do not move the selection outside the function.
+    y_true = y_true[..., 1:]
+    y_pred = y_pred[..., 1:]
     comparison = tf.equal(y_true, tf.constant(0, dtype=tf.float32))
 
     y_true_new = tf.where(comparison, tf.zeros_like(y_true), y_true)
@@ -122,9 +128,7 @@ def combined_f1_rmse(y_true, y_pred):
     The optimal values for F1 score and rmse are 1 and 0 respectively.
     Therefore, the combined optimal value is 1.
     """
-    return f1_score(y_true[..., 0], y_pred[..., 0]) - rmse(
-        y_true[..., 1:], y_pred[..., 1:]
-    )
+    return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
 
 
 def combined_bce_rmse(y_true, y_pred):
@@ -134,6 +138,5 @@ def combined_bce_rmse(y_true, y_pred):
     Bce is considered more important so we weighted rmse with 1/10.
     """
     return (
-        binary_crossentropy(y_true[..., 0], y_pred[..., 0])
-        + rmse(y_true[..., 1:], y_pred[..., 1:]) / 10
+        binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
     )
