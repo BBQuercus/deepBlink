@@ -126,6 +126,10 @@ def linear_sum_assignment(
     Returns:
         (rows, columns) corresponding to the matching assignment.
     """
+    # Handle zero-sized matrices (occurs if true or pred has no items)
+    if matrix.size == 0:
+        return [], []
+
     # Prevent scipy to optimize on values above the cutoff
     if cutoff is not None:
         matrix = np.where(matrix >= cutoff, matrix.max(), matrix)
