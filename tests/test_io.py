@@ -11,7 +11,7 @@ from hypothesis.strategies import lists
 import numpy as np
 import pytest
 
-from deepblink.io import extract_basename
+from deepblink.io import basename
 from deepblink.io import load_npz
 from deepblink.io import remove_zeros
 
@@ -23,15 +23,15 @@ def test_remove_zeros(mylist):
 
 
 @pytest.mark.parametrize(
-    "path, basename",
+    "path, bname",
     [
         ("/dir/dir/file.ext", "file"),
         ("./../../file.ext.txt", "file.ext"),
         ("file", "file"),
     ],
 )
-def test_extract_basename(path, basename):
-    assert extract_basename(path) == basename
+def test_basename(path, bname):
+    assert basename(path) == bname
 
 
 def test_load_npz():

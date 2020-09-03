@@ -38,7 +38,7 @@ import tensorflow as tf
 from .data import get_coordinate_list
 from .data import next_power
 from .data import normalize_image
-from .io import extract_basename
+from .io import basename
 from .io import load_image
 from .losses import combined_bce_rmse
 from .losses import combined_f1_rmse
@@ -221,7 +221,7 @@ def main():
         coord = _predict(image, model)
 
         # Save coord list
-        fname = os.path.join(outpath, f"{extract_basename(file)}.{args.type}")
+        fname = os.path.join(outpath, f"{basename(file)}.{args.type}")
         np.savetxt(
             fname, coord, fmt="%.4f", delimiter=delimeter, header=header, comments=""
         )
