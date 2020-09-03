@@ -1,15 +1,22 @@
 """Functions to calculate training loss on single image."""
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple, Union
 import warnings
 
 import numpy as np
 import scipy.optimize
 
+EPS = 1e-12
+
 
 def euclidean_dist(x1: float, y1: float, x2: float, y2: float) -> float:
     """Return the euclidean distance between two the points (x1, y1) and (x2, y2)."""
     return np.sqrt(np.square(x1 - x2) + np.square(y1 - y2))
+
+
+def offset_euclidean(offset: List[tuple]) -> np.ndarray:
+    """Calculates the euclidean distance based on row_column_offsets per coordinate."""
+    return np.sqrt(np.sum(np.square(np.array(offset)), axis=-1))
 
 
 def precision_score(pred: np.ndarray, true: np.ndarray) -> float:
@@ -69,11 +76,11 @@ def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
     if recall == 0 and precision == 0:
         return None
 
-    f1_value = (2 * precision * recall) / (precision + recall)
+    f1_value = (2 * precision * recall) / (precision + recall + EPS)
     return f1_value
 
 
-# TODO find better name
+# TODO remove test on depreciation
 def error_on_coordinates(
     pred: np.ndarray, true: np.ndarray, cell_size: int
 ) -> Optional[float]:
@@ -90,6 +97,11 @@ def error_on_coordinates(
     Returns:
         If no spots are found None, else the error on coordinate.
     """
+    warnings.warn(
+        "deepblink.metrics.error_on_coordinates will be depreciated in the next release.",
+        DeprecationWarning,
+    )
+
     spot = (true[..., 0] == 1) & (pred[..., 0] == 1)
     d = 0.0
     counter = 0
