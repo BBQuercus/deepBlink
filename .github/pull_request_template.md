@@ -22,7 +22,9 @@ This is simply a reminder of what we are going to look for before merging your c
  - [ ] I have added tests that prove my fix is effective or that my feature works
  - [ ] I have added necessary documentation (if appropriate)
  - [ ] Any dependent changes have been merged and published in downstream modules
- - [ ] My commit messages format follow the project [git commit message format](https://github.com/slashsbin/styleguide-git-commit-message#commit-message-format)
+ - [ ] My commit messages format follow the project [git commit message format](https://github.com/slashsbin/styleguide-git-commit-message#commit-message-format)*
  - [ ] First time only - I have added myself / the copyright holder to the authors.rst file
 
 💔 Thank you!
+
+\* Please note we only use the following (same semantic meaning as described) 🎨📰📝🐎📚🐛🚑🔥🚜🔨☔💚💎✨⬆️⬇️
