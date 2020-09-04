@@ -20,7 +20,7 @@ def fcn(
     """Simplest FCN architecture without skips or dropout.
 
     Arguments:
-        dropout: Percentage of dropout only for resnet architecture.
+        dropout: Percentage of dropout after each conv layer.
         cell_size: Size of one cell in the prediction matrix.
         filters: Log2 number of filters in the first convolution layers.
         n_convs: Number of convolution layers in each convolution block.
