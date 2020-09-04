@@ -38,8 +38,9 @@ import tensorflow as tf
 from .data import get_coordinate_list
 from .data import next_power
 from .data import normalize_image
-from .io import extract_basename
+from .io import basename
 from .io import load_image
+from .losses import combined_bce_rmse
 from .losses import combined_f1_rmse
 from .losses import f1_score
 from .losses import rmse
@@ -154,7 +155,7 @@ def _predict(
     Returns:
         List of coordinates [r, c].
     """
-    # Normalisation and padding
+    # Normalisation and padding to make image square and a power of 2
     image = normalize_image(image)
     pad_bottom = next_power(image.shape[0], 2) - image.shape[0]
     pad_right = next_power(image.shape[1], 2) - image.shape[1]
@@ -184,6 +185,7 @@ def main():
         custom_objects={
             "f1_score": f1_score,
             "rmse": rmse,
+            "combined_bce_rmse": combined_bce_rmse,
             "combined_f1_rmse": combined_f1_rmse,
         },
     )
@@ -219,7 +221,7 @@ def main():
         coord = _predict(image, model)
 
         # Save coord list
-        fname = os.path.join(outpath, f"{extract_basename(file)}.{args.type}")
+        fname = os.path.join(outpath, f"{basename(file)}.{args.type}")
         np.savetxt(
             fname, coord, fmt="%.4f", delimiter=delimeter, header=header, comments=""
         )
