@@ -8,6 +8,49 @@ import tensorflow as tf
 OPTIONS_CONV = {"kernel_size": 3, "padding": "same", "kernel_initializer": "he_normal"}
 
 
+def inception_naive_block(
+    inputs: tf.keras.layers.Layer, filters: int
+) -> tf.keras.layers.Layer:
+    """Inception naive block.
+
+    [Conv2d(1,1), Conv2D(3,3), Conv2D(5,5), MaxPooling2D(3,3)] -> output
+
+    Args:
+        inputs: Input layer.
+        filters: Number of convolutional filters applied.
+    """
+    # 1x1 conv
+    conv1 = tf.keras.layers.Conv2D(
+        filters,
+        (1, 1),
+        activation="relu",
+        padding="same",
+        kernel_initializer="he_normal",
+    )(inputs)
+    # 3x3 conv
+    conv3 = tf.keras.layers.Conv2D(
+        filters * 2,
+        (3, 3),
+        activation="relu",
+        padding="same",
+        kernel_initializer="he_normal",
+    )(inputs)
+    # 5x5 conv
+    conv5 = tf.keras.layers.Conv2D(
+        filters * 4,
+        (5, 5),
+        activation="relu",
+        padding="same",
+        kernel_initializer="he_normal",
+    )(inputs)
+    # 3x3 max pooling
+    pool = tf.keras.layers.MaxPooling2D((3, 3), strides=(1, 1), padding="same")(inputs)
+
+    # concatenate filters, assumes filters/channels last
+    layer_out = tf.keras.layers.concatenate([conv1, conv3, conv5, pool], axis=-1)
+    return layer_out
+
+
 def conv_block(
     inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2, dropout: float = 0
 ) -> tf.keras.layers.Layer:
