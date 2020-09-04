@@ -1,5 +1,5 @@
 # pylint: skip-file
-"""Residual network architecture."""
+"""Inception network architecture."""
 
 import math
 
@@ -17,7 +17,7 @@ def inception(
     n_convs: int = 3,
     n_extra_down: int = 0,
 ) -> tf.keras.models.Model:
-    """Residual network with interspersed dropout.
+    """Inception network with interspersed dropout.
 
     Arguments:
         dropout: Percentage of dropout after each conv layer architecture.
