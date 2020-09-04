@@ -1,3 +1,4 @@
+prune benchmarks
 prune bin
 prune ci
 prune docs
@@ -8,7 +9,7 @@ exclude .*
 exclude tox.ini
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
 
+include *.md
 include LICENSE
 include README.rst
-include *.md
 include requirements.txt environment.yml
