@@ -205,14 +205,14 @@ def f1_integral(
         distances measured across every cutoff and then dividing by the total number of assigned coordinates.
         This automatically weighs models with more detections at lower cutoff scores.
     """
+    cutoffs = np.linspace(start=0, stop=max_distance, num=n_cutoffs)
+
     if pred.size == 0 or true.size == 0:
         warnings.warn(
             f"Pred ({pred.shape}) and true ({true.shape}) must have size != 0.",
             RuntimeWarning,
         )
-        return 0.0 if return_raw else ([], [], [])
-
-    cutoffs = np.linspace(start=0, stop=max_distance, num=n_cutoffs)
+        return 0.0 if not return_raw else (np.zeros(50), np.zeros(50), cutoffs)
 
     matrix = scipy.spatial.distance.cdist(pred, true, metric="euclidean")
 

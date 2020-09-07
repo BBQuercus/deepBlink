@@ -115,7 +115,10 @@ def compute_metrics(pred: np.ndarray, true: np.ndarray) -> pd.DataFrame:
     for c_offset in offsets:
         abs_euclideans.append(np.mean(offset_euclidean(c_offset)))
         total_euclidean += np.sum(offset_euclidean(c_offset))
-        total_assignments += len(c_offset)
+        try:
+            total_assignments += len(c_offset)
+        except TypeError:
+            continue
 
     df = pd.DataFrame(
         {
@@ -150,9 +153,13 @@ def plot_metrics(fname: str, df: pd.DataFrame) -> None:
     sns.lineplot("cutoff", "mean_euclidean", data=df, ax=ax[1, 0])
 
     # Offset scatter
-    flat_list = np.array(
-        [item for sublist in df["offset"].to_numpy() for item in sublist]
-    )
+    try:
+        flat_list = np.array(
+            [item for sublist in df["offset"].to_numpy() for item in sublist]
+        )
+    except TypeError:
+        flat_list = np.zeros((0, 0))
+
     ax[1, 1].set_title("Prediction offset")
     if flat_list.size > 0:
         sns.kdeplot(data=flat_list.T[0], data2=flat_list.T[1], ax=ax[1, 1])
@@ -198,7 +205,7 @@ def run_test(
     """
     # Create output names
     today = datetime.date.today().strftime("%Y%m%d")
-    bname_dataset = pink.io.extract_basename(dataset)
+    bname_dataset = pink.io.basename(dataset)
     bname_file = f"{today}_test"
     bname_output = os.path.join(output, benchmark, bname_dataset)
     os.makedirs(os.path.join(bname_output, "metrics"), exist_ok=True)
