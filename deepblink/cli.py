@@ -213,6 +213,7 @@ def get_intensities(
 
     intensities = np.zeros((len(coordinate_list), 1))
     for idx, (r, c) in enumerate(np.round(coordinate_list).astype(int)):
+        # Selection with indexes will be truncated to the max index possible automatically
         area = (
             image[
                 max(r - radius, 0) : r + radius + 1,
