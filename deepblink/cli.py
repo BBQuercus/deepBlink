@@ -27,12 +27,14 @@ Why does this file exist, and why not put this in __main__?
       ``deepblink.__main__`` in ``sys.modules``.
     - Therefore, to avoid double excecution of the code, this split-up way is safer.
 """
-from typing import List, Tuple
+from typing import List
 import argparse
 import glob
 import os
+import textwrap
 
 import numpy as np
+import skimage.morphology
 import tensorflow as tf
 
 from .data import get_coordinate_list
@@ -114,7 +116,23 @@ def _parse_args():
         default="csv",
         help="output file type [options: csv, txt] [default: csv]",
     )
-    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "-r",
+        "--radius",
+        type=int,
+        default=None,
+        help=textwrap.dedent(
+            """if given, calculate the integrated intensity
+        in the given radius around each coordinate. set radius to zero if only the
+        central pixels intensity should be calculated."""
+        ),
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
     parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.5")
     args = parser.parse_args()
 
@@ -143,9 +161,7 @@ def _grab_files(path: str, extensions: List[str]) -> List[str]:
     return sorted(files)
 
 
-def _predict(
-    image: np.ndarray, model: tf.keras.models.Model
-) -> Tuple[np.ndarray, np.ndarray]:
+def _predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
     """Returns a binary or categorical model based prediction of an image.
 
     Args:
@@ -155,23 +171,63 @@ def _predict(
     Returns:
         List of coordinates [r, c].
     """
-    # Normalisation and padding to make image square and a power of 2
+    # Normalisation and padding
     image = normalize_image(image)
     pad_bottom = next_power(image.shape[0], 2) - image.shape[0]
     pad_right = next_power(image.shape[1], 2) - image.shape[1]
-    image = np.pad(image, ((0, pad_bottom), (0, pad_right)), "reflect")
+    image_pad = np.pad(image, ((0, pad_bottom), (0, pad_right)), "reflect")
 
     # Predict on image
-    pred = model.predict(image[None, ..., None]).squeeze()
-    coords = get_coordinate_list(pred, image.shape[0])
+    pred = model.predict(image_pad[None, ..., None]).squeeze()
+    coords = get_coordinate_list(pred, image_pad.shape[0])
 
     # Remove spots in padded part of image
     coords = np.array([coords[..., 0], coords[..., 1]])
-    coords = np.where(
-        (coords[0] < image.shape[1]) & (coords[1] < image.shape[0]), coords, None
+    coords = np.delete(
+        coords,
+        np.where((coords[0] > image.shape[0]) | (coords[1] > image.shape[1])),
+        axis=1,
     )
 
     return coords.T  # Transposition to save as rows
+
+
+def get_intensities(
+    image: np.ndarray, coordinate_list: np.ndarray, radius: int
+) -> np.ndarray:
+    """Finds integrated intensities in a radius around each coordinate.
+
+    Args:
+        image: Input image with pixel values.
+        coordinate_list: List of r, c coordinates in shape (n, 2).
+        radius: Radius of kernel to determine intensities.
+
+    Returns:
+        Array with all integrated intensities.
+    """
+    kernel = skimage.morphology.disk(radius)
+
+    for r, c in coordinate_list:
+        if not all([isinstance(i, float) for i in [r, c]]):
+            print(r, c)
+
+    intensities = np.zeros((len(coordinate_list), 1))
+    for idx, (r, c) in enumerate(np.round(coordinate_list).astype(int)):
+        # Selection with indexes will be truncated to the max index possible automatically
+        area = (
+            image[
+                max(r - radius, 0) : r + radius + 1,
+                max(c - radius, 0) : c + radius + 1,
+            ]
+            * kernel[
+                max(radius - r, 0) : radius + image.shape[0] - r,
+                max(radius - c, 0) : radius + image.shape[1] - c,
+            ]
+        )
+        intensities[idx] = np.sum(area)
+
+    output = np.append(coordinate_list, intensities, axis=1)
+    return output
 
 
 def main():
@@ -179,9 +235,9 @@ def main():
     args = _parse_args()
 
     # Model import
-    model = os.path.abspath(args.MODEL.name)
+    fname_model = os.path.abspath(args.MODEL.name)
     model = tf.keras.models.load_model(
-        model,
+        fname_model,
         custom_objects={
             "f1_score": f1_score,
             "rmse": rmse,
@@ -210,8 +266,13 @@ def main():
         outpath = os.path.abspath(args.output)
     else:
         outpath = inpath
+
+    # Header definition
     delimeter = " " if args.type == "txt" else ","
-    header = "r c" if args.type == "txt" else "r,c"
+    if args.radius is not None:
+        header = "r c i" if args.type == "txt" else "r,c,i"
+    else:
+        header = "r c" if args.type == "txt" else "r,c"
 
     for file in files:
         # Image import
@@ -219,6 +280,10 @@ def main():
 
         # Prediction
         coord = _predict(image, model)
+
+        # Optional intensity calculation
+        if args.radius is not None:
+            coord = get_intensities(image, coord, args.radius)
 
         # Save coord list
         fname = os.path.join(outpath, f"{basename(file)}.{args.type}")
