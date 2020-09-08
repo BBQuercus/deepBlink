@@ -47,7 +47,6 @@ def fcn(
     # If cell_size is 1, we need to upsample 2 == int(2 // cell_size)
     # If cell_size is 2, we need to upsample 1 == int(2 // 2)
     n_up = int(2 // cell_size)
-    print(n_up + n_extra_down)
     for n in range(n_up + n_extra_down):
         x = conv_block(
             inputs=x, filters=2 ** (filters + 1 - n), n_convs=n_convs, dropout=dropout

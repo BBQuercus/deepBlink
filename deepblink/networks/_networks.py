@@ -68,8 +68,7 @@ def conv_block(
     for _ in range(n_convs):
         x = tf.keras.layers.Conv2D(filters, **OPTIONS_CONV)(x)
         x = tf.keras.layers.Activation("relu")(x)
-        if dropout > 0:
-            x = tf.keras.layers.Dropout(dropout)(x)
+        x = tf.keras.layers.Dropout(dropout)(x)
     return x
 
 
@@ -120,8 +119,7 @@ def upconv_block(
     x = tf.keras.layers.UpSampling2D()(x)
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
     x = tf.keras.layers.Activation("relu")(x)
-    if dropout > 0:
-        x = tf.keras.layers.Dropout(dropout)(x)
+    x = tf.keras.layers.Dropout(dropout)(x)
     x = tf.keras.layers.Concatenate()([skip, x])
     x = conv_block(inputs=x, filters=filters, n_convs=n_convs, dropout=dropout)
 

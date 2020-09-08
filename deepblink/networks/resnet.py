@@ -31,8 +31,7 @@ def resnet(
     n_down = int(max(2, math.log(cell_size, 2)))
     for n in range(n_down + n_extra_down):
         x = residual_block(inputs=x, filters=2 ** (filters + n))
-        if dropout:
-            x = tf.keras.layers.Dropout(dropout)(x)
+        x = tf.keras.layers.Dropout(dropout)(x)
         skip_layers.append(x)
         x = tf.keras.layers.MaxPool2D(pool_size=(2, 2))(x)
 
@@ -43,8 +42,7 @@ def resnet(
     n_up = int(2 // cell_size)
     for n in range(n_up + n_extra_down):
         x = residual_block(inputs=x, filters=2 ** (filters + 1 - n))
-        if dropout:
-            x = tf.keras.layers.Dropout(dropout)(x)
+        x = tf.keras.layers.Dropout(dropout)(x)
         x = upconv_block(
             inputs=x, skip=skip_layers[-(n + 1)], filters=2 ** (filters + 1), n_convs=2
         )
