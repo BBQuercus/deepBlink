@@ -123,4 +123,3 @@ def conv_inception(
     x = tf.keras.layers.Activation("sigmoid")(x)
 
     return tf.keras.Model(inputs=inputs, outputs=x)
-
