@@ -7,7 +7,7 @@ from setuptools import setup
 setup(
     # Description
     name="deepblink",
-    version="0.0.5",
+    version="0.0.6",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description_content_type="text/plain",

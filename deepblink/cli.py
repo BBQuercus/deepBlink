@@ -5,7 +5,7 @@ Because the model is loaded into memory for every run, it is faster to
 run multiple images at once by passing a directory as input.
 
 Usage:
-    ``$ deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT``
+    ``$ deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-r RADIUS] [-v] [-V] MODEL INPUT``
     ``$ deepblink --help``
 
 Positional Arguments:
@@ -17,6 +17,7 @@ Optional Arguments:
 
     -o, --output    output file/folder location [default: input location]
     -t, --type      output file type [options: csv, txt] [default: csv]
+    -r, --radius    if given, calculate the integrated intensity in the given radius around each coordinate
     -v, --verbose   set program output to verbose [default: quiet]
     -V, --version   show version program's version number and exit
 
@@ -133,7 +134,7 @@ def _parse_args():
         action="store_true",
         help="set program output to verbose [default: quiet]",
     )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.5")
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
     args = parser.parse_args()
 
     return args
