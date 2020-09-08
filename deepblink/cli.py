@@ -134,7 +134,7 @@ def _parse_args():
         action="store_true",
         help="set program output to verbose [default: quiet]",
     )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.5")
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
     args = parser.parse_args()
 
     return args
