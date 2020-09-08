@@ -70,6 +70,6 @@ Usage
 
 Inferencing on deepBlink is performed at the command line as follows: ::
 
-    deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-v] [-V] MODEL INPUT
+    deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-r RADIUS] [-v] [-V] MODEL INPUT
 
 More detailed information is availabe in our `documentation <https://deepblink.readthedocs.io/>`_.
