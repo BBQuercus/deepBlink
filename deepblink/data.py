@@ -96,7 +96,7 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     if not matrix.ndim == 3:
         raise ValueError("Matrix must have a shape of (r, c, 3).")
     if not matrix.shape[2] == 3:
-        raise ValueError("Matrix must a depth of 3.")
+        raise ValueError("Matrix must have a depth of 3.")
     if not matrix.shape[0] == matrix.shape[1] and not matrix.shape[0] >= 1:
         raise ValueError("Matrix must have equal length >= 1 of r, c.")
 
