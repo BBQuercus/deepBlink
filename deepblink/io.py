@@ -79,7 +79,7 @@ def load_model(fname: str) -> tf.keras.models.Model:
     """Import a deepBlink model from file."""
     if not os.path.isfile(fname):
         raise ValueError(f"File must exist - '{fname}' does not.")
-    if os.path.splitext(fname)[-1] != "h5":
+    if os.path.splitext(fname)[-1] != ".h5":
         raise ValueError(f"File must be of type h5 - '{fname}' does not.")
 
     try:
