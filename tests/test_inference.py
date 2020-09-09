@@ -1,12 +1,12 @@
-"""Unittests for the deepblink.cli module."""
+"""Unittests for the deepblink.inference module."""
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
 import numpy as np
 import pytest
 import tensorflow as tf
 
-from deepblink.cli import _predict
-from deepblink.cli import get_intensities
+from deepblink.inference import get_intensities
+from deepblink.inference import predict
 from deepblink.losses import combined_bce_rmse
 from deepblink.losses import combined_f1_rmse
 from deepblink.losses import f1_score
@@ -30,7 +30,7 @@ def test_predict():
 
     for size in [249, 512, 876]:
         image = np.random.rand(size, size)
-        pred = _predict(image, model)
+        pred = predict(image, model)
         assert isinstance(pred, np.ndarray)
 
 
