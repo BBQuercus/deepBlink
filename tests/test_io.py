@@ -1,6 +1,7 @@
 """Unittests for the deepblink.io module."""
 # pylint: disable=missing-function-docstring
 
+from pathlib import Path
 import os
 import tempfile
 
@@ -13,6 +14,7 @@ import pytest
 
 from deepblink.io import basename
 from deepblink.io import load_npz
+from deepblink.io import grab_files
 from deepblink.io import remove_zeros
 
 
@@ -57,3 +59,16 @@ def test_load_npz():
         # Load only test dataset
         data = load_npz(fname, test_only=True)
         assert len(data) == 2
+
+
+def test_grab_files():
+    """Test function that grabs files in a directory given the extensions."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        fnames = ["test.txt", "text.csv", "test.h5", "csv.test"]
+        for fname in fnames:
+            Path(os.path.join(temp_dir, fname)).touch()
+
+        ext = ["txt", "csv"]
+        output = grab_files(temp_dir, ext)
+        expected = [os.path.join(temp_dir, f) for f in ["test.txt", "text.csv"]]
+        assert output == expected

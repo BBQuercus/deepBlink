@@ -28,9 +28,7 @@ Why does this file exist, and why not put this in __main__?
       ``deepblink.__main__`` in ``sys.modules``.
     - Therefore, to avoid double excecution of the code, this split-up way is safer.
 """
-from typing import List
 import argparse
-import glob
 import os
 import textwrap
 
@@ -44,6 +42,7 @@ from .data import normalize_image
 from .io import basename
 from .io import load_image
 from .io import load_model
+from .io import grab_files
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -137,28 +136,6 @@ def _parse_args():
     return args
 
 
-def _grab_files(path: str, extensions: List[str]) -> List[str]:
-    """Grab all files in directory with listed extensions.
-
-    Args:
-        path: Path to files to be grabbed. Without trailing "/".
-        extensions: List of all file extensions. Without leading ".".
-
-    Returns:
-        Sorted list of all corresponding files.
-
-    Raises:
-        OSError: Path not existing.
-    """
-    if not os.path.exists(path):
-        raise OSError(f"Path must exist. '{path}' does not.")
-
-    files = []
-    for ext in extensions:
-        files.extend(glob.glob(f"{path}/*.{ext}"))
-    return sorted(files)
-
-
 def _predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
     """Returns a binary or categorical model based prediction of an image.
 
@@ -241,7 +218,7 @@ def main():
     # File listing
     inputs = os.path.abspath(args.INPUT)
     if os.path.isdir(inputs):
-        files = _grab_files(inputs, EXTENSIONS)
+        files = grab_files(inputs, EXTENSIONS)
         inpath = inputs
     elif os.path.isfile(inputs):
         files = [inputs]

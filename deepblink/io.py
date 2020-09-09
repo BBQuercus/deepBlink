@@ -2,6 +2,7 @@
 
 from typing import Any, List
 import os
+import glob
 import warnings
 
 import numpy as np
@@ -94,3 +95,25 @@ def load_model(fname: str) -> tf.keras.models.Model:
         return model
     except ValueError as error:
         raise ImportError(f"Model '{fname}' could not be imported.") from error
+
+
+def grab_files(path: str, extensions: List[str]) -> List[str]:
+    """Grab all files in directory with listed extensions.
+
+    Args:
+        path: Path to files to be grabbed. Without trailing "/".
+        extensions: List of all file extensions. Without leading ".".
+
+    Returns:
+        Sorted list of all corresponding files.
+
+    Raises:
+        OSError: Path not existing.
+    """
+    if not os.path.exists(path):
+        raise OSError(f"Path must exist. '{path}' does not.")
+
+    files = []
+    for ext in extensions:
+        files.extend(glob.glob(f"{path}/*.{ext}"))
+    return sorted(files)
