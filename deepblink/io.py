@@ -7,6 +7,12 @@ import warnings
 import numpy as np
 import skimage.color
 import skimage.io
+import tensorflow as tf
+
+from .losses import combined_bce_rmse
+from .losses import combined_f1_rmse
+from .losses import f1_score
+from .losses import rmse
 
 
 def remove_zeros(lst: list) -> list:
@@ -53,7 +59,7 @@ def load_npz(fname: str, test_only: bool = False) -> List[Any]:
         return [data[f] for f in expected]
 
 
-def load_image(fname: str):
+def load_image(fname: str) -> np.ndarray:
     """Import a single image as numpy array checking format requirements."""
     try:
         image = skimage.io.imread(fname).squeeze().astype(np.float32)
@@ -66,3 +72,25 @@ def load_image(fname: str):
         )
     except ValueError as error:
         raise ImportError(f"File '{fname}' could not be imported.") from error
+
+
+def load_model(fname: str) -> tf.keras.models.Model:
+    """Import a deepBlink model from file."""
+    if not os.path.isfile(fname):
+        raise ValueError(f"File must exist - '{fname}' does not.")
+    if os.path.splitext(fname)[-1] != "h5":
+        raise ValueError(f"File must be of type h5 - '{fname}' does not.")
+
+    try:
+        model = tf.keras.models.load_model(
+            fname,
+            custom_objects={
+                "f1_score": f1_score,
+                "rmse": rmse,
+                "combined_bce_rmse": combined_bce_rmse,
+                "combined_f1_rmse": combined_f1_rmse,
+            },
+        )
+        return model
+    except ValueError as error:
+        raise ImportError(f"Model '{fname}' could not be imported.") from error

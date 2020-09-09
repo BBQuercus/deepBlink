@@ -43,10 +43,7 @@ from .data import next_power
 from .data import normalize_image
 from .io import basename
 from .io import load_image
-from .losses import combined_bce_rmse
-from .losses import combined_f1_rmse
-from .losses import f1_score
-from .losses import rmse
+from .io import load_model
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -237,15 +234,7 @@ def main():
 
     # Model import
     fname_model = os.path.abspath(args.MODEL.name)
-    model = tf.keras.models.load_model(
-        fname_model,
-        custom_objects={
-            "f1_score": f1_score,
-            "rmse": rmse,
-            "combined_bce_rmse": combined_bce_rmse,
-            "combined_f1_rmse": combined_f1_rmse,
-        },
-    )
+    model = load_model(fname_model)  # noqa: assignment-from-no-return
     if args.verbose:
         print("Model imported.")
 
