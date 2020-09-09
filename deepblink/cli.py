@@ -20,16 +20,11 @@ Optional Arguments:
     -r, --radius    if given, calculate the integrated intensity in the given radius around each coordinate
     -v, --verbose   set program output to verbose [default: quiet]
     -V, --version   show version program's version number and exit
-
-Why does this file exist, and why not put this in __main__?
-    - When you run `python -mdeepblink` or `deepblink` directly, python will execute ``__main__.py``
-      as a script. That means there won't be any ``deepblink.__main__`` in ``sys.modules``.
-    - When you import __main__ it will get executed again (as a module) because there's no
-      ``deepblink.__main__`` in ``sys.modules``.
-    - Therefore, to avoid double excecution of the code, this split-up way is safer.
 """
 import argparse
+import logging
 import os
+import sys
 import textwrap
 
 import numpy as np
@@ -40,6 +35,12 @@ from .io import basename
 from .io import grab_files
 from .io import load_image
 from .io import load_model
+
+
+# Configure verbose logger
+logging.basicConfig(
+    format="%(asctime)s: %(message)s", stream=sys.stdout, level=logging.INFO
+)
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -137,53 +138,114 @@ def main():
     """Entrypoint for the CLI."""
     args = _parse_args()
 
-    # Model import
-    fname_model = os.path.abspath(args.MODEL.name)
-    model = load_model(fname_model)  # noqa: assignment-from-no-return
-    if args.verbose:
-        print("Model imported.")
+    logger = logging.getLogger("Verbose output logger")
 
-    # File listing
-    inputs = os.path.abspath(args.INPUT)
-    if os.path.isdir(inputs):
-        files = grab_files(inputs, EXTENSIONS)
-        inpath = inputs
-    elif os.path.isfile(inputs):
-        files = [inputs]
-        inpath = os.path.dirname(inputs)
-    else:
-        raise ImportError("Input file(s) could not be found.")
-    if args.verbose:
-        print(f"{len(files)} file(s) found.")
+    handler = HandlePredict(
+        arg_model=args.MODEL.name,
+        arg_input=args.INPUT,
+        arg_output=args.output,
+        arg_radius=args.radius,
+        arg_type=args.type,
+        arg_verbose=args.verbose,
+        logger=logger,
+    )
 
-    # Output path definition
-    if os.path.exists(str(args.output)):
-        outpath = os.path.abspath(args.output)
-    else:
-        outpath = inpath
+    handler.run()
 
-    # Header definition
-    delimeter = " " if args.type == "txt" else ","
-    if args.radius is not None:
-        header = "r c i" if args.type == "txt" else "r,c,i"
-    else:
-        header = "r c" if args.type == "txt" else "r,c"
 
-    for file in files:
-        # Image import
-        image = load_image(file)
+class HandlePredict:
+    """Handling of prediction submodule for CLI (check argparser for docstring)."""
 
-        # Prediction
-        coord = predict(image, model)
+    def __init__(
+        self,
+        arg_model,
+        arg_input,
+        arg_output,
+        arg_radius,
+        arg_type,
+        arg_verbose,
+        logger,
+    ):
+        self.fname_model = arg_model
+        self.raw_input = arg_input
+        self.raw_output = arg_output
+        self.radius = arg_radius
+        self.type = arg_type
+        self.verbose = arg_verbose
+        self.logger = logger
 
-        # Optional intensity calculation
-        if args.radius is not None:
-            coord = get_intensities(image, coord, args.radius)
+        self.extensions = EXTENSIONS
+        self.abs_input = os.path.abspath(arg_input)
 
-        # Save coord list
-        fname = os.path.join(outpath, f"{basename(file)}.{args.type}")
+    @property
+    def path_input(self):
+        if os.path.isdir(self.abs_input):
+            path_input = self.abs_input
+        elif os.path.isfile(self.abs_input):
+            path_input = os.path.dirname(self.abs_input)
+        return path_input
+
+    @property
+    def file_list(self):
+        if os.path.isdir(self.abs_input):
+            file_list = grab_files(self.abs_input, self.extensions)
+        elif os.path.isfile(self.abs_input):
+            file_list = [self.abs_input]
+        else:
+            raise ImportError(
+                "❌ Input file(s) could not be found. Please make sure all files exist."
+            )
+        return file_list
+
+    @property
+    def path_output(self):
+        if os.path.exists(str(self.raw_output)):
+            outpath = os.path.abspath(self.raw_output)
+        else:
+            outpath = self.path_input
+        return outpath
+
+    def save_output(self, fname_in, coord_list):
+        is_radius = self.radius is not None
+        if self.type == "txt":
+            delimeter = " "
+            header = "r c i" if is_radius else "r c"
+        else:
+            delimeter = ","
+            header = "r,c,i" if is_radius else "r c"
+
+        fname_out = os.path.join(self.path_output, f"{basename(fname_in)}.{self.type}")
         np.savetxt(
-            fname, coord, fmt="%.4f", delimiter=delimeter, header=header, comments=""
+            fname_out,
+            coord_list,
+            fmt="%.4f",
+            delimiter=delimeter,
+            header=header,
+            comments="",
         )
-    if args.verbose:
-        print("Predictions complete.")
+
+    def predict_single(self, fname_in, model):
+        image = load_image(fname_in)
+        coord_list = predict(image, model)
+
+        if self.radius is not None:
+            coord_list = get_intensities(image, coord_list, self.radius)
+
+        self.save_output(fname_in, coord_list)
+        if self.verbose:
+            self.logger.log(20, f"🏃‍♂ File {fname_in} prediction complete.")
+
+    def run(self):
+        model = load_model(
+            os.path.abspath(self.fname_model)
+        )  # noqa: assignment-from-no-return
+        if self.verbose:
+            self.logger.log(20, "🧠 Model imported.")
+            self.logger.log(20, f"📂 {len(self.file_list)} file(s) found.")
+            self.logger.log(20, f"🗄️ output will be saved to {self.path_output}.")
+
+        for fname_in in self.file_list:
+            self.predict_single(fname_in, model)
+
+        if self.verbose:
+            self.logger.log(20, "🏁🏃‍♂️ All predictions are complete.")
