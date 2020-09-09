@@ -52,6 +52,9 @@ method-rgx=[a-z_][a-z0-9_]{2,70}$
 # Maximum number of characters on a single line.
 max-line-length = 120
 
+# Allow f-strings in logging messages.
+logging-format-style=fstr
+
 [DESIGN]
 # Minimum number of public methods for a class (see R0903).
 min-public-methods = 0
