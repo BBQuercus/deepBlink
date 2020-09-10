@@ -83,27 +83,52 @@ def _parse_args():
     """Argument parser."""
     parser = argparse.ArgumentParser(
         prog="deepblink",
-        description="Deepblink CLI for inferencing of new data with pretrained models.",
+        description="deepBlinks command line interface \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
+        epilog="We hope you enjoy using deepBlink \U0001F603",
     )
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
+    subparsers = parser.add_subparsers(dest="command")
 
-    # Positional arguments
-    parser.add_argument(
-        "MODEL", type=argparse.FileType("r"), help="model .h5 file location"
+    # Train parser
+    parser_train = subparsers.add_parser(
+        "train", help="\U0001F35E train a freshly baked model on a dataset",
     )
-    parser.add_argument(
+    parser_train.add_argument(
         "INPUT",
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
 
-    # Optional arguments
-    parser.add_argument(
+    # Check parser
+    parser_check = subparsers.add_parser(
+        "check", help="\U0001F537 \U0001F535 determine your input images' shape"
+    )
+    parser_check.add_argument(
+        "INPUT",
+        type=FileFolderType(),
+        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+    )
+
+    # Predict parser
+    parser_predict = subparsers.add_parser(
+        "predict",
+        help="\U0001F914 inference / prediction of data with a pre-trained model",
+    )
+    parser_predict.add_argument(
+        "MODEL", type=argparse.FileType("r"), help="model .h5 file location"
+    )
+    parser_predict.add_argument(
+        "INPUT",
+        type=FileFolderType(),
+        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+    )
+    parser_predict.add_argument(
         "-o",
         "--output",
         type=FolderType(),
         help="output file/folder location [default: input location]",
     )
-    parser.add_argument(
+    parser_predict.add_argument(
         "-t",
         "--type",
         type=str,
@@ -111,7 +136,7 @@ def _parse_args():
         default="csv",
         help="output file type [options: csv, txt] [default: csv]",
     )
-    parser.add_argument(
+    parser_predict.add_argument(
         "-r",
         "--radius",
         type=int,
@@ -122,15 +147,24 @@ def _parse_args():
         central pixels intensity should be calculated."""
         ),
     )
-    parser.add_argument(
+    parser_predict.add_argument(
         "-v",
         "--verbose",
         action="store_true",
         help="set program output to verbose [default: quiet]",
     )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
-    args = parser.parse_args()
 
+    # Eval parser
+    parser_eval = subparsers.add_parser(
+        "eval", help="\U0001F3AD measure a models performance on a dataset"
+    )
+    parser_eval.add_argument(
+        "INPUT",
+        type=FileFolderType(),
+        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+    )
+
+    args = parser.parse_args()
     return args
 
 
@@ -154,17 +188,27 @@ def main():
 
 
 class HandlePredict:
-    """Handling of prediction submodule for CLI (check argparser for docstring)."""
+    """Handling of prediction submodule for CLI (check argparser for docstring).
+
+    Args:
+        arg_model: Path to model.h5 file.
+        arg_input: Path to image file / folder with images.
+        arg_output: Path to output directory.
+        arg_radius: Size of integrated image intensity calculation.
+        arg_type: Output file type.
+        arg_verbose: If output is verbose.
+        logger: Logger to log verbose output.
+    """
 
     def __init__(
         self,
-        arg_model,
-        arg_input,
-        arg_output,
-        arg_radius,
-        arg_type,
-        arg_verbose,
-        logger,
+        arg_model: str,
+        arg_input: str,
+        arg_output: str,
+        arg_radius: int,
+        arg_type: str,
+        arg_verbose: bool,
+        logger: logging.Logger,
     ):
         self.fname_model = arg_model
         self.raw_input = arg_input
@@ -179,6 +223,7 @@ class HandlePredict:
 
     @property
     def path_input(self):
+        """Return absolute input path (dependent on file/folder input)."""
         if os.path.isdir(self.abs_input):
             path_input = self.abs_input
         elif os.path.isfile(self.abs_input):
@@ -187,18 +232,20 @@ class HandlePredict:
 
     @property
     def file_list(self):
+        """Return a list with all files to be processed."""
         if os.path.isdir(self.abs_input):
             file_list = grab_files(self.abs_input, self.extensions)
         elif os.path.isfile(self.abs_input):
             file_list = [self.abs_input]
         else:
             raise ImportError(
-                "❌ Input file(s) could not be found. Please make sure all files exist."
+                "\U0000274C Input file(s) could not be found. Please make sure all files exist."
             )
         return file_list
 
     @property
     def path_output(self):
+        """Return the absolute output path (dependent if given)."""
         if os.path.exists(str(self.raw_output)):
             outpath = os.path.abspath(self.raw_output)
         else:
@@ -206,6 +253,7 @@ class HandlePredict:
         return outpath
 
     def save_output(self, fname_in, coord_list):
+        """Save coordinate list to file with appropriate header."""
         is_radius = self.radius is not None
         if self.type == "txt":
             delimeter = " "
@@ -225,6 +273,7 @@ class HandlePredict:
         )
 
     def predict_single(self, fname_in, model):
+        """Predict and save a single image."""
         image = load_image(fname_in)
         coord_list = predict(image, model)
 
@@ -233,19 +282,22 @@ class HandlePredict:
 
         self.save_output(fname_in, coord_list)
         if self.verbose:
-            self.logger.log(20, f"🏃‍♂ File {fname_in} prediction complete.")
+            self.logger.log(20, f"\U0001F3C3 file {fname_in} prediction complete.")
 
     def run(self):
+        """Run prediction for all given images."""
         model = load_model(
             os.path.abspath(self.fname_model)
         )  # noqa: assignment-from-no-return
         if self.verbose:
-            self.logger.log(20, "🧠 Model imported.")
-            self.logger.log(20, f"📂 {len(self.file_list)} file(s) found.")
-            self.logger.log(20, f"🗄️ output will be saved to {self.path_output}.")
+            self.logger.log(20, "\U0001F9E0 model imported.")
+            self.logger.log(20, f"\U0001F4C2 {len(self.file_list)} file(s) found.")
+            self.logger.log(
+                20, f"\U0001F5C4 output will be saved to {self.path_output}."
+            )
 
         for fname_in in self.file_list:
             self.predict_single(fname_in, model)
 
         if self.verbose:
-            self.logger.log(20, "🏁🏃‍♂️ All predictions are complete.")
+            self.logger.log(20, "\U0001F3C1\U0001F3C3 all predictions are complete.")
