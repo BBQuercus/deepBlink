@@ -21,6 +21,7 @@ Optional Arguments:
     -v, --verbose   set program output to verbose [default: quiet]
     -V, --version   show version program's version number and exit
 """
+from typing import List
 import argparse
 import logging
 import os
@@ -28,6 +29,8 @@ import sys
 import textwrap
 
 import numpy as np
+import skimage.io
+import tensorflow as tf
 
 from .inference import predict
 from .inference import get_intensities
@@ -35,12 +38,6 @@ from .io import basename
 from .io import grab_files
 from .io import load_image
 from .io import load_model
-
-
-# Configure verbose logger
-logging.basicConfig(
-    format="%(asctime)s: %(message)s", stream=sys.stdout, level=logging.INFO
-)
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -79,56 +76,51 @@ class FolderType:
         return value
 
 
-def _parse_args():
-    """Argument parser."""
-    parser = argparse.ArgumentParser(
-        prog="deepblink",
-        description="deepBlinks command line interface \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
-        epilog="We hope you enjoy using deepBlink \U0001F603",
-    )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
-    subparsers = parser.add_subparsers(dest="command")
-
-    # Train parser
-    parser_train = subparsers.add_parser(
+def _parse_args_train(subparsers: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Subparser for training."""
+    parser = subparsers.add_parser(
         "train", help="\U0001F35E train a freshly baked model on a dataset",
     )
-    parser_train.add_argument(
+    parser.add_argument(
         "INPUT",
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
+    return subparsers
 
-    # Check parser
-    parser_check = subparsers.add_parser(
+
+def _parse_args_check(subparsers: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Subparser for checking."""
+    parser = subparsers.add_parser(
         "check", help="\U0001F537 \U0001F535 determine your input images' shape"
     )
-    parser_check.add_argument(
-        "INPUT",
-        type=FileFolderType(),
-        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+    parser.add_argument(
+        "INPUT", type=str, help=f"input image location [filetypes: {EXTENSIONS}]",
     )
+    return subparsers
 
-    # Predict parser
-    parser_predict = subparsers.add_parser(
+
+def _parse_args_predict(subparsers: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Subparser for prediction."""
+    parser = subparsers.add_parser(
         "predict",
         help="\U0001F914 inference / prediction of data with a pre-trained model",
     )
-    parser_predict.add_argument(
+    parser.add_argument(
         "MODEL", type=argparse.FileType("r"), help="model .h5 file location"
     )
-    parser_predict.add_argument(
+    parser.add_argument(
         "INPUT",
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
-    parser_predict.add_argument(
+    parser.add_argument(
         "-o",
         "--output",
         type=FolderType(),
         help="output file/folder location [default: input location]",
     )
-    parser_predict.add_argument(
+    parser.add_argument(
         "-t",
         "--type",
         type=str,
@@ -136,7 +128,7 @@ def _parse_args():
         default="csv",
         help="output file type [options: csv, txt] [default: csv]",
     )
-    parser_predict.add_argument(
+    parser.add_argument(
         "-r",
         "--radius",
         type=int,
@@ -221,8 +213,10 @@ class HandlePredict:
         self.extensions = EXTENSIONS
         self.abs_input = os.path.abspath(arg_input)
 
+        self.logger.log(20, "\U0001F914 starting prediction submodule")
+
     @property
-    def path_input(self):
+    def path_input(self) -> str:
         """Return absolute input path (dependent on file/folder input)."""
         if os.path.isdir(self.abs_input):
             path_input = self.abs_input
@@ -231,7 +225,7 @@ class HandlePredict:
         return path_input
 
     @property
-    def file_list(self):
+    def file_list(self) -> List[str]:
         """Return a list with all files to be processed."""
         if os.path.isdir(self.abs_input):
             file_list = grab_files(self.abs_input, self.extensions)
@@ -244,7 +238,7 @@ class HandlePredict:
         return file_list
 
     @property
-    def path_output(self):
+    def path_output(self) -> str:
         """Return the absolute output path (dependent if given)."""
         if os.path.exists(str(self.raw_output)):
             outpath = os.path.abspath(self.raw_output)
@@ -252,7 +246,7 @@ class HandlePredict:
             outpath = self.path_input
         return outpath
 
-    def save_output(self, fname_in, coord_list):
+    def save_output(self, fname_in: str, coord_list: np.ndarray) -> None:
         """Save coordinate list to file with appropriate header."""
         is_radius = self.radius is not None
         if self.type == "txt":
@@ -272,7 +266,7 @@ class HandlePredict:
             comments="",
         )
 
-    def predict_single(self, fname_in, model):
+    def predict_single(self, fname_in: str, model: tf.keras.models.Model) -> None:
         """Predict and save a single image."""
         image = load_image(fname_in)
         coord_list = predict(image, model)
@@ -281,23 +275,42 @@ class HandlePredict:
             coord_list = get_intensities(image, coord_list, self.radius)
 
         self.save_output(fname_in, coord_list)
-        if self.verbose:
-            self.logger.log(20, f"\U0001F3C3 file {fname_in} prediction complete.")
+        self.logger.log(20, f"\U0001F3C3 prediction of file {fname_in} complete")
 
     def run(self):
         """Run prediction for all given images."""
         model = load_model(
             os.path.abspath(self.fname_model)
         )  # noqa: assignment-from-no-return
-        if self.verbose:
-            self.logger.log(20, "\U0001F9E0 model imported.")
-            self.logger.log(20, f"\U0001F4C2 {len(self.file_list)} file(s) found.")
-            self.logger.log(
-                20, f"\U0001F5C4 output will be saved to {self.path_output}."
-            )
+        self.logger.log(20, "\U0001F9E0 model imported")
+        self.logger.log(20, f"\U0001F4C2 {len(self.file_list)} file(s) found")
+        self.logger.log(
+            20, f"\U0001F5C4{' '} output will be saved to {self.path_output}"
+        )
 
         for fname_in in self.file_list:
             self.predict_single(fname_in, model)
 
-        if self.verbose:
-            self.logger.log(20, "\U0001F3C1\U0001F3C3 all predictions are complete.")
+        self.logger.log(20, "\U0001F3C1\U0001F3C3 all predictions are complete")
+
+
+def main():
+    """Entrypoint for the CLI."""
+    args = _parse_args()
+    logger = _configure_logger(args.verbose, args.debug)
+
+    if args.command == "check":
+        handler = HandleCheck(arg_input=args.INPUT, logger=logger)
+
+    if args.command == "predict":
+        handler = HandlePredict(
+            arg_model=args.MODEL.name,
+            arg_input=args.INPUT,
+            arg_output=args.output,
+            arg_radius=args.radius,
+            arg_type=args.type,
+            arg_verbose=args.verbose,
+            logger=logger,
+        )
+
+    handler.run()
