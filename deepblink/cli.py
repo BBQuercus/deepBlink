@@ -27,17 +27,19 @@ import logging
 import os
 import sys
 import textwrap
+import yaml
 
 import numpy as np
 import skimage.io
 import tensorflow as tf
 
-from .inference import predict
 from .inference import get_intensities
+from .inference import predict
 from .io import basename
 from .io import grab_files
 from .io import load_image
 from .io import load_model
+from .training import run_experiment
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -84,9 +86,18 @@ def _parse_args_train(
         "train", help="\U0001F35E train a freshly baked model on a dataset",
     )
     parser.add_argument(
-        "INPUT",
-        type=FileFolderType(),
-        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+        "-c",
+        "--config",
+        type=str,
+        required=True,
+        help="path to the experimental config.yaml file. Check the GitHub repository for an example",
+    )
+    parser.add_argument(
+        "-g",
+        "--gpu",
+        type=int,
+        default=None,
+        help="index of GPU to be used [default: None]",
     )
     return subparsers
 
@@ -212,6 +223,47 @@ def _configure_logger(verbose: bool, debug: bool):
     )
     logger = logging.getLogger("Verbose output logger")
     return logger
+
+
+class HandleTrain:
+    """Handle checking submodule for CLI.
+
+    Args:
+        arg_config: Path to config.yaml file.
+        arg_gpu: Which gpu is to be used.
+        logger: Verbose logger.
+    """
+
+    def __init__(self, arg_config: str, arg_gpu: int, logger: logging.Logger):
+        self.raw_config = arg_config
+        self.gpu = arg_gpu
+
+        self.logger = logger
+
+    @property
+    def config(self):
+        """Load config.yaml file into memory."""
+        if not os.path.isfile(self.raw_config):
+            raise ImportError(
+                "\U0000274C Input file does not exist. Please provide a valid path."
+            )
+        if not self.raw_config.lower().endswith("yaml"):
+            raise ImportError(
+                "\U0000274C Input file extension invalid. Please provide the filetype yaml."
+            )
+        with open(self.raw_config, "r") as config_file:
+            config = yaml.safe_load(config_file)
+        return config
+
+    def set_gpu(self):
+        """Set GPU environment variable."""
+        if self.gpu is not None:
+            os.environ["CUDA_VISIBLE_DEVICES"] = f"{self.gpu}"
+
+    def run(self):
+        """Set configuration and start training loop."""
+        self.set_gpu()
+        run_experiment(self.config)
 
 
 class HandleCheck:
@@ -410,6 +462,9 @@ def main():
     """Entrypoint for the CLI."""
     args = _parse_args()
     logger = _configure_logger(args.verbose, args.debug)
+
+    if args.command == "train":
+        handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
 
     if args.command == "check":
         handler = HandleCheck(arg_input=args.INPUT, logger=logger)
