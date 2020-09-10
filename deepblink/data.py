@@ -100,7 +100,7 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     if not matrix.shape[0] == matrix.shape[1] and not matrix.shape[0] >= 1:
         raise ValueError("Matrix must have equal length >= 1 of r, c.")
 
-    matrix_size = matrix.shape[0]
+    matrix_size = max(matrix.shape)  # Handles non-square images
     cell_size = image_size // matrix_size
     coords_r = []
     coords_c = []
