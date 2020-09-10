@@ -76,7 +76,9 @@ class FolderType:
         return value
 
 
-def _parse_args_train(subparsers: argparse.ArgumentParser) -> argparse.ArgumentParser:
+def _parse_args_train(
+    subparsers: argparse._SubParsersAction,
+) -> argparse._SubParsersAction:
     """Subparser for training."""
     parser = subparsers.add_parser(
         "train", help="\U0001F35E train a freshly baked model on a dataset",
@@ -89,7 +91,9 @@ def _parse_args_train(subparsers: argparse.ArgumentParser) -> argparse.ArgumentP
     return subparsers
 
 
-def _parse_args_check(subparsers: argparse.ArgumentParser) -> argparse.ArgumentParser:
+def _parse_args_check(
+    subparsers: argparse._SubParsersAction,
+) -> argparse._SubParsersAction:
     """Subparser for checking."""
     parser = subparsers.add_parser(
         "check", help="\U0001F537 \U0001F535 determine your input images' shape"
@@ -100,7 +104,9 @@ def _parse_args_check(subparsers: argparse.ArgumentParser) -> argparse.ArgumentP
     return subparsers
 
 
-def _parse_args_predict(subparsers: argparse.ArgumentParser) -> argparse.ArgumentParser:
+def _parse_args_predict(
+    subparsers: argparse._SubParsersAction,
+) -> argparse._SubParsersAction:
     """Subparser for prediction."""
     parser = subparsers.add_parser(
         "predict",
@@ -139,48 +145,154 @@ def _parse_args_predict(subparsers: argparse.ArgumentParser) -> argparse.Argumen
         central pixels intensity should be calculated."""
         ),
     )
-    parser_predict.add_argument(
+    return subparsers
+
+
+def _parse_args_eval(
+    subparsers: argparse._SubParsersAction,
+) -> argparse._SubParsersAction:
+    """Subparser for evaluation."""
+    parser = subparsers.add_parser(
+        "eval", help="\U0001F3AD measure a models performance on a dataset"
+    )
+    parser.add_argument(
+        "INPUT",
+        type=FileFolderType(),
+        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+    )
+    return subparsers
+
+
+def _parse_args():
+    """Argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="deepblink",
+        description=textwrap.dedent(
+            """deepBlinks command line interface \U0001F469\U0000200D\U0001F4BB
+        for training, inferencing, and evaluation"""
+        ),
+        epilog="We hope you enjoy using deepBlink \U0001F603",
+    )
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
+    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
         help="set program output to verbose [default: quiet]",
     )
+    parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
 
-    # Eval parser
-    parser_eval = subparsers.add_parser(
-        "eval", help="\U0001F3AD measure a models performance on a dataset"
-    )
-    parser_eval.add_argument(
-        "INPUT",
-        type=FileFolderType(),
-        help=f"input file/folder location [filetypes: {EXTENSIONS}]",
-    )
+    subparsers = parser.add_subparsers(dest="command")
+    subparsers = _parse_args_train(subparsers)
+    subparsers = _parse_args_check(subparsers)
+    subparsers = _parse_args_predict(subparsers)
+    subparsers = _parse_args_eval(subparsers)
 
     args = parser.parse_args()
     return args
 
 
-def main():
-    """Entrypoint for the CLI."""
-    args = _parse_args()
+def _configure_logger(verbose: bool, debug: bool):
+    """Return verbose logger with three levels.
 
-    logger = logging.getLogger("Verbose output logger")
+    * Verbose false and debug false - no verbose logging.
+    * Verbose true and debug false - only info level loginfo for standard users.
+    * Debug true - debug mode for developers.
+    """
+    if debug:
+        level = logging.DEBUG
+    else:
+        if verbose:
+            level = logging.INFO
+        else:
+            level = logging.CRITICAL
 
-    handler = HandlePredict(
-        arg_model=args.MODEL.name,
-        arg_input=args.INPUT,
-        arg_output=args.output,
-        arg_radius=args.radius,
-        arg_type=args.type,
-        arg_verbose=args.verbose,
-        logger=logger,
+    logging.basicConfig(
+        format="%(asctime)s: %(message)s", stream=sys.stdout, level=level
     )
+    logger = logging.getLogger("Verbose output logger")
+    return logger
 
-    handler.run()
+
+class HandleCheck:
+    """Handle checking submodule for CLI.
+
+    Args:
+        arg_input: Path to image.
+        logger: Verbose logger.
+    """
+
+    def __init__(self, arg_input: str, logger: logging.Logger):
+        self.raw_input = arg_input
+        self.logger = logger
+
+        self.extensions = tuple(EXTENSIONS)
+        self.abs_input = os.path.abspath(arg_input)
+        self.logger.log(20, "\U0001F537 \U0001F535 starting checking submodule")
+
+    # TODO merge with pink.io.load_image
+    @property
+    def image(self):
+        """Load a single image."""
+        if not os.path.isfile(self.abs_input):
+            raise ImportError(
+                "\U0000274C Input file does not exist. Please provide a valid path."
+            )
+        if not self.abs_input.lower().endswith(self.extensions):
+            raise ImportError(
+                f"\U0000274C Input file extension invalid. Please use one of {self.extensions}."
+            )
+        image = skimage.io.imread(self.abs_input).squeeze()
+        return image
+
+    @staticmethod
+    def predict_shape(shape) -> str:
+        """Predict the channel-arangement based on common standards."""
+        is_rgb = 3 in shape
+        max_len = 5 if is_rgb else 4
+        if not any([len(shape) == i for i in range(2, max_len)]):
+            raise ValueError("Shape can't be predicted.")
+
+        dims = {}
+        dims["x"], dims["y"] = [
+            idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]
+        ]
+        sorted_shape = sorted(shape)
+        if is_rgb:
+            dims["3"] = shape.index(3)
+            sorted_shape.remove(3)
+        if len(sorted_shape) >= 3:
+            dims["z"] = shape.index(sorted_shape[0])
+        if len(sorted_shape) >= 4:
+            dims["t"] = shape.index(sorted_shape[1])
+
+        sorted_dims = [k for k, v in sorted(dims.items(), key=lambda item: item[1])]
+        order = ",".join(sorted_dims)
+        return order
+
+    def run(self) -> None:
+        """Run check for input image."""
+        print(
+            textwrap.dedent(
+                f"""
+        1. Your image has a shape of: {self.image.shape}
+        ----------
+        2. Possible parameters
+        \U000027A1 x, y: single 2D image used for one prediction
+        \U000027A1 z: third (height) dimension
+        \U000027A1 t: time dimension
+        \U000027A1 3: RGB color stack
+        ----------
+        3. By default we would assign: "({self.predict_shape(self.image.shape)})"
+        \U0001F449 If this is incorrect, please provide the proper shape using the --shape flag to the
+        submodule predict in deepblink's command line interface
+        """
+            )
+        )
 
 
 class HandlePredict:
-    """Handling of prediction submodule for CLI (check argparser for docstring).
+    """Handle prediction submodule for CLI.
 
     Args:
         arg_model: Path to model.h5 file.
