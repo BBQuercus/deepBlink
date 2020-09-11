@@ -6,6 +6,7 @@ import textwrap
 from ._handler import EXTENSIONS
 from ._type import FileFolderType
 from ._type import FolderType
+from ._type import ShapeType
 
 
 def _parse_args_train(
@@ -84,6 +85,17 @@ def _parse_args_predict(
             """if given, calculate the integrated intensity
         in the given radius around each coordinate. set radius to zero if only the
         central pixels intensity should be calculated."""
+        ),
+    )
+    parser.add_argument(
+        "-s",
+        "--shape",
+        type=ShapeType(),
+        default=None,
+        help=textwrap.dedent(
+            """if given, uses the specified dimension arangement. otherwise falls
+        back to defaults. must be in the format "(x,y,z,t,3)" using the specified
+        characters."""
         ),
     )
     return subparsers
