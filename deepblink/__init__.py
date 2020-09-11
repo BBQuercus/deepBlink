@@ -21,6 +21,7 @@ from . import augment
 from . import cli
 from . import data
 from . import datasets
+from . import inference
 from . import io
 from . import losses
 from . import metrics

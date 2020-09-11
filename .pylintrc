@@ -1,27 +1,21 @@
 [MESSAGES CONTROL]
 
 # Disable the message(s) with the given id(s).
-# C0413 - wrong-import-position of third-party libraries
 # E0401 - used when pylint has been unable to import a module.
-# E1130 - invalid-unary-operand-type false positive https://github.com/PyCQA/pylint/issues/1472
-# E1136 - emitted when a subscripted value doesn’t support subscription(i.e. doesn’t define __getitem__ method)
-# E0203 - used when an instance member is accessed before it’s actually assigned.
-# R0801 - similar lines across files
-# W0102 - used when a mutable value as list or dictionary is detected in a default value for an argument.
 # W0201 - used when an instance attribute is defined outside the __init__ method.
-# W0235 - Useless super delegation in method '__init__'
-# W0511 - TODO comments
-# W1202 - logging-format-interpolation - Behavior barring fstrings in logging https://github.com/PyCQA/pylint/issues/2395
+# W0212 - access to protected member that is inevitable when breaking up argparse subparsers.
+# W0235 - useless super delegation in method '__init__'.
+# W0511 - TODO comments.
 # bad-continuation: disagrees with black formatter
 # missing-function-dosctring: docstyle handles
-disable=E1136,E0401,W0201,W0235,W0511,bad-continuation
+disable = E0401, E1136, W0201, W0212, W0235, W0511, bad-continuation
 
 [MASTER]
 
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code
-extension-pkg-whitelist=numpy
+extension-pkg-whitelist = numpy
 
 [TYPECHECK]
 
@@ -29,12 +23,12 @@ extension-pkg-whitelist=numpy
 # (useful for modules/projects where namespaces are manipulated during runtime
 # and thus existing member attributes cannot be deduced by static analysis. It
 # supports qualified module names, as well as Unix pattern matching.
-ignored-modules=numpy,skimage,tensorflow
+ignored-modules = numpy, skimage, tensorflow
 
 # List of classes names for which member attributes should not be checked
 # (useful for classes with attributes dynamically set). This supports can work
 # with qualified names.
-ignored-classes=numpy,skimage,tensorflow
+ignored-classes = numpy, skimage, tensorflow
 
 [BASIC]
 
@@ -42,15 +36,18 @@ ignored-classes=numpy,skimage,tensorflow
 good-names = _, a, b, c, d, e, f, i, j, k, n, N, m, M, D, p, r, t, v, x, X, y, Y, w, h, W, H, x1, x2, y1, y2, ax, df, xy, xyz, x0, y0, z0, z, xx, yy, app, log, tp, fp, fn
 
 # Regular expression which should only match correct function names
-function-rgx=[a-z_][a-z0-9_]{2,70}$
+function-rgx = [a-z_][a-z0-9_]{2,70}$
 
 # Regular expression which should only match correct method names
-method-rgx=[a-z_][a-z0-9_]{2,70}$
+method-rgx = [a-z_][a-z0-9_]{2,70}$
 
 [FORMAT]
 
 # Maximum number of characters on a single line.
 max-line-length = 120
+
+# Allow f-strings in logging messages.
+logging-format-style = new
 
 [DESIGN]
 # Minimum number of public methods for a class (see R0903).
@@ -58,7 +55,5 @@ min-public-methods = 0
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes = 15
-
 max-locals = 25
-
 max-args = 10
