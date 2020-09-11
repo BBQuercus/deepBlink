@@ -17,9 +17,9 @@ setup(
         visualize single proteins, domains, mRNAs, and many more. These spots were traditionally detected with
         mathematical operators such as Laplacian of Gaussian. These operators, however, rely on human input ranging
         from image-intensity thresholds, approximative spot sizes, etc. This process is tedious and not always
-        reliable.\n\n
+        reliable.\n
         DeepBlink relies on neural networks to automatically find spots without the need for human
-        intervention. DeepBlink is available as a ready-to-use command-line interface.\n\n
+        intervention. DeepBlink is available as a ready-to-use command-line interface.\n
         All deepBlink wheels distributed on PyPI are MIT licensed."""
     ),
     # Installation
@@ -29,11 +29,12 @@ setup(
     python_requires=">=3.6, !=3.9.*",
     install_requires=[
         "matplotlib",
-        "numpy",
+        "numpy>=1.16.0,<1.19.0",
         "pandas",
         "pillow",
+        "pyyaml",
         "scikit-image",
-        "scipy",
+        "scipy==1.4.1",
         "tensorflow>=2.0",
         "wandb>=0.7.0",
     ],
