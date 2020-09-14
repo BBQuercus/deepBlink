@@ -30,7 +30,7 @@ def main():
             arg_output=args.output,
             arg_radius=args.radius,
             arg_type=args.type,
-            arg_verbose=args.verbose,
+            arg_shape=args.shape,
             logger=logger,
         )
 

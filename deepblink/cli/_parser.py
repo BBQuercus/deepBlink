@@ -3,7 +3,7 @@
 import argparse
 import textwrap
 
-from ._handler import EXTENSIONS
+from ..io import EXTENSIONS
 from ._type import FileFolderType
 from ._type import FolderType
 from ._type import ShapeType
@@ -38,7 +38,7 @@ def _parse_args_check(
 ) -> argparse._SubParsersAction:
     """Subparser for checking."""
     parser = subparsers.add_parser(
-        "check", help="\U0001F537 \U0001F535 determine your input images' shape"
+        "check", help="\U0001F537 determine your input images' shape"
     )
     parser.add_argument(
         "INPUT", type=str, help=f"input image location [filetypes: {EXTENSIONS}]",
