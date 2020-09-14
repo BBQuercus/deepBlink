@@ -7,7 +7,7 @@ import textwrap
 import yaml
 
 import numpy as np
-import skimage.io
+import pandas as pd
 import tensorflow as tf
 
 from ..inference import get_intensities
@@ -16,10 +16,34 @@ from ..io import basename
 from ..io import grab_files
 from ..io import load_image
 from ..io import load_model
+from ..io import EXTENSIONS
 from ..training import run_experiment
+from ..util import delete_non_unique_columns
 
-# List of currently supported image file extensions.
-EXTENSIONS = ["tif", "jpeg", "jpg", "png"]
+
+def predict_shape(shape) -> str:
+    """Predict the channel-arangement based on common standards."""
+    is_rgb = 3 in shape
+    max_len = 5 if is_rgb else 4
+    if not any([len(shape) == i for i in range(2, max_len)]):
+        raise ValueError("Shape can't be predicted.")
+
+    dims = {}
+    dims["x"], dims["y"] = [
+        idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]
+    ]
+    sorted_shape = sorted(shape)
+    if is_rgb:
+        dims["3"] = shape.index(3)
+        sorted_shape.remove(3)
+    if len(sorted_shape) >= 3:
+        dims["z"] = shape.index(sorted_shape[0])
+    if len(sorted_shape) >= 4:
+        dims["t"] = shape.index(sorted_shape[1])
+
+    sorted_dims = [k for k, v in sorted(dims.items(), key=lambda item: item[1])]
+    order = ",".join(sorted_dims)
+    return order
 
 
 class HandleTrain:
@@ -50,17 +74,21 @@ class HandleTrain:
             )
         with open(self.raw_config, "r") as config_file:
             config = yaml.safe_load(config_file)
+        self.logger.info(f"\U0001F4C2 Loaded config file: {config}")
         return config
 
     def set_gpu(self):
         """Set GPU environment variable."""
         if self.gpu is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = f"{self.gpu}"
+        self.logger.info(f"\U0001F5A5 set GPU number to {self.gpu}")
 
     def run(self):
         """Set configuration and start training loop."""
         self.set_gpu()
+        self.logger.info("\U0001F3C3 Beginning with training")
         run_experiment(self.config)
+        self.logger.info("\U0001F3C1 training complete")
 
 
 class HandleCheck:
@@ -75,49 +103,13 @@ class HandleCheck:
         self.raw_input = arg_input
         self.logger = logger
 
-        self.extensions = tuple(EXTENSIONS)
         self.abs_input = os.path.abspath(arg_input)
-        self.logger.log(20, "\U0001F537 \U0001F535 starting checking submodule")
+        self.logger.info("\U0001F537 starting checking submodule")
 
-    # TODO merge with pink.io.load_image
     @property
     def image(self):
         """Load a single image."""
-        if not os.path.isfile(self.abs_input):
-            raise ImportError(
-                "\U0000274C Input file does not exist. Please provide a valid path."
-            )
-        if not self.abs_input.lower().endswith(self.extensions):
-            raise ImportError(
-                f"\U0000274C Input file extension invalid. Please use one of {self.extensions}."
-            )
-        image = skimage.io.imread(self.abs_input).squeeze()
-        return image
-
-    @staticmethod
-    def predict_shape(shape) -> str:
-        """Predict the channel-arangement based on common standards."""
-        is_rgb = 3 in shape
-        max_len = 5 if is_rgb else 4
-        if not any([len(shape) == i for i in range(2, max_len)]):
-            raise ValueError("Shape can't be predicted.")
-
-        dims = {}
-        dims["x"], dims["y"] = [
-            idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]
-        ]
-        sorted_shape = sorted(shape)
-        if is_rgb:
-            dims["3"] = shape.index(3)
-            sorted_shape.remove(3)
-        if len(sorted_shape) >= 3:
-            dims["z"] = shape.index(sorted_shape[0])
-        if len(sorted_shape) >= 4:
-            dims["t"] = shape.index(sorted_shape[1])
-
-        sorted_dims = [k for k, v in sorted(dims.items(), key=lambda item: item[1])]
-        order = ",".join(sorted_dims)
-        return order
+        return load_image(self.abs_input)
 
     def run(self) -> None:
         """Run check for input image."""
@@ -132,7 +124,7 @@ class HandleCheck:
         \U000027A1 t: time dimension
         \U000027A1 3: RGB color stack
         ----------
-        3. By default we would assign: "({self.predict_shape(self.image.shape)})"
+        3. By default we would assign: "({predict_shape(self.image.shape)})"
         \U0001F449 If this is incorrect, please provide the proper shape using the --shape flag to the
         submodule predict in deepblink's command line interface
         """
@@ -149,7 +141,7 @@ class HandlePredict:
         arg_output: Path to output directory.
         arg_radius: Size of integrated image intensity calculation.
         arg_type: Output file type.
-        arg_verbose: If output is verbose.
+        arg_shape: Custom shape format to label axes.
         logger: Logger to log verbose output.
     """
 
@@ -160,7 +152,7 @@ class HandlePredict:
         arg_output: str,
         arg_radius: int,
         arg_type: str,
-        arg_verbose: bool,
+        arg_shape: str,
         logger: logging.Logger,
     ):
         self.fname_model = arg_model
@@ -168,13 +160,13 @@ class HandlePredict:
         self.raw_output = arg_output
         self.radius = arg_radius
         self.type = arg_type
-        self.verbose = arg_verbose
+        self.raw_shape = arg_shape
         self.logger = logger
 
         self.extensions = EXTENSIONS
         self.abs_input = os.path.abspath(arg_input)
 
-        self.logger.log(20, "\U0001F914 starting prediction submodule")
+        self.logger.info("\U0001F914 starting prediction submodule")
 
     @property
     def path_input(self) -> str:
@@ -199,6 +191,16 @@ class HandlePredict:
         return file_list
 
     @property
+    def image_list(self) -> List[np.ndarray]:
+        """Return a list with all images."""
+        try:
+            is_rgb = "3" in self.raw_shape
+        except TypeError:
+            is_rgb = False
+        self.logger.debug(f"Setting image loaded as RGB {is_rgb}")
+        return [load_image(fname, is_rgb=is_rgb) for fname in self.file_list]
+
+    @property
     def path_output(self) -> str:
         """Return the absolute output path (dependent if given)."""
         if os.path.exists(str(self.raw_output)):
@@ -207,49 +209,96 @@ class HandlePredict:
             outpath = self.path_input
         return outpath
 
-    def save_output(self, fname_in: str, coord_list: np.ndarray) -> None:
-        """Save coordinate list to file with appropriate header."""
-        is_radius = self.radius is not None
-        if self.type == "txt":
-            delimeter = " "
-            header = "r c i" if is_radius else "r c"
-        else:
-            delimeter = ","
-            header = "r,c,i" if is_radius else "r c"
+    # TODO solve double definition of replace_chars here and in ShapeType
+    # TODO solve mypy return type bug
+    @property
+    def shape(self):
+        """Resolve input shape."""
+        first_image = self.image_list[0]
+        if not all([i.ndim == first_image.ndim for i in self.image_list]):
+            raise ValueError("Images must all have the same number of dimensions.")
+        if not all([i.shape == first_image.shape for i in self.image_list]):
+            self.logger.warning(
+                "\U000026A0 Images do not have equal shapes (dimensions match)."
+            )
 
+        if self.raw_shape is None:
+            shape = predict_shape(self.image_list[0].shape)
+            self.logger.info(f"\U0001F535 Using predicted shape of {shape}.")
+        else:
+            shape = self.raw_shape
+            self.logger.info(f"\U0001F535 Using provided input shape of {shape}.")
+        for c in ["(", ")", " "]:
+            shape = shape.replace(c, "")
+        shape = shape.split(",")
+        return shape
+
+    def save_output(self, fname_in: str, df: pd.DataFrame) -> None:
+        """Save coordinate list to file with appropriate header."""
         fname_out = os.path.join(self.path_output, f"{basename(fname_in)}.{self.type}")
-        np.savetxt(
-            fname_out,
-            coord_list,
-            fmt="%.4f",
-            delimiter=delimeter,
-            header=header,
-            comments="",
+        df = delete_non_unique_columns(df)
+
+        if self.type == "txt":
+            header = " ".join(df.columns.to_list())
+            np.savetxt(
+                fname_out,
+                df.values,
+                fmt="%.4f",
+                delimiter=" ",
+                header=header,
+                comments="",
+            )
+        if self.type == "csv":
+            df.to_csv(fname_out, index=False)
+        self.logger.info(
+            f"\U0001F3C3 prediction of file {fname_in} saved as {fname_out}"
         )
 
-    def predict_single(self, fname_in: str, model: tf.keras.models.Model) -> None:
+    def predict_adaptive(
+        self, fname_in: str, image: np.ndarray, model: tf.keras.models.Model
+    ) -> None:
         """Predict and save a single image."""
-        image = load_image(fname_in)
-        coord_list = predict(image, model)
+        order = ["t", "z", "y", "x"]
+        shape = self.shape
 
-        if self.radius is not None:
-            coord_list = get_intensities(image, coord_list, self.radius)
+        # Create an image and shape with all possible dimensions
+        for i in order:
+            if i not in shape:
+                image = np.expand_dims(image, axis=-1)
+                shape.append(i)
 
-        self.save_output(fname_in, coord_list)
-        self.logger.log(20, f"\U0001F3C3 prediction of file {fname_in} complete")
+        # Rearange all axes to match to the desired order
+        for destination, name in enumerate(order):
+            source = shape.index(name)
+            image = np.moveaxis(image, source, destination)
+            shape.insert(destination, shape.pop(source))
+        if not order == shape:
+            self.logger.debug("Axes rearangement did not work properly")
+
+        # Iterate through t and z
+        df = pd.DataFrame()
+        for t_idx, z_ser in enumerate(image):
+            for z_idx, single_image in enumerate(z_ser):
+                coords = predict(single_image, model)
+                curr_df = pd.DataFrame(coords, columns=["r", "c"])
+                curr_df["t"] = t_idx
+                curr_df["z"] = z_idx
+                if self.radius is not None:
+                    curr_df["i"] = get_intensities(single_image, coords, self.radius)
+                df = df.append(curr_df)
+
+        self.save_output(fname_in, df)
 
     def run(self):
         """Run prediction for all given images."""
         model = load_model(
             os.path.abspath(self.fname_model)
         )  # noqa: assignment-from-no-return
-        self.logger.log(20, "\U0001F9E0 model imported")
-        self.logger.log(20, f"\U0001F4C2 {len(self.file_list)} file(s) found")
-        self.logger.log(
-            20, f"\U0001F5C4{' '} output will be saved to {self.path_output}"
-        )
+        self.logger.info("\U0001F9E0 model imported")
+        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found")
+        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}")
 
-        for fname_in in self.file_list:
-            self.predict_single(fname_in, model)
+        for fname_in, image in zip(self.file_list, self.image_list):
+            self.predict_adaptive(fname_in, image, model)
 
-        self.logger.log(20, "\U0001F3C1\U0001F3C3 all predictions are complete")
+        self.logger.info("\U0001F3C1 all predictions are complete")
