@@ -55,6 +55,11 @@ class ShapeType:
             raise ValueError(
                 f"Input must only contain values '{self.allowed_characters}'. '{raw_value}' does not."
             )
+        allow_others = self.allowed_characters.replace(",", "")
+        if not bool(re.match(f"^([{allow_others}],)+[{allow_others}]$", value)):
+            raise ValueError(
+                f"Input must have format '(?,?,?,?)'. '{raw_value}' does not."
+            )
         if not all([c in value for c in self.required_characters]):
             raise ValueError(
                 f"Input must contain {self.required_characters}. '{raw_value}' does not."
