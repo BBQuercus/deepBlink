@@ -4,6 +4,8 @@ from typing import Callable, Iterable, Tuple
 import importlib
 import random
 
+import pandas as pd
+
 
 def get_from_module(path: str, attribute: str) -> Callable:
     """Grab an attribute (e.g. class) from a given module path."""
@@ -56,3 +58,11 @@ def train_valid_split(
     y_train = y_list[split_len:]
 
     return x_train, x_valid, y_train, y_valid
+
+
+def delete_non_unique_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Deletes DataFrame columns that only contain one (non-unique) value."""
+    for col in df.columns:
+        if len(df[col].unique()) == 1:
+            df.drop(col, inplace=True, axis=1)
+    return df
