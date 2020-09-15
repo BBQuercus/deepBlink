@@ -1,5 +1,9 @@
 """Setup file for pypi package called deepblink."""
 
+# TODO write makefile for basic deployment using
+# python setup.py sdist
+# twine upload dist/latest-version.tar.gz
+
 import textwrap
 from setuptools import find_packages
 from setuptools import setup
