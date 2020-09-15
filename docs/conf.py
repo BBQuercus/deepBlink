@@ -4,14 +4,14 @@ Sphinx is used to create an interactive, viewable API documentation.
 There are three steps to building a fresh documentation:
 
 1. Generate new API docs:
-    sphinx-apidoc -o sphinx/ deepblink -e --tocfile index -d 1
+    sphinx-apidoc -o docs/ deepblink -e --tocfile index -d 1
 2. Rearange minor things:
-    - Replace index.rst content with ".. include:: ./deepblink.rst"
+    - Delete index.rst
     - Delete everything under "Module contents" in deepblink.rst
     - Combine both remaining toctrees in deepblink.rst and sort
     alphabetically while removing the "Submodules..." headings
 3. Build the project for local inspection:
-    sphinx-build sphinx dist/docs
+    sphinx-build docs dist/docs
 
 This generates the HTML files in a build/ directory.
 Inspect the index.html to make sure things look good.
@@ -32,7 +32,7 @@ extensions = [
 ]
 
 source_suffix = ".rst"
-master_doc = "index"
+master_doc = "deepblink"
 project = "deepblink"
 year = "2020"
 author = "Bastian Eichenberger"
