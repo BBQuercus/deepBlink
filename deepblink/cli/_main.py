@@ -1,10 +1,15 @@
 """Main / entrypoint function for deepblinks CLI."""
 
+import os
+
 from ._handler import HandleCheck
 from ._handler import HandlePredict
 from ._handler import HandleTrain
 from ._logger import _configure_logger
 from ._parser import _parse_args
+
+# Removes tensorflow's information on CPU / GPU availablity.
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 def main():
@@ -25,7 +30,7 @@ def main():
             arg_output=args.output,
             arg_radius=args.radius,
             arg_type=args.type,
-            arg_verbose=args.verbose,
+            arg_shape=args.shape,
             logger=logger,
         )
 

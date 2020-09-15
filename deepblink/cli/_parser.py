@@ -3,9 +3,10 @@
 import argparse
 import textwrap
 
-from ._handler import EXTENSIONS
+from ..io import EXTENSIONS
 from ._type import FileFolderType
 from ._type import FolderType
+from ._type import ShapeType
 
 
 def _parse_args_train(
@@ -37,7 +38,7 @@ def _parse_args_check(
 ) -> argparse._SubParsersAction:
     """Subparser for checking."""
     parser = subparsers.add_parser(
-        "check", help="\U0001F537 \U0001F535 determine your input images' shape"
+        "check", help="\U0001F537 determine your input images' shape"
     )
     parser.add_argument(
         "INPUT", type=str, help=f"input image location [filetypes: {EXTENSIONS}]",
@@ -84,6 +85,17 @@ def _parse_args_predict(
             """if given, calculate the integrated intensity
         in the given radius around each coordinate. set radius to zero if only the
         central pixels intensity should be calculated."""
+        ),
+    )
+    parser.add_argument(
+        "-s",
+        "--shape",
+        type=ShapeType(),
+        default=None,
+        help=textwrap.dedent(
+            """if given, uses the specified dimension arangement. otherwise falls
+        back to defaults. must be in the format "(x,y,z,t,3)" using the specified
+        characters."""
         ),
     )
     return subparsers

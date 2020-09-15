@@ -1,6 +1,6 @@
 """Dataset preparation functions."""
 
-from typing import Any, List
+from typing import Any, List, Tuple
 import os
 import glob
 import warnings
@@ -14,6 +14,9 @@ from .losses import combined_bce_rmse
 from .losses import combined_f1_rmse
 from .losses import f1_score
 from .losses import rmse
+
+# List of currently supported image file extensions.
+EXTENSIONS = ("tif", "jpeg", "jpg", "png")
 
 
 def remove_zeros(lst: list) -> list:
@@ -60,19 +63,27 @@ def load_npz(fname: str, test_only: bool = False) -> List[Any]:
         return [data[f] for f in expected]
 
 
-def load_image(fname: str) -> np.ndarray:
-    """Import a single image as numpy array checking format requirements."""
+def load_image(
+    fname: str, extensions: Tuple[str, ...] = EXTENSIONS, is_rgb: bool = False
+) -> np.ndarray:
+    """Import a single image as numpy array checking format requirements.
+
+    Args:
+        fname: Absolute or relative filepath of image.
+        extensions: Allowed image extensions.
+        is_rgb: If true, converts RGB images to grayscale.
+    """
+    if not os.path.isfile(fname):
+        raise ImportError("Input file does not exist. Please provide a valid path.")
+    if not fname.lower().endswith(extensions):
+        raise ImportError(f"Input file extension invalid. Please use {extensions}.")
     try:
         image = skimage.io.imread(fname).squeeze().astype(np.float32)
-        if image.ndim == 3 and image.shape[2] == 3:
-            return skimage.color.rgb2gray(image)
-        if image.ndim == 2 and image.shape[0] > 0 and image.shape[1] > 0:
-            return image
-        raise ValueError(
-            f"File must be in the format (x, y) or (x, y, 3) but is {image.shape}."
-        )
     except ValueError as error:
         raise ImportError(f"File '{fname}' could not be imported.") from error
+    if is_rgb:
+        image = skimage.color.rgb2gray(image)
+    return image
 
 
 def load_model(fname: str) -> tf.keras.models.Model:
@@ -97,7 +108,7 @@ def load_model(fname: str) -> tf.keras.models.Model:
         raise ImportError(f"Model '{fname}' could not be imported.") from error
 
 
-def grab_files(path: str, extensions: List[str]) -> List[str]:
+def grab_files(path: str, extensions: Tuple[str, ...]) -> List[str]:
     """Grab all files in directory with listed extensions.
 
     Args:
