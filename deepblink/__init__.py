@@ -5,6 +5,7 @@ Modules are arranged as follows:
 - cli: Command line interface for inferencing.
 - data: Data manipulation. Mainly to properly format for training.
 - datasets: Unique data import functions.
+- inference: Prediction related functions.
 - io: File-manipulation-related functions.
 - losses: Simple functions returning model losses.
 - metrics: Quantitative output of training / model performance.

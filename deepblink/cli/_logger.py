@@ -13,14 +13,14 @@ def _configure_logger(verbose: bool, debug: bool):
     """
     if debug:
         level = logging.DEBUG
+        form = "%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s"
     else:
         if verbose:
             level = logging.INFO
         else:
             level = logging.CRITICAL
+        form = "%(asctime)s: %(message)s"
 
-    logging.basicConfig(
-        format="%(asctime)s: %(message)s", stream=sys.stdout, level=level
-    )
+    logging.basicConfig(format=form, stream=sys.stdout, level=level)
     logger = logging.getLogger("Verbose output logger")
     return logger

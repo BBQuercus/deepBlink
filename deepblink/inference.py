@@ -74,5 +74,4 @@ def get_intensities(
         )
         intensities[idx] = np.sum(area)
 
-    output = np.append(coordinate_list, intensities, axis=1)
-    return output
+    return intensities

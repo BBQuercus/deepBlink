@@ -49,5 +49,5 @@ def coordinates():
 )
 def test_get_intensities(radius, expected, image, coordinates):
     output = get_intensities(image, coordinates, radius)
-    output_sum = np.sum(output.T[2])  # Third column is intensity
+    output_sum = np.sum(output)
     assert expected == output_sum
