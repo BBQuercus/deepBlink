@@ -41,7 +41,7 @@ def _parse_args_train(
 ) -> argparse._SubParsersAction:
     """Subparser for training."""
     parser = subparsers.add_parser(
-        "train", help="\U0001F35E train a freshly baked model on a dataset",
+        "train", help="\U0001F686 train a freshly baked model on a dataset",
     )
     parser.add_argument(
         "-c",
@@ -133,7 +133,7 @@ def _parse_args_predict(
         default=None,
         help=textwrap.dedent(
             """if given, uses the specified dimension arrangement. otherwise falls
-        back to defaults. must be in the format "(x,y,z,t,3)" using the specified
+        back to defaults. must be in the format "(x,y,z,t,c,3)" using the specified
         characters."""
         ),
     )

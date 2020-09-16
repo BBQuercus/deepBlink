@@ -4,8 +4,14 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 from hypothesis.strategies import lists
+import numpy as np
+import pandas as pd
+import pytest
 
+from deepblink.util import delete_non_unique_columns
+from deepblink.util import predict_shape
 from deepblink.util import relative_shuffle
+from deepblink.util import remove_falses
 from deepblink.util import train_valid_split
 
 
@@ -27,3 +33,50 @@ def test_train_valid_split(mylist):
 
     assert (len(yvalid)) == (split_len)
     assert (len(ytrain)) == (len(mylist) - (split_len))
+
+
+def test_delete_non_unique_columns():
+    columns = list("ABCD")
+    df = pd.DataFrame(np.random.randint(0, 100, size=(15, 4)), columns=columns)
+
+    # Keep unique columns
+    assert all(delete_non_unique_columns(df).columns == columns)
+
+    # Delete non unique columns
+    df["E"] = np.random.randint(100)
+    df["F"] = "test"
+    assert all(delete_non_unique_columns(df).columns == columns)
+
+
+@pytest.mark.parametrize(
+    "tupl, expected",
+    [
+        ((0, 1, 2), (1, 2)),
+        ((0, 0), ()),
+        ((False, True, None, 1), (True, 1)),
+        ((1, 2), (1, 2)),
+    ],
+)
+def test_remove_falses(tupl, expected):
+    assert remove_falses(tupl) == expected
+
+
+@pytest.mark.parametrize(
+    "shape, expected",
+    [
+        ((100, 100, 2), ("x,y,c")),
+        ((100, 100, 3), ("x,y,3")),
+        ((10, 100, 100), ("z,x,y")),
+        ((10, 100, 100, 2), ("z,x,y,c")),
+        ((20, 10, 100, 100), ("t,z,x,y")),
+        ((20, 10, 100, 100, 2), ("t,z,x,y,c")),
+    ],
+)
+def test_predict_shape_1(shape, expected):
+    assert predict_shape(shape) == expected
+
+
+@pytest.mark.parametrize("shape", [(100,), (0, 0), list(range(7))])
+def test_predict_shape_2(shape):
+    with pytest.raises(ValueError):
+        predict_shape(shape)

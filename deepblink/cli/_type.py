@@ -40,7 +40,7 @@ class ShapeType:
 
     def __init__(self):
         self.remove_characters = ["(", ")", " "]
-        self.allowed_characters = "xy3tz,"
+        self.allowed_characters = "xy3ctz"
         self.required_characters = ["x", "y"]
 
     def __call__(self, value):  # noqa: D102
@@ -51,12 +51,15 @@ class ShapeType:
         raw_value = value
         for c in self.remove_characters:
             value = value.replace(c, "")
-        if not bool(re.match(f"^[{self.allowed_characters}]+$", value)):
+        if not bool(re.match(f"^[{self.allowed_characters},]+$", value)):
             raise ValueError(
-                f"Input must only contain values '{self.allowed_characters}'. '{raw_value}' does not."
+                f"Input must only contain values '{self.allowed_characters},'. '{raw_value}' does not."
             )
-        allow_others = self.allowed_characters.replace(",", "")
-        if not bool(re.match(f"^([{allow_others}],)+[{allow_others}]$", value)):
+        if not bool(
+            re.match(
+                f"^([{self.allowed_characters}],)+[{self.allowed_characters}]$", value
+            )
+        ):
             raise ValueError(
                 f"Input must have format '(?,?,?,?)'. '{raw_value}' does not."
             )
