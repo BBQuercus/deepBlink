@@ -1,7 +1,7 @@
-deepblink.networks package
+deepblink.inference module
 ==========================
 
-.. automodule:: deepblink.networks
+.. automodule:: deepblink.inference
    :members:
    :undoc-members:
    :show-inheritance:

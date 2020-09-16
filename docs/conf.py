@@ -1,19 +1,20 @@
-"""Configuration file for sphinx documentation.
-To build locally start populating 'references' manually
-via apidoc from the home dir:
+"""Sphinx API documentation.
 
-    $ sphinx-apidoc -o docs/references deepblink\
-                    -H References\
-                    --tocfile index
+Sphinx is used to create an interactive, viewable API documentation.
+There are three steps to building a fresh documentation:
 
-Next, make sure all links are functional. Due to inconsistent behaviour,
-it currently isn't included in the tox checks. Run:
+1. Generate new API docs:
+    sphinx-apidoc -o docs/ deepblink -e --tocfile index -d 1
+2. Rearange minor things:
+    - Delete index.rst
+    - Delete everything under "Module contents" in deepblink.rst
+    - Combine both remaining toctrees in deepblink.rst and sort
+    alphabetically while removing the "Submodules..." headings
+3. Build the project for local inspection:
+    sphinx-build docs dist/docs
 
-    $ sphinx-build -b linkcheck docs dist/docs
-
-Finally, check proper building using:
-
-    $ sphinx-build docs dist/docs
+This generates the HTML files in a build/ directory.
+Inspect the index.html to make sure things look good.
 """
 
 import os
@@ -31,7 +32,7 @@ extensions = [
 ]
 
 source_suffix = ".rst"
-master_doc = "index"
+master_doc = "deepblink"
 project = "deepblink"
 year = "2020"
 author = "Bastian Eichenberger"

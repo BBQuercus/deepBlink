@@ -1,5 +1,8 @@
-deepblink.cli module
-====================
+deepblink.cli package
+=====================
+
+Module contents
+---------------
 
 .. automodule:: deepblink.cli
    :members:
