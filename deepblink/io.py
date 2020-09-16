@@ -19,11 +19,6 @@ from .losses import rmse
 EXTENSIONS = ("tif", "jpeg", "jpg", "png")
 
 
-def remove_zeros(lst: list) -> list:
-    """Removes all occurences of "0" from a list of numpy arrays."""
-    return [i for i in lst if isinstance(i, np.ndarray)]
-
-
 def extract_basename(path: str) -> str:
     """Depreciated name: Returns the basename removing path and extension."""
     warnings.warn(

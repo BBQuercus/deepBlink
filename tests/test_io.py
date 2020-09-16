@@ -5,23 +5,12 @@ from pathlib import Path
 import os
 import tempfile
 
-from hypothesis import given
-from hypothesis.extra.numpy import arrays
-from hypothesis.strategies import floats
-from hypothesis.strategies import lists
 import numpy as np
 import pytest
 
 from deepblink.io import basename
 from deepblink.io import load_npz
 from deepblink.io import grab_files
-from deepblink.io import remove_zeros
-
-
-@given(lists(arrays(np.float, (5, 5), elements=floats(0, 1)), min_size=3, max_size=10))
-def test_remove_zeros(mylist):
-    mylist[1] = 0
-    assert len(remove_zeros(mylist)) == (len(mylist) - 1)
 
 
 @pytest.mark.parametrize(
