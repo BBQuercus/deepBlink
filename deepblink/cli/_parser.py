@@ -93,7 +93,7 @@ def _parse_args_predict(
         type=ShapeType(),
         default=None,
         help=textwrap.dedent(
-            """if given, uses the specified dimension arangement. otherwise falls
+            """if given, uses the specified dimension arrangement. otherwise falls
         back to defaults. must be in the format "(x,y,z,t,3)" using the specified
         characters."""
         ),
