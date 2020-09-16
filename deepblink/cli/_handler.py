@@ -46,6 +46,63 @@ def predict_shape(shape) -> str:
     return order
 
 
+class HandleConfig:
+    """Handle configuration submodule for CLI.
+
+    Args:
+        arg_output: Name of output file.
+        logger: Logger to log verbose output.
+    """
+
+    def __init__(self, arg_output: str, logger: logging.Logger):
+        self.raw_output = arg_output
+        self.logger = logger
+        self.logger.info("\U00002699 starting config submodule")
+
+        self.abs_output = os.path.abspath(arg_output)
+
+    @property
+    def config(self):
+        """Default configuration as dictionary."""
+        return {
+            "name": "deepBlink",
+            "savedir": "PATH/TO/OUTDIR",
+            "comments": "COMMENT ON WANDB",
+            "use_wandb": False,
+            "dataset": "SpotsDataset",
+            "dataset_args": {
+                "version": "PATH/TO/DATASET.NPZ",
+                "cell_size": 4,
+                "flip": False,
+                "illuminate": False,
+                "rotate": False,
+                "gaussian_noise": False,
+                "translate": False,
+            },
+            "model": "SpotsModel",
+            "network": "inception_squeeze",
+            "network_args": {"dropout": 0.0, "filters": 4, "n_extra_down": 0},
+            "loss": "combined_bce_rmse",
+            "optimizer": "adam",
+            "train_args": {
+                "batch_size": 2,
+                "epochs": 1000,
+                "learning_rate": 1e-4,
+                "overfit": False,
+            },
+        }
+
+    def save_yaml(self):
+        """Dump configuration into yaml file."""
+        with open(self.abs_output, "w") as outfile:
+            yaml.dump(self.config, outfile, default_flow_style=False)
+
+    def run(self):
+        """Save configuration as yaml file."""
+        self.save_yaml()
+        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}.")
+
+
 class HandleTrain:
     """Handle checking submodule for CLI.
 
