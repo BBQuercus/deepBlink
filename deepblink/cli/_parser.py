@@ -9,6 +9,15 @@ from ._type import FolderType
 from ._type import ShapeType
 
 
+def _add_verbose(parser: argparse._SubParsersAction):
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
+
+
 def _parse_args_config(
     subparsers: argparse._SubParsersAction,
 ) -> argparse._SubParsersAction:
@@ -23,12 +32,7 @@ def _parse_args_config(
         default="config.yaml",
         help="custom name of configuration file [default: config.yaml]",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
+    _add_verbose(parser)
     return subparsers
 
 
@@ -53,12 +57,7 @@ def _parse_args_train(
         default=None,
         help="index of GPU to be used [default: None]",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
+    _add_verbose(parser)
     return subparsers
 
 
@@ -76,12 +75,7 @@ def _parse_args_check(
         type=str,
         help=f"input image location [filetypes: {EXTENSIONS}]",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
+    _add_verbose(parser)
     return subparsers
 
 
@@ -143,12 +137,7 @@ def _parse_args_predict(
         characters."""
         ),
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
+    _add_verbose(parser)
     return subparsers
 
 
@@ -166,12 +155,7 @@ def _parse_args_eval(
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
+    _add_verbose(parser)
     return subparsers
 
 
