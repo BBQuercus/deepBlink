@@ -9,7 +9,7 @@ from ._type import FolderType
 from ._type import ShapeType
 
 
-def _add_verbose(parser: argparse._SubParsersAction):
+def _add_verbose(parser: argparse.ArgumentParser):
     parser.add_argument(
         "-v",
         "--verbose",
