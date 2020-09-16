@@ -9,6 +9,29 @@ from ._type import FolderType
 from ._type import ShapeType
 
 
+def _parse_args_config(
+    subparsers: argparse._SubParsersAction,
+) -> argparse._SubParsersAction:
+    """Subparser for configuration."""
+    parser = subparsers.add_parser(
+        "config", help="\U00002699 create a configuration file for training",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        default="config.yaml",
+        help="custom name of configuration file [default: config.yaml]",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
+    return subparsers
+
+
 def _parse_args_train(
     subparsers: argparse._SubParsersAction,
 ) -> argparse._SubParsersAction:
@@ -30,6 +53,12 @@ def _parse_args_train(
         default=None,
         help="index of GPU to be used [default: None]",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
     return subparsers
 
 
@@ -41,7 +70,17 @@ def _parse_args_check(
         "check", help="\U0001F537 determine your input images' shape"
     )
     parser.add_argument(
-        "INPUT", type=str, help=f"input image location [filetypes: {EXTENSIONS}]",
+        "-i",
+        "--input",
+        required=True,
+        type=str,
+        help=f"input image location [filetypes: {EXTENSIONS}]",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
     )
     return subparsers
 
@@ -55,10 +94,16 @@ def _parse_args_predict(
         help="\U0001F914 inference / prediction of data with a pre-trained model",
     )
     parser.add_argument(
-        "MODEL", type=argparse.FileType("r"), help="model .h5 file location"
+        "-m",
+        "--model",
+        required=True,
+        type=argparse.FileType("r"),
+        help="model .h5 file location",
     )
     parser.add_argument(
-        "INPUT",
+        "-i",
+        "--input",
+        required=True,
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
@@ -98,6 +143,12 @@ def _parse_args_predict(
         characters."""
         ),
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
     return subparsers
 
 
@@ -109,9 +160,17 @@ def _parse_args_eval(
         "eval", help="\U0001F3AD measure a models performance on a dataset"
     )
     parser.add_argument(
-        "INPUT",
+        "-i",
+        "--input",
+        required=True,
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
     )
     return subparsers
 
@@ -126,19 +185,14 @@ def _parse_args():
         epilog="We hope you enjoy using deepBlink \U0001F603",
     )
     parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
     parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
 
     subparsers = parser.add_subparsers(dest="command")
+    subparsers = _parse_args_config(subparsers)
     subparsers = _parse_args_train(subparsers)
     subparsers = _parse_args_check(subparsers)
     subparsers = _parse_args_predict(subparsers)
-    subparsers = _parse_args_eval(subparsers)
+    # subparsers = _parse_args_eval(subparsers)
 
     args = parser.parse_args()
     return args
