@@ -152,13 +152,13 @@ def _parse_args_create(
         "-i",
         "--input",
         required=True,
-        type=str,
+        type=FolderType(),
         help=f"path to raw images [filetypes: {EXTENSIONS}]",
     )
     parser.add_argument(
         "-l",
         "--labels",
-        type=str,
+        type=FolderType(),
         help="path to raw labels in csv format [default: --input/labels]",
     )
     parser.add_argument(
@@ -166,7 +166,11 @@ def _parse_args_create(
         "--name",
         default="dataset",
         type=str,
-        help="name of dataset output file. file extension is added automatically [default: 'dataset']",
+        help=(
+            "name of dataset output file.\t"
+            "file extension is added automatically.\t"
+            "will be saved into the input path [default: 'dataset']"
+        ),
     )
     _add_verbose(parser)
     return subparsers
