@@ -25,8 +25,8 @@ for (i = 0; i < lengthOf(filelist); i++) {
         run("Measure");
 
 		// Save output to file
-		bname = split(filelist[i], ".");
-		fnameout = pathout + bname[0] + ".csv";
+		bname = replace(filelist[i], ".tif", ".csv");
+		fnameout = pathout + bname;
 		saveAs("Results", fnameout);
 
 		// Close opened windows
