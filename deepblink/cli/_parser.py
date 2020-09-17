@@ -141,6 +141,37 @@ def _parse_args_predict(
     return subparsers
 
 
+def _parse_args_create(
+    subparsers: argparse._SubParsersAction,
+) -> argparse._SubParsersAction:
+    """Subparser for creation."""
+    parser = subparsers.add_parser(
+        "create", help="\U0001F5BC create a new dataset from raw files"
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        required=True,
+        type=str,
+        help=f"path to raw images [filetypes: {EXTENSIONS}]",
+    )
+    parser.add_argument(
+        "-l",
+        "--labels",
+        type=str,
+        help="path to raw labels in csv format [default: --input/labels]",
+    )
+    parser.add_argument(
+        "-n",
+        "--name",
+        default="dataset",
+        type=str,
+        help="name of dataset output file. file extension is added automatically [default: 'dataset']",
+    )
+    _add_verbose(parser)
+    return subparsers
+
+
 def _parse_args_eval(
     subparsers: argparse._SubParsersAction,
 ) -> argparse._SubParsersAction:
@@ -172,10 +203,11 @@ def _parse_args():
     parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
 
     subparsers = parser.add_subparsers(dest="command")
-    subparsers = _parse_args_config(subparsers)
-    subparsers = _parse_args_train(subparsers)
     subparsers = _parse_args_check(subparsers)
+    subparsers = _parse_args_config(subparsers)
+    subparsers = _parse_args_create(subparsers)
     subparsers = _parse_args_predict(subparsers)
+    subparsers = _parse_args_train(subparsers)
     # subparsers = _parse_args_eval(subparsers)
 
     args = parser.parse_args()
