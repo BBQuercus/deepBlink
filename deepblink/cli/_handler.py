@@ -443,7 +443,8 @@ class HandleCreate:
         self.logger.debug(f"using {len(images)} non-empty files.")
         return images, labels
 
-    def convert_labels(self, image: np.ndarray, df: pd.DataFrame) -> pd.DataFrame:
+    @staticmethod
+    def convert_labels(image: np.ndarray, df: pd.DataFrame) -> pd.DataFrame:
         """Pre-processes labels to be used in deepBlink.
 
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
