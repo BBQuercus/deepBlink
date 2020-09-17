@@ -17,8 +17,9 @@ for (i = 0; i < lengthOf(filelist); i++) {
     	// Open images
         open(pathin + filelist[i]);
 
-		// Convert Fiji's strange units into pixel units
+		// Change Fiji's strange default values
 		run("Set Scale...", "distance=0 known=0 pixel=1 unit=pixel");
+		run("Set Measurements...", "  redirect=None decimal=9");
 
         // Generate a list of spots
         run("Measure");
