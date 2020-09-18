@@ -30,12 +30,12 @@ class HandleConfig:
         logger: Logger to log verbose output.
     """
 
-    def __init__(self, arg_output: str, logger: logging.Logger):
-        self.raw_output = arg_output
+    def __init__(self, arg_name: str, logger: logging.Logger):
+        self.name = arg_name
         self.logger = logger
         self.logger.info("\U00002699 starting config submodule")
 
-        self.abs_output = os.path.abspath(self.raw_output)
+        self.abs_output = os.path.abspath(self.name + ".yaml")
 
     def __call__(self):
         """Save configuration as yaml file."""
