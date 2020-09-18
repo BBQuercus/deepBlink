@@ -121,5 +121,5 @@ def grab_files(path: str, extensions: Tuple[str, ...]) -> List[str]:
 
     files = []
     for ext in extensions:
-        files.extend(glob.glob(f"{path}/*.{ext}"))
+        files.extend(sorted(glob.glob(f"{path}/*.{ext}")))
     return sorted(files)

@@ -19,6 +19,7 @@ from ..io import EXTENSIONS
 from ..training import run_experiment
 from ..util import delete_non_unique_columns
 from ..util import predict_shape
+from ..util import train_valid_split
 
 
 class HandleConfig:
@@ -29,12 +30,17 @@ class HandleConfig:
         logger: Logger to log verbose output.
     """
 
-    def __init__(self, arg_output: str, logger: logging.Logger):
-        self.raw_output = arg_output
+    def __init__(self, arg_name: str, logger: logging.Logger):
+        self.name = arg_name
         self.logger = logger
         self.logger.info("\U00002699 starting config submodule")
 
-        self.abs_output = os.path.abspath(arg_output)
+        self.abs_output = os.path.abspath(self.name + ".yaml")
+
+    def __call__(self):
+        """Save configuration as yaml file."""
+        self.save_yaml()
+        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}.")
 
     @property
     def config(self):
@@ -72,11 +78,6 @@ class HandleConfig:
         with open(self.abs_output, "w") as outfile:
             yaml.dump(self.config, outfile, default_flow_style=False)
 
-    def run(self):
-        """Save configuration as yaml file."""
-        self.save_yaml()
-        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}.")
-
 
 class HandleTrain:
     """Handle checking submodule for CLI.
@@ -92,6 +93,13 @@ class HandleTrain:
         self.gpu = arg_gpu
         self.logger = logger
         self.logger.info("\U0001F686 starting checking submodule")
+
+    def __call__(self):
+        """Set configuration and start training loop."""
+        self.set_gpu()
+        self.logger.info("\U0001F3C3 Beginning with training")
+        run_experiment(self.config)
+        self.logger.info("\U0001F3C1 training complete")
 
     @property
     def config(self):
@@ -115,13 +123,6 @@ class HandleTrain:
             os.environ["CUDA_VISIBLE_DEVICES"] = f"{self.gpu}"
         self.logger.info(f"\U0001F5A5 set GPU number to {self.gpu}")
 
-    def run(self):
-        """Set configuration and start training loop."""
-        self.set_gpu()
-        self.logger.info("\U0001F3C3 Beginning with training")
-        run_experiment(self.config)
-        self.logger.info("\U0001F3C1 training complete")
-
 
 class HandleCheck:
     """Handle checking submodule for CLI.
@@ -136,14 +137,9 @@ class HandleCheck:
         self.logger = logger
         self.logger.info("\U0001F537 starting checking submodule")
 
-        self.abs_input = os.path.abspath(arg_input)
+        self.abs_input = os.path.abspath(self.raw_input)
 
-    @property
-    def image(self):
-        """Load a single image."""
-        return load_image(self.abs_input)
-
-    def run(self) -> None:
+    def __call__(self) -> None:
         """Run check for input image."""
         print(
             textwrap.dedent(
@@ -163,6 +159,11 @@ class HandleCheck:
         """
             )
         )
+
+    @property
+    def image(self):
+        """Load a single image."""
+        return load_image(self.abs_input)
 
 
 class HandlePredict:
@@ -198,11 +199,21 @@ class HandlePredict:
         self.logger.info("\U0001F914 starting prediction submodule")
 
         self.extensions = EXTENSIONS
-        self.abs_input = os.path.abspath(arg_input)
+        self.abs_input = os.path.abspath(self.raw_input)
         self.model = load_model(
             os.path.abspath(self.fname_model)
         )  # noqa: assignment-from-no-return
         self.logger.info("\U0001F9E0 model imported")
+
+    def __call__(self):
+        """Run prediction for all given images."""
+        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found.")
+        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}.")
+
+        for fname_in, image in zip(self.file_list, self.image_list):
+            self.predict_adaptive(fname_in, image)
+
+        self.logger.info("\U0001F3C1 all predictions are complete.")
 
     @property
     def path_input(self) -> str:
@@ -334,12 +345,155 @@ class HandlePredict:
         self.logger.debug(f"completed prediction loop with\n{df.head()}.")
         self.save_output(fname_in, df)
 
-    def run(self):
-        """Run prediction for all given images."""
-        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found.")
-        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}.")
 
-        for fname_in, image in zip(self.file_list, self.image_list):
-            self.predict_adaptive(fname_in, image)
+class HandleCreate:
+    """Handle creation submodule for CLI.
 
-        self.logger.info("\U0001F3C1 all predictions are complete.")
+    Args:
+        arg_input: Path to folder with images.
+        arg_labels: Path to folder with labels.
+        arg_name: Name of dataset file to be saved.
+        logger: Logger to log verbose output.
+    """
+
+    def __init__(self, arg_input, arg_labels, arg_name, logger):
+        self.raw_input = arg_input
+        self.raw_labels = arg_labels
+        self.raw_name = arg_name
+        self.logger = logger
+        self.logger.info("\U0001F5BC starting creation submodule")
+
+        # TODO use inputs?
+        self.test_split = 0.2
+        self.valid_split = 0.2
+
+        self.abs_input = os.path.abspath(self.raw_input)
+        self.extensions = EXTENSIONS
+
+    def __call__(self):
+        """Run dataset creation."""
+        image_list, label_list = self.image_label_lists
+        if len(image_list) != len(label_list):
+            raise ValueError(
+                f"Number of images must match labels. {len(image_list)} != {len(label_list)}."
+            )
+
+        label_list_adj = [
+            self.convert_labels(image, label)
+            for image, label in zip(image_list, label_list)
+        ]
+        self.logger.debug(
+            f"images converted: {len(label_list)} == {len(label_list_adj)}."
+        )
+
+        x_trainval, x_test, y_trainval, y_test = train_valid_split(
+            image_list, label_list_adj, valid_split=self.test_split
+        )
+        x_train, x_valid, y_train, y_valid = train_valid_split(
+            x_trainval, y_trainval, valid_split=self.valid_split
+        )
+        self.logger.info(
+            f"\U0001F4A6 images split: {len(x_train)} train, {len(x_valid)} valid, {len(x_test)} test."
+        )
+
+        y_train = [y.values for y in y_train]
+        y_valid = [y.values for y in y_valid]
+        y_test = [y.values for y in y_test]
+        np.savez_compressed(
+            self.fname_out,
+            x_train=x_train,
+            y_train=y_train,
+            x_valid=x_valid,
+            y_valid=y_valid,
+            x_test=x_test,
+            y_test=y_test,
+        )
+        self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}.")
+
+    @property
+    def abs_labels(self):
+        """Return absolute path to directory with labels."""
+        if self.raw_labels is not None:
+            path = os.path.abspath(self.raw_labels)
+            self.logger.debug(f"using provided label path at {path}.")
+        elif os.path.isdir(os.path.join(self.abs_input, "labels")):
+            path = os.path.join(self.abs_input, "labels")
+            self.logger.debug(f"using default label path at {path}.")
+        else:
+            self.logger.debug(
+                f"no labels found in default {self.abs_input} or input {self.raw_labels}."
+            )
+            raise ValueError(
+                (
+                    "\U0000274C No label path found.\t"
+                    "Please use a directory called 'labels' in input or use the '--labels' flag."
+                )
+            )
+        return path
+
+    @property
+    def fname_out(self):
+        """Return the absolute path to the dataset."""
+        raw_name = self.raw_name
+        if raw_name is not None:
+            if os.path.isfile(raw_name):
+                path = raw_name
+                self.logger.warning(
+                    f"\U000026A0 input name {raw_name} is already a file."
+                )
+            elif os.path.isdir(raw_name):
+                path = os.path.join(raw_name, "dataset.npz")
+                self.logger.warning(
+                    f"\U000026A0 input name {raw_name} is already a file."
+                )
+            else:
+                fname = raw_name[:-4] if raw_name.endswith(".npz") else raw_name
+                path = os.path.join(self.abs_input, f"{fname}.npz")
+                self.logger.debug(f"using given name {raw_name} only.")
+        else:
+            path = os.path.join(self.raw_name, "dataset.npz")
+            self.logger.debug(f"using default output at {path}.")
+        return path
+
+    @property
+    def image_label_lists(self):
+        """Return lists with all images and labels."""
+        fname_images = grab_files(self.abs_input, self.extensions)
+        fname_labels = grab_files(self.abs_labels, extensions=("csv",))
+
+        self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}.")
+        self.logger.debug(f"labels - found {len(fname_labels)} files: {fname_labels}.")
+
+        images = []
+        labels = []
+        for image, label in zip(fname_images, fname_labels):
+            if basename(image) != basename(label):
+                self.logger.warning(
+                    f"\U0000274C file basenames do not match! {image} != {label}."
+                )
+            df = pd.read_csv(label, index_col=0)
+            if len(df) <= 1:
+                self.logger.warning(
+                    f"\U000026A0 labels for {label} empty. will not be used."
+                )
+                continue
+            images.append(load_image(image, is_rgb=False))
+            labels.append(df)
+
+        self.logger.debug(f"using {len(images)} non-empty files.")
+        return images, labels
+
+    @staticmethod
+    def convert_labels(image: np.ndarray, df: pd.DataFrame) -> pd.DataFrame:
+        """Pre-processes labels to be used in deepBlink.
+
+        Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
+        Rounds coordinates on borders to prevent Fiji out-of bounds behavior.
+        """
+        df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
+
+        for name, var in zip(["r", "c"], image.shape):
+            df[name] = df[name].where(df[name] < var, var)
+            df[name] = df[name].where(df[name] > 0, 0)
+
+        return df

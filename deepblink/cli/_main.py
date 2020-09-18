@@ -4,6 +4,7 @@ import os
 
 from ._handler import HandleCheck
 from ._handler import HandleConfig
+from ._handler import HandleCreate
 from ._handler import HandlePredict
 from ._handler import HandleTrain
 from ._logger import _configure_logger
@@ -18,19 +19,24 @@ def main():
     args = _parse_args()
     logger = _configure_logger(args.verbose, args.debug)
 
-    if args.command == "config":
-        handler = HandleConfig(arg_output=args.output, logger=logger)
-
-    if args.command == "train":
-        handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
-
     if args.command == "check":
-        handler = HandleCheck(arg_input=args.INPUT, logger=logger)
+        handler = HandleCheck(arg_input=args.input, logger=logger)
+
+    if args.command == "config":
+        handler = HandleConfig(arg_name=args.name, logger=logger)
+
+    if args.command == "create":
+        handler = HandleCreate(
+            arg_input=args.input,
+            arg_labels=args.labels,
+            arg_name=args.name,
+            logger=logger,
+        )
 
     if args.command == "predict":
         handler = HandlePredict(
-            arg_model=args.MODEL.name,
-            arg_input=args.INPUT,
+            arg_model=args.model.name,
+            arg_input=args.input,
             arg_output=args.output,
             arg_radius=args.radius,
             arg_type=args.type,
@@ -38,4 +44,7 @@ def main():
             logger=logger,
         )
 
-    handler.run()
+    if args.command == "train":
+        handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
+
+    handler()
