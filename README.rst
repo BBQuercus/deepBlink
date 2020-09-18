@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBBQuercus%2FdeepBlink.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBBQuercus%2FdeepBlink?ref=badge_shield)
+
 .. image:: https://badge.fury.io/py/deepblink.svg
     :target: https://badge.fury.io/py/deepblink
     :alt: Pypi package version number.
@@ -73,3 +75,6 @@ Inferencing on deepBlink is performed at the command line as follows: ::
     deepblink [-h] [-o OUTPUT] [-t {csv,txt}] [-r RADIUS] [-v] [-V] MODEL INPUT
 
 More detailed information is availabe in our `documentation <https://deepblink.readthedocs.io/>`_.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBBQuercus%2FdeepBlink.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FBBQuercus%2FdeepBlink?ref=badge_large)
