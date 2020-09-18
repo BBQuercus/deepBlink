@@ -37,6 +37,11 @@ class HandleConfig:
 
         self.abs_output = os.path.abspath(self.raw_output)
 
+    def __call__(self):
+        """Save configuration as yaml file."""
+        self.save_yaml()
+        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}.")
+
     @property
     def config(self):
         """Default configuration as dictionary."""
@@ -73,11 +78,6 @@ class HandleConfig:
         with open(self.abs_output, "w") as outfile:
             yaml.dump(self.config, outfile, default_flow_style=False)
 
-    def run(self):
-        """Save configuration as yaml file."""
-        self.save_yaml()
-        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}.")
-
 
 class HandleTrain:
     """Handle checking submodule for CLI.
@@ -93,6 +93,13 @@ class HandleTrain:
         self.gpu = arg_gpu
         self.logger = logger
         self.logger.info("\U0001F686 starting checking submodule")
+
+    def __call__(self):
+        """Set configuration and start training loop."""
+        self.set_gpu()
+        self.logger.info("\U0001F3C3 Beginning with training")
+        run_experiment(self.config)
+        self.logger.info("\U0001F3C1 training complete")
 
     @property
     def config(self):
@@ -116,13 +123,6 @@ class HandleTrain:
             os.environ["CUDA_VISIBLE_DEVICES"] = f"{self.gpu}"
         self.logger.info(f"\U0001F5A5 set GPU number to {self.gpu}")
 
-    def run(self):
-        """Set configuration and start training loop."""
-        self.set_gpu()
-        self.logger.info("\U0001F3C3 Beginning with training")
-        run_experiment(self.config)
-        self.logger.info("\U0001F3C1 training complete")
-
 
 class HandleCheck:
     """Handle checking submodule for CLI.
@@ -139,12 +139,7 @@ class HandleCheck:
 
         self.abs_input = os.path.abspath(self.raw_input)
 
-    @property
-    def image(self):
-        """Load a single image."""
-        return load_image(self.abs_input)
-
-    def run(self) -> None:
+    def __call__(self) -> None:
         """Run check for input image."""
         print(
             textwrap.dedent(
@@ -164,6 +159,11 @@ class HandleCheck:
         """
             )
         )
+
+    @property
+    def image(self):
+        """Load a single image."""
+        return load_image(self.abs_input)
 
 
 class HandlePredict:
@@ -204,6 +204,16 @@ class HandlePredict:
             os.path.abspath(self.fname_model)
         )  # noqa: assignment-from-no-return
         self.logger.info("\U0001F9E0 model imported")
+
+    def __call__(self):
+        """Run prediction for all given images."""
+        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found.")
+        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}.")
+
+        for fname_in, image in zip(self.file_list, self.image_list):
+            self.predict_adaptive(fname_in, image)
+
+        self.logger.info("\U0001F3C1 all predictions are complete.")
 
     @property
     def path_input(self) -> str:
@@ -335,16 +345,6 @@ class HandlePredict:
         self.logger.debug(f"completed prediction loop with\n{df.head()}.")
         self.save_output(fname_in, df)
 
-    def run(self):
-        """Run prediction for all given images."""
-        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found.")
-        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}.")
-
-        for fname_in, image in zip(self.file_list, self.image_list):
-            self.predict_adaptive(fname_in, image)
-
-        self.logger.info("\U0001F3C1 all predictions are complete.")
-
 
 class HandleCreate:
     """Handle creation submodule for CLI.
@@ -369,6 +369,46 @@ class HandleCreate:
 
         self.abs_input = os.path.abspath(self.raw_input)
         self.extensions = EXTENSIONS
+
+    def __call__(self):
+        """Run dataset creation."""
+        image_list, label_list = self.image_label_lists
+        if len(image_list) != len(label_list):
+            raise ValueError(
+                f"Number of images must match labels. {len(image_list)} != {len(label_list)}."
+            )
+
+        label_list_adj = [
+            self.convert_labels(image, label)
+            for image, label in zip(image_list, label_list)
+        ]
+        self.logger.debug(
+            f"images converted: {len(label_list)} == {len(label_list_adj)}."
+        )
+
+        x_trainval, x_test, y_trainval, y_test = train_valid_split(
+            image_list, label_list_adj, valid_split=self.test_split
+        )
+        x_train, x_valid, y_train, y_valid = train_valid_split(
+            x_trainval, y_trainval, valid_split=self.valid_split
+        )
+        self.logger.info(
+            f"\U0001F4A6 images split: {len(x_train)} train, {len(x_valid)} valid, {len(x_test)} test."
+        )
+
+        y_train = [y.values for y in y_train]
+        y_valid = [y.values for y in y_valid]
+        y_test = [y.values for y in y_test]
+        np.savez_compressed(
+            self.fname_out,
+            x_train=x_train,
+            y_train=y_train,
+            x_valid=x_valid,
+            y_valid=y_valid,
+            x_test=x_test,
+            y_test=y_test,
+        )
+        self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}.")
 
     @property
     def abs_labels(self):
@@ -457,43 +497,3 @@ class HandleCreate:
             df[name] = df[name].where(df[name] > 0, 0)
 
         return df
-
-    def run(self):
-        """Run dataset creation."""
-        image_list, label_list = self.image_label_lists
-        if len(image_list) != len(label_list):
-            raise ValueError(
-                f"Number of images must match labels. {len(image_list)} != {len(label_list)}."
-            )
-
-        label_list_adj = [
-            self.convert_labels(image, label)
-            for image, label in zip(image_list, label_list)
-        ]
-        self.logger.debug(
-            f"images converted: {len(label_list)} == {len(label_list_adj)}."
-        )
-
-        x_trainval, x_test, y_trainval, y_test = train_valid_split(
-            image_list, label_list_adj, valid_split=self.test_split
-        )
-        x_train, x_valid, y_train, y_valid = train_valid_split(
-            x_trainval, y_trainval, valid_split=self.valid_split
-        )
-        self.logger.info(
-            f"\U0001F4A6 images split: {len(x_train)} train, {len(x_valid)} valid, {len(x_test)} test."
-        )
-
-        y_train = [y.values for y in y_train]
-        y_valid = [y.values for y in y_valid]
-        y_test = [y.values for y in y_test]
-        np.savez_compressed(
-            self.fname_out,
-            x_train=x_train,
-            y_train=y_train,
-            x_valid=x_valid,
-            y_valid=y_valid,
-            x_test=x_test,
-            y_test=y_test,
-        )
-        self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}.")

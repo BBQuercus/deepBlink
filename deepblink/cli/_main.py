@@ -20,7 +20,7 @@ def main():
     logger = _configure_logger(args.verbose, args.debug)
 
     if args.command == "check":
-        handler = HandleCheck(arg_input=args.INPUT, logger=logger)
+        handler = HandleCheck(arg_input=args.input, logger=logger)
 
     if args.command == "config":
         handler = HandleConfig(arg_output=args.output, logger=logger)
@@ -35,8 +35,8 @@ def main():
 
     if args.command == "predict":
         handler = HandlePredict(
-            arg_model=args.MODEL.name,
-            arg_input=args.INPUT,
+            arg_model=args.model.name,
+            arg_input=args.input,
             arg_output=args.output,
             arg_radius=args.radius,
             arg_type=args.type,
@@ -47,4 +47,4 @@ def main():
     if args.command == "train":
         handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
 
-    handler.run()
+    handler()
