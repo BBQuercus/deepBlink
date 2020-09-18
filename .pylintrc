@@ -6,9 +6,10 @@
 # W0212 - access to protected member that is inevitable when breaking up argparse subparsers.
 # W0235 - useless super delegation in method '__init__'.
 # W0511 - TODO comments.
+# W1203 - use lazy % formatting in logging functions
 # bad-continuation: disagrees with black formatter
 # missing-function-dosctring: docstyle handles
-disable = E0401, E1136, W0201, W0212, W0235, W0511, bad-continuation
+disable = E0401, E1136, W0201, W0212, W0235, W0511, W1203, bad-continuation
 
 [MASTER]
 
