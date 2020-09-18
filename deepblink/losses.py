@@ -117,7 +117,9 @@ def rmse(y_true, y_pred):
     n_true_spots = tf.math.count_nonzero(sum_rc_coords, dtype=tf.float32)
 
     squared_displacement_xy_summed = K.sum(K.square(y_true_new - y_pred_new), axis=-1)
-    rmse_value = K.sqrt(K.sum(squared_displacement_xy_summed) / (n_true_spots + K.epsilon()))
+    rmse_value = K.sqrt(
+        K.sum(squared_displacement_xy_summed) / (n_true_spots + K.epsilon())
+    )
 
     return rmse_value
 
