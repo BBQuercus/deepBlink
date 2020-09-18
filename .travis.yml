@@ -1,43 +1,99 @@
-language: python
-dist: xenial
-cache: false
-env:
-  global:
-    - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-    - SEGFAULT_SIGNALS=all
-    - LANG=en_US.UTF-8
+# Storage of pip dependencies across builds
+cache: pip
+
+# Matrix for all supportd python versions on linux, windows, osx
 matrix:
   include:
-    - python: '3.6'
-      env:
-        - TOXENV=check
-    - python: '3.6'
-      env:
-        - TOXENV=docs
-    - env:
-        - TOXENV=py36
-      python: '3.6'
-    - env:
-        - TOXENV=py37
-      python: '3.7'
-    - env:
-        - TOXENV=py38
-      python: '3.8'
-before_install:
-  - python --version
-  - uname -a
-  - lsb_release -a || true
+    - name: Python 3.8.1 on Ubuntu 16.04 (Xenial Xerus)
+      env: TOXENV=py38
+      language: python
+      os: linux
+      dist: xenial
+      python: 3.8.1
+
+    - name: Python 3.7.6 on Ubuntu 16.04 (Xenial Xerus)
+      env: TOXENV=py37
+      language: python
+      os: linux
+      dist: xenial
+      python: 3.7.6
+
+    - name: Python 3.6.8 on Ubuntu 16.04 (Xenial Xerus)
+      env: TOXENV=py36
+      language: python
+      os: linux
+      dist: xenial
+      python: 3.6.8
+
+    - name: Python 3.8.1 on Windows 10 (64-bit)
+      env: TOXENV=py38
+      language: shell
+      os: windows
+      before_install:
+        - export PATH=/c/Python38:/c/Python38/Scripts:$PATH
+        - choco install python --version 3.8.1
+
+    - name: Python 3.7.6 on Windows 10 (64-bit)
+      env: TOXENV=py37
+      language: shell
+      os: windows
+      before_install:
+        - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
+        - choco install python --version 3.7.6
+
+    - name: Python 3.6.8 on Windows 10 (64-bit)
+      env: TOXENV=py36
+      language: shell
+      os: windows
+      before_install:
+        - export PATH=/c/Python36:/c/Python36/Scripts:$PATH
+        - choco install python --version 3.6.8
+
+    - name: Python 3.8.1 on macOS 10.14 (Mojave)
+      env: TOXENV=py38
+      language: shell
+      os: osx
+      osx_image: xcode10.2
+      before_install:
+        - export PATH=/Users/travis/.pyenv/shims:$PATH PYENV_VERSION=3.8.1
+        - travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+
+    - name: Python 3.7.6 on macOS 10.14 (Mojave)
+      env: TOXENV=py37
+      language: shell
+      os: osx
+      osx_image: xcode10.2
+      before_install:
+        - export PATH=/Users/travis/.pyenv/shims:$PATH PYENV_VERSION=3.7.6
+        - travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+
+    - name: Python 3.6.8 on macOS 10.14 (Mojave)
+      env: TOXENV=py36
+      language: shell
+      os: osx
+      osx_image: xcode10.2
+      before_install:
+        - export PATH=/Users/travis/.pyenv/shims:$PATH PYENV_VERSION=3.6.8
+        - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install $PYENV_VERSION
+  
+# Install the latest requirements
 install:
-  - python -mpip install --progress-bar=off tox -rci/requirements.txt
-  - virtualenv --version
-  - easy_install --version
-  - pip --version
-  - tox --version
+  - python -m pip install --upgrade tox virtualenv pip setuptools six codecov
+
+# Run tox
 script:
   - tox -v
+
+# Upload test coverages to codecov
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+# Expand tox information on failure
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
+
+# Email settings
 notifications:
   email:
     on_success: never
