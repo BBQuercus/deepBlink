@@ -80,48 +80,6 @@ def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
     return f1_value
 
 
-# TODO remove test on depreciation
-def error_on_coordinates(
-    pred: np.ndarray, true: np.ndarray, cell_size: int
-) -> Optional[float]:
-    """The mean error on spot coordinates.
-
-    F1 score will be measured within cell of size "cell_size".
-    If cell_size = 1, F1 score will be measured at resolution of pixel.
-
-    Args:
-        pred: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
-        true: np.ndarray of shape (n, n, 3): p, r, c format for each cell.
-        cell_size: Size of cell used to calculate F1 score, precision and recall.
-
-    Returns:
-        If no spots are found None, else the error on coordinate.
-    """
-    warnings.warn(
-        "deepblink.metrics.error_on_coordinates will be depreciated in the next release.",
-        DeprecationWarning,
-    )
-
-    spot = (true[..., 0] == 1) & (pred[..., 0] == 1)
-    d = 0.0
-    counter = 0
-    assert pred.shape == true.shape
-
-    row, col = np.asarray(spot).nonzero()
-    for i, j in zip(row, col):
-        x1 = true[i, j, 1] * cell_size
-        x2 = pred[i, j, 1] * cell_size
-        y1 = true[i, j, 2] * cell_size
-        y2 = pred[i, j, 2] * cell_size
-        d += euclidean_dist(x1=x1, y1=y1, x2=x2, y2=y2)
-        counter += 1
-
-    if counter:
-        return d / counter
-
-    return None
-
-
 def linear_sum_assignment(
     matrix: np.ndarray, cutoff: float = None
 ) -> Tuple[list, list]:
