@@ -198,6 +198,7 @@ def _parse_args_eval(
 
 def _parse_args():
     """Argument parser."""
+    parser = argparse.ArgumentParser()
     parent_parser = argparse.ArgumentParser(
         prog="deepblink",
         description="deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
@@ -214,7 +215,7 @@ def _parse_args():
         help="set program output to verbose [default: quiet]",
     )
 
-    subparsers = parent_parser.add_subparsers(dest="command", title="submodules")
+    subparsers = parser.add_subparsers(dest="command")
     # _parse_args_eval(subparsers, parent_parser)
     _parse_args_check(subparsers, parent_parser)
     _parse_args_config(subparsers, parent_parser)
@@ -222,5 +223,5 @@ def _parse_args():
     _parse_args_predict(subparsers, parent_parser)
     _parse_args_train(subparsers, parent_parser)
 
-    args = parent_parser.parse_args()
+    args = parser.parse_args()
     return args

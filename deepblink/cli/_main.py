@@ -47,4 +47,7 @@ def main():
     if args.command == "train":
         handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
 
-    handler()
+    try:
+        handler()
+    except UnboundLocalError:
+        logger.error(f"args.command defined as {args.command}. no handler defined.")
