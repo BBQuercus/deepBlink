@@ -9,39 +9,36 @@ from ._type import FolderType
 from ._type import ShapeType
 
 
-def _add_verbose(parser: argparse.ArgumentParser):
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="set program output to verbose [default: quiet]",
-    )
-
-
 def _parse_args_config(
-    subparsers: argparse._SubParsersAction,
-) -> argparse._SubParsersAction:
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
+):
     """Subparser for configuration."""
     parser = subparsers.add_parser(
-        "config", help="\U00002699 create a configuration file for training",
+        "config",
+        parents=[parent_parser],
+        add_help=False,
+        description="\U00002699 Configuration submodule",
+        help="\U00002699 create a configuration file for training",
     )
     parser.add_argument(
-        "-o",
-        "--output",
+        "-n",
+        "--name",
         type=str,
-        default="config.yaml",
-        help="custom name of configuration file [default: config.yaml]",
+        default="config",
+        help="custom name of configuration file. file extension will be added automatically [default: config]",
     )
-    _add_verbose(parser)
-    return subparsers
 
 
 def _parse_args_train(
-    subparsers: argparse._SubParsersAction,
-) -> argparse._SubParsersAction:
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+):
     """Subparser for training."""
     parser = subparsers.add_parser(
-        "train", help="\U0001F686 train a freshly baked model on a dataset",
+        "train",
+        parents=[parent_parser],
+        add_help=False,
+        description="\U0001F686 Training submodule",
+        help="\U0001F686 train a freshly baked model on a dataset",
     )
     parser.add_argument(
         "-c",
@@ -57,16 +54,18 @@ def _parse_args_train(
         default=None,
         help="index of GPU to be used [default: None]",
     )
-    _add_verbose(parser)
-    return subparsers
 
 
 def _parse_args_check(
-    subparsers: argparse._SubParsersAction,
-) -> argparse._SubParsersAction:
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+):
     """Subparser for checking."""
     parser = subparsers.add_parser(
-        "check", help="\U0001F537 determine your input images' shape"
+        "check",
+        parents=[parent_parser],
+        add_help=False,
+        description="\U0001F537 Checking submodule",
+        help="\U0001F537 determine your input images' shape",
     )
     parser.add_argument(
         "-i",
@@ -75,16 +74,17 @@ def _parse_args_check(
         type=str,
         help=f"input image location [filetypes: {EXTENSIONS}]",
     )
-    _add_verbose(parser)
-    return subparsers
 
 
 def _parse_args_predict(
-    subparsers: argparse._SubParsersAction,
-) -> argparse._SubParsersAction:
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+):
     """Subparser for prediction."""
     parser = subparsers.add_parser(
         "predict",
+        parents=[parent_parser],
+        add_help=False,
+        description="\U0001F914 Prediction submodule",
         help="\U0001F914 inference / prediction of data with a pre-trained model",
     )
     parser.add_argument(
@@ -137,16 +137,18 @@ def _parse_args_predict(
         characters."""
         ),
     )
-    _add_verbose(parser)
-    return subparsers
 
 
 def _parse_args_create(
-    subparsers: argparse._SubParsersAction,
-) -> argparse._SubParsersAction:
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+):
     """Subparser for creation."""
     parser = subparsers.add_parser(
-        "create", help="\U0001F5BC create a new dataset from raw files"
+        "create",
+        parents=[parent_parser],
+        add_help=False,
+        description="\U0001F5BC Creation submodule",
+        help="\U0001F5BC create a new dataset from raw files",
     )
     parser.add_argument(
         "-i",
@@ -172,16 +174,18 @@ def _parse_args_create(
             "will be saved into the input path [default: 'dataset']"
         ),
     )
-    _add_verbose(parser)
-    return subparsers
 
 
 def _parse_args_eval(
-    subparsers: argparse._SubParsersAction,
-) -> argparse._SubParsersAction:
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+):
     """Subparser for evaluation."""
     parser = subparsers.add_parser(
-        "eval", help="\U0001F3AD measure a models performance on a dataset"
+        "eval",
+        parents=[parent_parser],
+        add_help=False,
+        description="\U0001F3AD Evaluation submodule",
+        help="\U0001F3AD measure a models performance on a dataset",
     )
     parser.add_argument(
         "-i",
@@ -190,29 +194,33 @@ def _parse_args_eval(
         type=FileFolderType(),
         help=f"input file/folder location [filetypes: {EXTENSIONS}]",
     )
-    _add_verbose(parser)
-    return subparsers
 
 
 def _parse_args():
     """Argument parser."""
-    parser = argparse.ArgumentParser(
+    parent_parser = argparse.ArgumentParser(
         prog="deepblink",
-        description=textwrap.dedent(
-            """deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation"""
-        ),
+        description="deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
         epilog="We hope you enjoy using deepBlink \U0001F603",
     )
-    parser.add_argument("-V", "--version", action="version", version="%(prog)s 0.0.6")
-    parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
+    parent_parser.add_argument(
+        "-V", "--version", action="version", version="%(prog)s 0.0.6"
+    )
+    parent_parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
+    parent_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
 
-    subparsers = parser.add_subparsers(dest="command")
-    subparsers = _parse_args_check(subparsers)
-    subparsers = _parse_args_config(subparsers)
-    subparsers = _parse_args_create(subparsers)
-    subparsers = _parse_args_predict(subparsers)
-    subparsers = _parse_args_train(subparsers)
-    # subparsers = _parse_args_eval(subparsers)
+    subparsers = parent_parser.add_subparsers(dest="command", title="submodules")
+    # _parse_args_eval(subparsers, parent_parser)
+    _parse_args_check(subparsers, parent_parser)
+    _parse_args_config(subparsers, parent_parser)
+    _parse_args_create(subparsers, parent_parser)
+    _parse_args_predict(subparsers, parent_parser)
+    _parse_args_train(subparsers, parent_parser)
 
-    args = parser.parse_args()
+    args = parent_parser.parse_args()
     return args
