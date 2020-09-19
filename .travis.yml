@@ -69,7 +69,6 @@ after_success:
 
 # Expand tox information on failure
 after_failure:
-  - more .tox/log/* | cat
   - more .tox/*/log/* | cat
 
 # Email settings
