@@ -44,4 +44,3 @@ jobs:
       run: tox -e safety
     - name: run tox style
       run: tox -e style
-      
