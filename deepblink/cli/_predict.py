@@ -133,13 +133,13 @@ class HandlePredict:
 
     def __call__(self):
         """Run prediction for all given images."""
-        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found.")
-        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}.")
+        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found")
+        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}")
 
         for fname_in, image in zip(self.file_list, self.image_list):
             self.predict_adaptive(fname_in, image)
 
-        self.logger.info("\U0001F3C1 all predictions are complete.")
+        self.logger.info("\U0001F3C1 all predictions are complete")
 
     @property
     def path_input(self) -> str:
@@ -170,7 +170,7 @@ class HandlePredict:
             is_rgb = "3" in self.raw_shape
         except TypeError:
             is_rgb = False
-        self.logger.debug(f"loading image as RGB {is_rgb}.")
+        self.logger.debug(f"loading image as RGB {is_rgb}")
         return [load_image(fname, is_rgb=is_rgb) for fname in self.file_list]
 
     @property
@@ -192,15 +192,15 @@ class HandlePredict:
             raise ValueError("Images must all have the same number of dimensions.")
         if not all([i.shape == first_image.shape for i in self.image_list]):
             self.logger.warning(
-                "\U000026A0 images do not have equal shapes (dimensions match)."
+                "\U000026A0 images do not have equal shapes (dimensions match)"
             )
 
         if self.raw_shape is None:
             shape = predict_shape(self.image_list[0].shape)
-            self.logger.info(f"\U0001F535 using predicted shape of {shape}.")
+            self.logger.info(f"\U0001F535 using predicted shape of {shape}")
         else:
             shape = self.raw_shape
-            self.logger.info(f"\U0001F535 using provided input shape of {shape}.")
+            self.logger.info(f"\U0001F535 using provided input shape of {shape}")
         for c in ["(", ")", " "]:
             shape = shape.replace(c, "")
         shape = shape.split(",")
@@ -210,7 +210,7 @@ class HandlePredict:
         """Save coordinate list to file with appropriate header."""
         fname_out = os.path.join(self.path_output, f"{basename(fname_in)}.{self.type}")
         df = delete_non_unique_columns(df)
-        self.logger.debug(f"non-unique columns to be saved are {df.columns}.")
+        self.logger.debug(f"non-unique columns to be saved are {df.columns}")
 
         if self.type == "txt":
             header = " ".join(df.columns.to_list())
@@ -225,7 +225,7 @@ class HandlePredict:
         if self.type == "csv":
             df.to_csv(fname_out, index=False)
         self.logger.info(
-            f"\U0001F3C3 prediction of file {fname_in} saved as {fname_out}."
+            f"\U0001F3C3 prediction of file {fname_in} saved as {fname_out}"
         )
 
     def predict_single(
@@ -258,7 +258,7 @@ class HandlePredict:
             image = np.moveaxis(image, source, destination)
             shape.insert(destination, shape.pop(source))
         if not order == shape:
-            self.logger.debug("axes rearangement did not work properly.")
+            self.logger.debug("axes rearangement did not work properly")
 
         # Iterate through c, t, and z
         df = pd.DataFrame()
@@ -268,5 +268,5 @@ class HandlePredict:
                     curr_df = self.predict_single(single_image, c_idx, t_idx, z_idx)
                     df = df.append(curr_df)
 
-        self.logger.debug(f"completed prediction loop with\n{df.head()}.")
+        self.logger.debug(f"completed prediction loop with\n{df.head()}")
         self.save_output(fname_in, df)

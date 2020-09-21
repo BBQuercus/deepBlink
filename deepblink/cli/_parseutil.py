@@ -78,6 +78,7 @@ class CustomFormatter(argparse.HelpFormatter):
     """Custom changes to argparse's default help text formatter."""
 
     def add_usage(self, usage, actions, groups, prefix=None):
+        """Helpformatter internal usage description function overwrite."""
         if prefix is None:
             prefix = "Usage: "
         return super(CustomFormatter, self).add_usage(usage, actions, groups, prefix)

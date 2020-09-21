@@ -97,7 +97,7 @@ class HandleCreate:
             for image, label in zip(image_list, label_list)
         ]
         self.logger.debug(
-            f"images converted: {len(label_list)} == {len(label_list_adj)}."
+            f"images converted: {len(label_list)} == {len(label_list_adj)}"
         )
 
         x_trainval, x_test, y_trainval, y_test = train_valid_split(
@@ -107,7 +107,7 @@ class HandleCreate:
             x_trainval, y_trainval, valid_split=self.valid_split
         )
         self.logger.info(
-            f"\U0001F4A6 images split: {len(x_train)} train, {len(x_valid)} valid, {len(x_test)} test."
+            f"\U0001F4A6 images split: {len(x_train)} train, {len(x_valid)} valid, {len(x_test)} test"
         )
 
         y_train = [y.values for y in y_train]
@@ -122,20 +122,20 @@ class HandleCreate:
             x_test=x_test,
             y_test=y_test,
         )
-        self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}.")
+        self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}")
 
     @property
     def abs_labels(self):
         """Return absolute path to directory with labels."""
         if self.raw_labels is not None:
             path = os.path.abspath(self.raw_labels)
-            self.logger.debug(f"using provided label path at {path}.")
+            self.logger.debug(f"using provided label path at {path}")
         elif os.path.isdir(os.path.join(self.abs_input, "labels")):
             path = os.path.join(self.abs_input, "labels")
-            self.logger.debug(f"using default label path at {path}.")
+            self.logger.debug(f"using default label path at {path}")
         else:
             self.logger.debug(
-                f"no labels found in default {self.abs_input} or input {self.raw_labels}."
+                f"no labels found in default {self.abs_input} or input {self.raw_labels}"
             )
             raise ValueError(
                 (
@@ -153,20 +153,20 @@ class HandleCreate:
             if os.path.isfile(raw_name):
                 path = raw_name
                 self.logger.warning(
-                    f"\U000026A0 input name {raw_name} is already a file."
+                    f"\U000026A0 input name {raw_name} is already a file"
                 )
             elif os.path.isdir(raw_name):
                 path = os.path.join(raw_name, "dataset.npz")
                 self.logger.warning(
-                    f"\U000026A0 input name {raw_name} is already a file."
+                    f"\U000026A0 input name {raw_name} is already a file"
                 )
             else:
                 fname = raw_name[:-4] if raw_name.endswith(".npz") else raw_name
                 path = os.path.join(self.abs_input, f"{fname}.npz")
-                self.logger.debug(f"using given name {raw_name} only.")
+                self.logger.debug(f"using given name {raw_name} only")
         else:
             path = os.path.join(self.raw_name, "dataset.npz")
-            self.logger.debug(f"using default output at {path}.")
+            self.logger.debug(f"using default output at {path}")
         return path
 
     @property
@@ -175,26 +175,26 @@ class HandleCreate:
         fname_images = grab_files(self.abs_input, self.extensions)
         fname_labels = grab_files(self.abs_labels, extensions=("csv",))
 
-        self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}.")
-        self.logger.debug(f"labels - found {len(fname_labels)} files: {fname_labels}.")
+        self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}")
+        self.logger.debug(f"labels - found {len(fname_labels)} files: {fname_labels}")
 
         images = []
         labels = []
         for image, label in zip(fname_images, fname_labels):
             if basename(image) != basename(label):
                 self.logger.warning(
-                    f"\U0000274C file basenames do not match! {image} != {label}."
+                    f"\U0000274C file basenames do not match! {image} != {label}"
                 )
             df = pd.read_csv(label, index_col=0)
             if len(df) <= 1:
                 self.logger.warning(
-                    f"\U000026A0 labels for {label} empty. will not be used."
+                    f"\U000026A0 labels for {label} empty. will not be used"
                 )
                 continue
             images.append(load_image(image, is_rgb=False))
             labels.append(df)
 
-        self.logger.debug(f"using {len(images)} non-empty files.")
+        self.logger.debug(f"using {len(images)} non-empty files")
         return images, labels
 
     @staticmethod

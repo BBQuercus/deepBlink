@@ -50,7 +50,7 @@ class HandleConfig:
     def __call__(self):
         """Save configuration as yaml file."""
         self.save_yaml()
-        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}.")
+        self.logger.info(f"\U0001F3C1 saved config file to {self.abs_output}")
 
     @property
     def config(self):

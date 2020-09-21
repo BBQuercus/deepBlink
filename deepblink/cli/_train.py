@@ -59,7 +59,7 @@ class HandleTrain:
     def __call__(self):
         """Set configuration and start training loop."""
         self.set_gpu()
-        self.logger.info("\U0001F3C3 Beginning with training")
+        self.logger.info("\U0001F3C3 beginning with training")
         run_experiment(self.config)
         self.logger.info("\U0001F3C1 training complete")
 
@@ -76,7 +76,7 @@ class HandleTrain:
             )
         with open(self.raw_config, "r") as config_file:
             config = yaml.safe_load(config_file)
-        self.logger.info(f"\U0001F4C2 Loaded config file: {config}")
+        self.logger.info(f"\U0001F4C2 loaded config file: {config}")
         return config
 
     def set_gpu(self):
