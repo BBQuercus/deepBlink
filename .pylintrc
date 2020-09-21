@@ -50,6 +50,9 @@ max-line-length = 120
 # Allow f-strings in logging messages.
 logging-format-style = new
 
+# Change minimum number of identical files for R0801 to trigger.
+min-similarity-lines=10
+
 [DESIGN]
 # Minimum number of public methods for a class (see R0903).
 min-public-methods = 0
