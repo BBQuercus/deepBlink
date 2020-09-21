@@ -9,7 +9,6 @@ import pytest
 import scipy.spatial
 
 from deepblink.metrics import _f1_at_cutoff
-from deepblink.metrics import error_on_coordinates
 from deepblink.metrics import euclidean_dist
 from deepblink.metrics import f1_integral
 from deepblink.metrics import f1_score
@@ -68,20 +67,6 @@ def test_f1_score(nfalsenegative, expected_recall):
     output = f1_score(pred, true)
     expected = (2 * expected_recall * 1) / (expected_recall + 1)
     assert output == pytest.approx(expected)
-
-
-@pytest.mark.parametrize("ndifferent, expected_error", [(2, 0.016), (5, 0.04), (0, 0)])
-def test_error_on_coordinates(ndifferent, expected_error):
-    true = np.ones((10, 10, 3))
-    true[..., 1] = 0.5
-    pred = np.ones((10, 10, 3))
-    pred[..., 1] = 0.5
-
-    index1 = np.random.choice(true.shape[0], ndifferent, replace=False)
-    index2 = np.random.choice(true.shape[0], ndifferent, replace=False)
-    pred[index1, index2, 1] = 0.3
-
-    assert error_on_coordinates(pred, true, 4) == expected_error
 
 
 @given(n=st.integers(min_value=0, max_value=20))

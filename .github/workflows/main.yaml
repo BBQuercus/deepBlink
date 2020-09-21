@@ -1,0 +1,46 @@
+name: main
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  # Unittests on windows/ubuntu across python versions
+  unittest:
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8"]
+        os: [windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: install tox
+      run: python -m pip install --upgrade tox virtualenv setuptools pip codecov
+    - name: run tox
+      run: tox -e py
+    - name: upload coverage reports to Codecov
+      run: codecov
+      env:
+        super_secret: ${{ secrets.CODECOV_TOKEN }}
+
+  # Important checks but not reliant on different versions
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    - name: install tox
+      run: python -m pip install --upgrade tox virtualenv setuptools pip
+    - name: run tox deploy
+      run: tox -e deploy
+    - name: run tox safety
+      run: tox -e safety
+    - name: run tox style
+      run: tox -e style
