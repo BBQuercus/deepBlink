@@ -72,3 +72,39 @@ class ShapeType:
                 f"Input must contain {self.required_characters}. '{raw_value}' does not."
             )
         return raw_value
+
+
+class CustomFormatter(argparse.HelpFormatter):
+    """Custom changes to argparse's default help text formatter."""
+
+    def add_usage(self, usage, actions, groups, prefix=None):
+        if prefix is None:
+            prefix = "Usage: "
+        return super(CustomFormatter, self).add_usage(usage, actions, groups, prefix)
+
+
+# TODO find a simpler and safer solution
+def _add_utils(parser: argparse.ArgumentParser):
+    """A very hacky way of trying to move this group to the bottom of help text."""
+    group = parser.add_argument_group("General utilities")
+    group.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help="show this help message and exit",
+    )
+    group.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version="%(prog)s 0.0.6",
+        help="show %(prog)s's version number and exit",
+    )
+    group.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="set program output to verbose [default: quiet]",
+    )
+    group.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
