@@ -1,17 +1,47 @@
 """Main / entrypoint function for deepblinks CLI."""
 
+import argparse
 import os
 
-from ._handler import HandleCheck
-from ._handler import HandleConfig
-from ._handler import HandleCreate
-from ._handler import HandlePredict
-from ._handler import HandleTrain
+from ._check import HandleCheck
+from ._check import _parse_args_check
+from ._config import HandleConfig
+from ._config import _parse_args_config
+from ._create import HandleCreate
+from ._create import _parse_args_create
 from ._logger import _configure_logger
-from ._parser import _parse_args
+from ._parseutil import CustomFormatter
+from ._parseutil import _add_utils
+from ._predict import HandlePredict
+from ._predict import _parse_args_predict
+from ._train import HandleTrain
+from ._train import _parse_args_train
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+
+def _parse_args():
+    """Argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="deepblink",
+        description="deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
+        epilog="We hope you enjoy using deepBlink \U0001F603",
+        formatter_class=CustomFormatter,
+        add_help=False,
+    )
+
+    subparsers = parser.add_subparsers(title="Commands", dest="command")
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    _parse_args_check(subparsers, parent_parser)
+    _parse_args_config(subparsers, parent_parser)
+    _parse_args_create(subparsers, parent_parser)
+    _parse_args_predict(subparsers, parent_parser)
+    _parse_args_train(subparsers, parent_parser)
+    _add_utils(parser)
+
+    args = parser.parse_args()
+    return args
 
 
 def main():
@@ -50,4 +80,4 @@ def main():
     try:
         handler()
     except UnboundLocalError:
-        logger.error(f"args.command defined as {args.command}. no handler defined.")
+        logger.error(f"args.command defined as {args.command}. no handler defined")
