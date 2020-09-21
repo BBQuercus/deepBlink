@@ -1,4 +1,8 @@
-"""Custom argparse types / classes."""
+"""Utility file with custom argparse types / classes.
+
+This utility file is used separate to avoid circular dependencies between
+_parser.py and the individual _commands.py.
+"""
 
 import argparse
 import os
