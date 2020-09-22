@@ -19,14 +19,6 @@ from .losses import rmse
 EXTENSIONS = ("tif", "jpeg", "jpg", "png")
 
 
-def extract_basename(path: str) -> str:
-    """Depreciated name: Returns the basename removing path and extension."""
-    warnings.warn(
-        'Will be renamed to "basename" in the next release.', DeprecationWarning
-    )
-    return basename(path)
-
-
 def basename(path: str) -> str:
     """Returns the basename removing path and extension."""
     return os.path.splitext(os.path.basename(path))[0]
