@@ -1,11 +1,13 @@
 """CLI submodule for creating a new dataset."""
 
+from typing import List, Tuple
 import argparse
 import logging
 import os
 
 import numpy as np
 import pandas as pd
+import skimage.util
 
 from ..io import EXTENSIONS
 from ..io import basename
@@ -55,6 +57,30 @@ def _parse_args_create(
             "will be saved into the input path [default: 'dataset']"
         ),
     )
+    group2.add_argument(
+        "-s",
+        "--size",
+        default=None,
+        type=int,
+        help=(
+            "if given, crops images to specified size.\t"
+            "deepBlink requires powers of 2, such as 256, 512... [default: None]"
+        ),
+    )
+    group2.add_argument(
+        "-vs",
+        "--validsplit",
+        default=0.2,
+        type=int,
+        help="validation vs. train split percentage (0 - 1) [default: 0.2]",
+    )
+    group2.add_argument(
+        "-ts",
+        "--testsplit",
+        default=0.2,
+        type=int,
+        help="test vs. trainval split percentage (0 - 1) [default: 0.2]",
+    )
     _add_utils(parser)
 
 
@@ -65,43 +91,47 @@ class HandleCreate:
         arg_input: Path to folder with images.
         arg_labels: Path to folder with labels.
         arg_name: Name of dataset file to be saved.
+        arg_size: Size of image to be cropped.
+        arg_testsplit: Test vs. Trainval split percentage.
+        arg_testsplit: Valid vs. Train split percentage.
         logger: Logger to log verbose output.
     """
 
     def __init__(
-        self, arg_input: str, arg_labels: str, arg_name: str, logger: logging.Logger
+        self,
+        arg_input: str,
+        arg_labels: str,
+        arg_name: str,
+        arg_size: int,
+        arg_testsplit: int,
+        arg_validsplit: int,
+        logger: logging.Logger,
     ):
         self.raw_input = arg_input
         self.raw_labels = arg_labels
         self.raw_name = arg_name
+        self.img_size = arg_size
+        self.test_split = arg_testsplit
+        self.valid_split = arg_validsplit
         self.logger = logger
         self.logger.info("\U0001F5BC starting creation submodule")
-
-        # TODO use inputs?
-        self.test_split = 0.2
-        self.valid_split = 0.2
 
         self.abs_input = os.path.abspath(self.raw_input)
         self.extensions = EXTENSIONS
 
     def __call__(self):
         """Run dataset creation."""
-        image_list, label_list = self.image_label_lists
-        if len(image_list) != len(label_list):
-            raise ValueError(
-                f"Number of images must match labels. {len(image_list)} != {len(label_list)}."
-            )
-
-        label_list_adj = [
-            self.convert_labels(image, label)
-            for image, label in zip(image_list, label_list)
-        ]
-        self.logger.debug(
-            f"images converted: {len(label_list)} == {len(label_list_adj)}"
-        )
+        image_list = []
+        label_list = []
+        for image, label in zip(*self.image_label_lists):
+            label_norm = self.convert_labels(image=image, df=label)
+            image_crops, label_crops = self.crop_images(image=image, df=label_norm)
+            image_list.extend(image_crops)
+            label_list.extend(label_crops)
+        self.logger.debug(f"images converted: {len(image_list)} == {len(label_list)}")
 
         x_trainval, x_test, y_trainval, y_test = train_valid_split(
-            image_list, label_list_adj, valid_split=self.test_split
+            image_list, label_list, valid_split=self.test_split
         )
         x_train, x_valid, y_train, y_valid = train_valid_split(
             x_trainval, y_trainval, valid_split=self.valid_split
@@ -163,7 +193,7 @@ class HandleCreate:
             else:
                 fname = raw_name[:-4] if raw_name.endswith(".npz") else raw_name
                 path = os.path.join(self.abs_input, f"{fname}.npz")
-                self.logger.debug(f"using given name {raw_name} only")
+                self.logger.debug(f"using given name {raw_name}")
         else:
             path = os.path.join(self.raw_name, "dataset.npz")
             self.logger.debug(f"using default output at {path}")
@@ -194,7 +224,12 @@ class HandleCreate:
             images.append(load_image(image, is_rgb=False))
             labels.append(df)
 
+        if len(images) != len(labels):
+            raise ValueError(
+                f"Number of images and labels must match. {len(images)} != {len(labels)}."
+            )
         self.logger.debug(f"using {len(images)} non-empty files")
+
         return images, labels
 
     @staticmethod
@@ -211,3 +246,42 @@ class HandleCreate:
             df[name] = df[name].where(df[name] > 0, 0)
 
         return df
+
+    def crop_images(
+        self, image: np.ndarray, df: pd.DataFrame
+    ) -> Tuple[List[np.ndarray], List[pd.DataFrame]]:
+        """Crop images to a uniform size and scale labels accordingly."""
+        size = self.img_size
+        if size is None:
+            self.logger.debug(f"using unchanged size in {image.shape}")
+            return [image], [df]
+
+        windows = skimage.util.view_as_windows(
+            image, window_shape=(size, size), step=size
+        )
+
+        img_list = []
+        df_list = []
+        for r, cimages in enumerate(windows):
+            for c, img in enumerate(cimages):
+                img_list.append(img)
+
+                r_min = r * size
+                c_min = c * size
+                df_slice = df.loc[
+                    (
+                        (df["r"] >= r_min)
+                        & (df["r"] <= r_min + size)
+                        & (df["c"] >= c_min)
+                        & (df["c"] <= c_min + size)
+                    )
+                ]
+                df_norm = df_slice.copy()
+                df_norm.loc[:, "r"] = df_slice["r"] - r_min
+                df_norm.loc[:, "c"] = df_slice["c"] - c_min
+                df_list.append(df_norm)
+
+        self.logger.debug(
+            f"converted original size of {image.shape} into {len(df_list)} crops"
+        )
+        return img_list, df_list
