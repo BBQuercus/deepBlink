@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import textwrap
 
 from ._check import HandleCheck
 from ._check import _parse_args_check
@@ -11,6 +12,7 @@ from ._create import HandleCreate
 from ._create import _parse_args_create
 from ._logger import _configure_logger
 from ._parseutil import CustomFormatter
+from ._parseutil import FMT
 from ._parseutil import _add_utils
 from ._predict import HandlePredict
 from ._predict import _parse_args_predict
@@ -25,13 +27,19 @@ def _parse_args():
     """Argument parser."""
     parser = argparse.ArgumentParser(
         prog="deepblink",
-        description="deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
-        epilog="We hope you enjoy using deepBlink \U0001F603",
+        description=f"{FMT.dc}deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for all of your blobbing needs.{FMT.e}",
+        epilog=(
+            f"See {FMT.b}deepblink <command> --help{FMT.e} to read about the specific subcommand.\n"
+            f"See the online wiki at {FMT.u}https://github.com/BBQuercus/deepBlink/wiki{FMT.e} for an overview.\n"
+            "We hope you enjoy using deepBlink \U0001F603"
+        ),
         formatter_class=CustomFormatter,
         add_help=False,
     )
 
-    subparsers = parser.add_subparsers(title="Commands", dest="command")
+    subparsers = parser.add_subparsers(
+        title=f"{FMT.r}Commands for various situations{FMT.e}", dest="command",
+    )
     parent_parser = argparse.ArgumentParser(add_help=False)
     _parse_args_check(subparsers, parent_parser)
     _parse_args_config(subparsers, parent_parser)
@@ -72,7 +80,6 @@ def main():
             arg_input=args.input,
             arg_output=args.output,
             arg_radius=args.radius,
-            arg_type=args.type,
             arg_shape=args.shape,
             logger=logger,
         )

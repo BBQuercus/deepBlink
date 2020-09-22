@@ -7,6 +7,7 @@ import yaml
 
 from ..training import run_experiment
 from ._parseutil import CustomFormatter
+from ._parseutil import FMT
 from ._parseutil import FileType
 from ._parseutil import _add_utils
 
@@ -20,24 +21,38 @@ def _parse_args_train(
         parents=[parent_parser],
         formatter_class=CustomFormatter,
         add_help=False,
-        description="\U0001F686 Training submodule",
-        help="\U0001F686 train a freshly baked model on a dataset",
+        description=(
+            f"\U0001F686 {FMT.dc}Training submodule{FMT.e} \U0001F686\n\n"
+            f"Train a custom model using a custom dataset created in {FMT.b}deepblink create{FMT.e} "
+            "or using a published dataset."
+        ),
+        help="\U0001F686 Train a freshly baked model on a dataset.",
     )
-    group1 = parser.add_argument_group("Required")
+    group1 = parser.add_argument_group(f"{FMT.r}Required{FMT.e}")
     group1.add_argument(
         "-c",
         "--config",
         type=FileType("yaml"),
         required=True,
-        help="path to the experimental config.yaml file. Check the GitHub repository for an example [required]",
+        help=(
+            "Configuration file. "
+            f"Path to the config.yaml created using {FMT.b}deepblink config{FMT.e}. "
+            f"The path be relative (e.g. {FMT.b}../dir{FMT.e}) or absolute (e.g. {FMT.b}/Users/myname/{FMT.e}. "
+            "Please see the training information on the wiki to configure the file to your requirements. "
+            "[required]"
+        ),
     )
-    group2 = parser.add_argument_group("Optional")
+    group2 = parser.add_argument_group(f"{FMT.g}Optional{FMT.e}")
     group2.add_argument(
         "-g",
         "--gpu",
         type=int,
         default=None,
-        help="index of GPU to be used [default: None]",
+        help=(
+            "GPU index. "
+            "Value passed CUDA_VISIBLE_DEVICES if a GPU is used for training. "
+            "[default: None]"
+        ),
     )
     _add_utils(parser)
 
