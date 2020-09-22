@@ -18,7 +18,7 @@ def _configure_logger(verbose: bool, debug: bool):
         if verbose:
             level = logging.INFO
         else:
-            level = logging.CRITICAL
+            level = logging.ERROR
         form = "%(asctime)s: %(message)s"
 
     logging.basicConfig(format=form, stream=sys.stdout, level=level)
