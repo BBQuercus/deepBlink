@@ -50,7 +50,7 @@ def main():
     logger = _configure_logger(args.verbose, args.debug)
 
     if args.command == "check":
-        handler = HandleCheck(arg_input=args.input, logger=logger)
+        handler = HandleCheck(arg_input=args.INPUT, logger=logger)
 
     if args.command == "config":
         handler = HandleConfig(arg_name=args.name, logger=logger)

@@ -9,6 +9,7 @@ from ..io import EXTENSIONS
 from ..io import load_image
 from ..util import predict_shape
 from ._parseutil import CustomFormatter
+from ._parseutil import FileType
 from ._parseutil import _add_utils
 
 
@@ -26,10 +27,8 @@ def _parse_args_check(
     )
     group1 = parser.add_argument_group("Required")
     group1.add_argument(
-        "-i",
-        "--input",
-        required=True,
-        type=str,
+        "INPUT",
+        type=FileType(EXTENSIONS),
         help=f"input image location [required] [filetypes: {EXTENSIONS}]",
     )
     _add_utils(parser)

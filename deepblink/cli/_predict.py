@@ -42,7 +42,7 @@ def _parse_args_predict(
         "-i",
         "--input",
         required=True,
-        type=FileFolderType(),
+        type=FileFolderType(EXTENSIONS),
         help=f"input file/folder location [required] [filetypes: {EXTENSIONS}]",
     )
     group1.add_argument(

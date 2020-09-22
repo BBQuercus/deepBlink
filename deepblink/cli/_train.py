@@ -7,6 +7,7 @@ import yaml
 
 from ..training import run_experiment
 from ._parseutil import CustomFormatter
+from ._parseutil import FileType
 from ._parseutil import _add_utils
 
 
@@ -26,7 +27,7 @@ def _parse_args_train(
     group1.add_argument(
         "-c",
         "--config",
-        type=str,
+        type=FileType("yaml"),
         required=True,
         help="path to the experimental config.yaml file. Check the GitHub repository for an example [required]",
     )
