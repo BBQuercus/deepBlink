@@ -1,9 +1,9 @@
 """Dataset preparation functions."""
 
 from typing import Any, List, Tuple
-import os
 import glob
-import warnings
+import os
+import re
 
 import numpy as np
 import skimage.color
@@ -22,6 +22,11 @@ EXTENSIONS = ("tif", "jpeg", "jpg", "png")
 def basename(path: str) -> str:
     """Returns the basename removing path and extension."""
     return os.path.splitext(os.path.basename(path))[0]
+
+
+def securename(fname: str) -> str:
+    """Turns potentially unsafe names into a single, safe, alphanumeric string."""
+    return re.sub(r"[^\w\d-]", "_", fname)
 
 
 def load_npz(fname: str, test_only: bool = False) -> List[Any]:
