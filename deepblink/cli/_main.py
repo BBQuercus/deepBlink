@@ -60,6 +60,9 @@ def main():
             arg_input=args.input,
             arg_labels=args.labels,
             arg_name=args.name,
+            arg_size=args.size,
+            arg_testsplit=args.testsplit,
+            arg_validsplit=args.validsplit,
             logger=logger,
         )
 
