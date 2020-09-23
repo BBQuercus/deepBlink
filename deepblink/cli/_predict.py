@@ -62,7 +62,7 @@ def _parse_args_predict(
         "-m",
         "--model",
         required=True,
-        type=FileType("h5"),
+        type=FileType(["h5"]),
         help=(
             "DeepBlink model. "
             'Model has to be of file type ".h5". '
@@ -206,7 +206,7 @@ class HandlePredict:
     # TODO solve double definition of replace_chars here and in ShapeType
     # TODO solve mypy return type bug
     @property
-    def shape(self):
+    def shape(self) -> List[str]:
         """Resolve input shape."""
         first_image = self.image_list[0]
         if not all([i.ndim == first_image.ndim for i in self.image_list]):
@@ -224,8 +224,8 @@ class HandlePredict:
             self.logger.info(f"\U0001F535 using provided input shape of {shape}")
         for c in ["(", ")", " "]:
             shape = shape.replace(c, "")
-        shape = shape.split(",")
-        return shape
+        shape_list = shape.split(",")
+        return shape_list
 
     def save_output(self, fname_in: str, df: pd.DataFrame) -> None:
         """Save coordinate list to file with appropriate header."""

@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import textwrap
 
 from ._check import HandleCheck
 from ._check import _parse_args_check
@@ -76,7 +75,7 @@ def main():
 
     if args.command == "predict":
         handler = HandlePredict(
-            arg_model=args.model.name,
+            arg_model=args.model,
             arg_input=args.input,
             arg_output=args.output,
             arg_radius=args.radius,

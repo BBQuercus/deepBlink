@@ -32,7 +32,7 @@ def _parse_args_train(
     group1.add_argument(
         "-c",
         "--config",
-        type=FileType("yaml"),
+        type=FileType(["yaml"]),
         required=True,
         help=(
             "Configuration file. "
