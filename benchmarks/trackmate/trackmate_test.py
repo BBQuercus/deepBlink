@@ -2,7 +2,6 @@
 import glob
 import os
 import sys
-import textwrap
 
 from dask.distributed import Client
 import dask
@@ -13,6 +12,7 @@ import pandas as pd
 sys.path.append("../")
 from util import _parse_args_fiji
 from util import compute_metrics
+from util import print_scores
 
 
 DTYPES = {
@@ -96,13 +96,7 @@ def main():
     print("Files processed.")
 
     df = pd.concat([pd.read_csv(file) for file in result])
-    print(
-        textwrap.dedent(
-            f"""Metrics on test set:
-        * F1 score: {df["f1_integral"].mean()} ± {df["f1_integral"].std()}
-        * Mean euclidean distance: {df["mean_euclidean"].mean()} ± {df["mean_euclidean"].std()}"""
-        )
-    )
+    print_scores(df)
 
     client.shutdown()
 
