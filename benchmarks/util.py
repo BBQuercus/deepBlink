@@ -1,10 +1,9 @@
 """Utility functions used by benchmarking scripts."""
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Tuple
 import argparse
 import datetime
 import os
 
-import dask
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -169,10 +168,10 @@ def plot_metrics(fname: str, df: pd.DataFrame) -> None:
     plt.close()
 
 
-def print_scores(df: Union[pd.DataFrame, dask.DataFrame]) -> None:
+def print_scores(df: pd.DataFrame) -> None:
     """Print calculated metrics."""
-    f1s_mean = df[df["cutoff" == 5]]["f1_score"].mean()
-    f1s_std = df[df["cutoff" == 5]]["f1_score"].std()
+    f1s_mean = df[df["cutoff"] == 5]["f1_score"].mean()
+    f1s_std = df[df["cutoff"] == 5]["f1_score"].std()
     f1i_mean = df["f1_integral"].mean()
     f1i_std = df["f1_integral"].std()
     rmse_mean = df["mean_euclidean"].mean()
