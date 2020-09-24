@@ -170,16 +170,14 @@ def plot_metrics(fname: str, df: pd.DataFrame) -> None:
 
 def print_scores(df: pd.DataFrame) -> None:
     """Print calculated metrics."""
-    f1s_mean = df[df["cutoff"] == 5]["f1_score"].mean()
-    f1s_std = df[df["cutoff"] == 5]["f1_score"].std()
-    f1i_mean = df["f1_integral"].mean()
-    f1i_std = df["f1_integral"].std()
-    rmse_mean = df["mean_euclidean"].mean()
-    rmse_std = df["mean_euclidean"].std()
+    p = 4
+    f1i_mean = df["f1_integral"].mean().round(p)
+    f1i_std = df["f1_integral"].std().round(p)
+    rmse_mean = df["mean_euclidean"].mean().round(p)
+    rmse_std = df["mean_euclidean"].std().round(p)
 
     print(
         "Metrics on test set:\n"
-        f"* F1 score @5px: {f1s_mean} ± {f1s_std}\n"
         f"* F1 integral score: {f1i_mean} ± {f1i_std}\n"
         f"* Mean euclidean distance: {rmse_mean} ± {rmse_std}"
     )
