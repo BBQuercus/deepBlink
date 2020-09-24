@@ -15,7 +15,6 @@ from ..io import grab_files
 from ..io import load_image
 from ..util import train_valid_split
 from ._parseutil import CustomFormatter
-from ._parseutil import FMT
 from ._parseutil import FolderType
 from ._parseutil import _add_utils
 
@@ -30,14 +29,14 @@ def _parse_args_create(
         formatter_class=CustomFormatter,
         add_help=False,
         description=(
-            f"\U0001F4BE {FMT.dc}Creation submodule{FMT.e} \U0001F4BE\n\n"
+            "\U0001F4BE Creation submodule \U0001F4BE\n\n"
             "Create a custom dataset with raw files and corresponding labels. "
             "Relies on labeling output from FIJI that was saved with the provided macro "
-            f"described here {FMT.u}https://github.com/BBQuercus/deepBlink/wiki/Datasets{FMT.e}."
+            'described here "https://github.com/BBQuercus/deepBlink/wiki/Datasets".'
         ),
         help="\U0001F4BE Create a new dataset from raw files.",
     )
-    group1 = parser.add_argument_group(f"{FMT.r}Required{FMT.e}")
+    group1 = parser.add_argument_group("Required")
     group1.add_argument(
         "-i",
         "--input",
@@ -49,7 +48,7 @@ def _parse_args_create(
             f"[required] [filetypes: {', '.join(EXTENSIONS)}]"
         ),
     )
-    group2 = parser.add_argument_group(f"{FMT.g}Optional{FMT.e}")
+    group2 = parser.add_argument_group("Optional")
     group2.add_argument(
         "-l",
         "--labels",

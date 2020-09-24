@@ -102,25 +102,10 @@ class CustomFormatter(argparse.RawDescriptionHelpFormatter):
         return super(CustomFormatter, self).add_usage(usage, actions, groups, prefix)
 
 
-class FMT:
-    """Formatting options for command line output."""
-
-    p = "\033[95m"  # purple
-    c = "\033[96m"  # cyan
-    dc = "\033[36m"  # dark cyan
-    bl = "\033[94m"  # blue for "General Utilities"
-    g = "\033[92m"  # green for "Optional"
-    y = "\033[93m"  # yellow for titles
-    r = "\033[91m"  # red for "Required"
-    b = "\033[1m"  # bold for commands
-    u = "\033[4m"  # underline for links
-    e = "\033[0m"  # end
-
-
 # TODO find a simpler and safer solution
 def _add_utils(parser: argparse.ArgumentParser):
     """A very hacky way of trying to move this group to the bottom of help text."""
-    group = parser.add_argument_group(f"{FMT.bl}General utilities{FMT.e}")
+    group = parser.add_argument_group("General utilities")
     group.add_argument(
         "-h",
         "--help",

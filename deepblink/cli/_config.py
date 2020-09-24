@@ -7,7 +7,6 @@ import yaml
 
 from ..io import securename
 from ._parseutil import CustomFormatter
-from ._parseutil import FMT
 from ._parseutil import _add_utils
 
 
@@ -21,12 +20,12 @@ def _parse_args_config(
         add_help=False,
         formatter_class=CustomFormatter,
         description=(
-            f"\U0001F528 {FMT.dc}Configuration submodule{FMT.e} \U0001F528\n\n"
+            "\U0001F528 Configuration submodule \U0001F528\n\n"
             "Prepare a configuration file used to adjust parameters during training. "
         ),
         help="\U0001F528 Create a configuration file for training.",
     )
-    group2 = parser.add_argument_group(f"{FMT.g}Optional{FMT.e}")
+    group2 = parser.add_argument_group("Optional")
     group2.add_argument(
         "-n",
         "--name",

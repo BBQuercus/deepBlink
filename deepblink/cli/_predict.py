@@ -18,7 +18,6 @@ from ..io import load_model
 from ..util import delete_non_unique_columns
 from ..util import predict_shape
 from ._parseutil import CustomFormatter
-from ._parseutil import FMT
 from ._parseutil import FileFolderType
 from ._parseutil import FileType
 from ._parseutil import FolderType
@@ -36,14 +35,14 @@ def _parse_args_predict(
         add_help=False,
         formatter_class=CustomFormatter,
         description=(
-            f"\U0001F914 {FMT.dc}Prediction submodule{FMT.e} \U0001F914\n\n"
+            "\U0001F914 Prediction submodule \U0001F914\n\n"
             "Use a pre-trained model to predict blob coordinates on new data. "
             "In addition to the required model and input file or folder, "
             "several optional features are accessible as described below."
         ),
         help="\U0001F914 Predict on data with a pre-trained model.",
     )
-    group1 = parser.add_argument_group(f"{FMT.r}Required{FMT.e}")
+    group1 = parser.add_argument_group("Required")
     group1.add_argument(
         "-i",
         "--input",
@@ -52,7 +51,7 @@ def _parse_args_predict(
         help=(
             "Image files to predict on. "
             "Input can either be given as path to a directory containing files or as a single file. "
-            f"The path be relative (e.g. {FMT.b}../dir{FMT.e}) or absolute (e.g. {FMT.b}/Users/myname/{FMT.e}. "
+            "The path be relative (e.g. ../dir) or absolute (e.g. /Users/myname/). "
             "Fileglobs are currently not available. "
             "Note that only the specified filetypes will be processed. "
             f"[required] [filetypes: {', '.join(EXTENSIONS)}]"
@@ -67,12 +66,12 @@ def _parse_args_predict(
             "DeepBlink model. "
             'Model has to be of file type ".h5". '
             'The path can be relative or absolute as described in "--input". '
-            f"Model can either be trained on custom data using {FMT.b}deepblink train{FMT.e} or using a pre-trained "
-            f"model available through the GitHub wiki on {FMT.u}https://github.com/BBQuercus/deepBlink/wiki{FMT.e}. "
+            'Model can either be trained on custom data using "deepblink train" or using a pre-trained '
+            'model available through the GitHub wiki on "https://github.com/BBQuercus/deepBlink/wiki". '
             "[required]"
         ),
     )
-    group2 = parser.add_argument_group(f"{FMT.g}Optional{FMT.e}")
+    group2 = parser.add_argument_group("Optional")
     group2.add_argument(
         "-o",
         "--output",
@@ -106,8 +105,8 @@ def _parse_args_predict(
             "Image shape."
             "Used to assess the arrangement of input image axes otherwise known as shape. "
             "If not given, uses a basic prediction based on common defaults. "
-            f"Must be in the format {FMT.b}(x,y,z,t,c,3){FMT.e} using the specified characters. "
-            f"If unsure, use {FMT.b}deepblink check{FMT.e} to determine your images shape "
+            'Must be in the format "(x,y,z,t,c,3)" using the specified characters. '
+            'If unsure, use "deepblink check" to determine your images shape '
             "and more detailed information. "
             "[default: None]"
         ),
