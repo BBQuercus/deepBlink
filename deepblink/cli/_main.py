@@ -25,13 +25,19 @@ def _parse_args():
     """Argument parser."""
     parser = argparse.ArgumentParser(
         prog="deepblink",
-        description="deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for training, inferencing, and evaluation",
-        epilog="We hope you enjoy using deepBlink \U0001F603",
+        description="deepBlink's CLI \U0001F469\U0000200D\U0001F4BB for all of your blobbing needs.",
+        epilog=(
+            'See "deepblink <command> --help" to read about the specific subcommand.\n'
+            'See the online wiki at "https://github.com/BBQuercus/deepBlink/wiki" for an overview.\n'
+            "We hope you enjoy using deepBlink \U0001F603"
+        ),
         formatter_class=CustomFormatter,
         add_help=False,
     )
 
-    subparsers = parser.add_subparsers(title="Commands", dest="command")
+    subparsers = parser.add_subparsers(
+        title="Commands for various situations", dest="command",
+    )
     parent_parser = argparse.ArgumentParser(add_help=False)
     _parse_args_check(subparsers, parent_parser)
     _parse_args_config(subparsers, parent_parser)
@@ -50,7 +56,7 @@ def main():
     logger = _configure_logger(args.verbose, args.debug)
 
     if args.command == "check":
-        handler = HandleCheck(arg_input=args.input, logger=logger)
+        handler = HandleCheck(arg_input=args.INPUT, logger=logger)
 
     if args.command == "config":
         handler = HandleConfig(arg_name=args.name, logger=logger)
@@ -68,11 +74,10 @@ def main():
 
     if args.command == "predict":
         handler = HandlePredict(
-            arg_model=args.model.name,
+            arg_model=args.model,
             arg_input=args.input,
             arg_output=args.output,
             arg_radius=args.radius,
-            arg_type=args.type,
             arg_shape=args.shape,
             logger=logger,
         )

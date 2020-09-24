@@ -10,6 +10,12 @@
 
 Threshold independent detection and localization of diffraction-limited spots.
 
+## Contents
+- [Contents](#contents)
+- [Overview](#overview)
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Usage](#usage)
 
 ## Overview
 In biomedical microscopy data, a common task involves the detection of
@@ -34,6 +40,11 @@ interface.
 </table>
 
 
+## Documentation
+
+More documentation about deepBlink including how to train, create a dataset, contribute etc. is available at [https://github.com/BBQuercus/deepBlink/wiki](https://github.com/BBQuercus/deepBlink/wiki).
+
+
 ## Installation
 This package is built for [Python](https://www.python.org/downloads/) versions newer than 3.6 and can easily be installed with pip:
 ```bash
@@ -48,7 +59,7 @@ appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nv
 Inferencing on deepBlink is performed at the command line as follows:
 
 ```bash
-deepblink predict -m MODEL -i INPUT [-o OUTPUT] [-t {csv,txt}] [-r RADIUS] [-s SHAPE]
+deepblink predict -m MODEL -i INPUT [-o OUTPUT] [-r RADIUS] [-s SHAPE]
 ```
 
-**More detailed information** (including how to train, create a dataset, etc.) is availabe in our [documentation](https://github.com/BBQuercus/deepBlink/wiki).
+With `MODEL` being a pre-trained or custom model and `INPUT` being the path to a input image or folder containing images.

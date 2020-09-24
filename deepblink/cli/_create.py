@@ -28,8 +28,13 @@ def _parse_args_create(
         parents=[parent_parser],
         formatter_class=CustomFormatter,
         add_help=False,
-        description="\U0001F5BC Creation submodule",
-        help="\U0001F5BC create a new dataset from raw files",
+        description=(
+            "\U0001F4BE Creation submodule \U0001F4BE\n\n"
+            "Create a custom dataset with raw files and corresponding labels. "
+            "Relies on labeling output from FIJI that was saved with the provided macro "
+            'described here "https://github.com/BBQuercus/deepBlink/wiki/Datasets".'
+        ),
+        help="\U0001F4BE Create a new dataset from raw files.",
     )
     group1 = parser.add_argument_group("Required")
     group1.add_argument(
@@ -37,14 +42,22 @@ def _parse_args_create(
         "--input",
         required=True,
         type=FolderType(),
-        help=f"path to raw images [required] [filetypes: {EXTENSIONS}]",
+        help=(
+            "Path to the directory containing raw images. "
+            "Note that only the specified filetypes will be processed. "
+            f"[required] [filetypes: {', '.join(EXTENSIONS)}]"
+        ),
     )
     group2 = parser.add_argument_group("Optional")
     group2.add_argument(
         "-l",
         "--labels",
         type=FolderType(),
-        help="path to raw labels in csv format [default: --input/labels]",
+        help=(
+            "Path to the directory containing labels in csv format. "
+            "The default path accounts for using the FIJI macro described on the wiki. "
+            "[default: --INPUT/labels/]"
+        ),
     )
     group2.add_argument(
         "-n",
@@ -52,9 +65,9 @@ def _parse_args_create(
         default="dataset",
         type=str,
         help=(
-            "name of dataset output file.\t"
-            "file extension is added automatically.\t"
-            "will be saved into the input path [default: 'dataset']"
+            "Custom dataset name. "
+            'The file extension "npz" will be added automatically. '
+            '[default: "dataset"]'
         ),
     )
     group2.add_argument(
@@ -63,23 +76,35 @@ def _parse_args_create(
         default=None,
         type=int,
         help=(
-            "if given, crops images to specified size.\t"
-            "deepBlink requires powers of 2, such as 256, 512... [default: None]"
+            "Image crop size. "
+            "If given, crops all images into the specified size. "
+            "Will crop non-overlapping and ignore areas that did not get covered."
+            "deepBlink requires square images powers of 2, such as 256, 512... "
+            "[default: None]"
         ),
     )
     group2.add_argument(
         "-vs",
         "--validsplit",
         default=0.2,
-        type=int,
-        help="validation vs. train split percentage (0 - 1) [default: 0.2]",
+        type=float,
+        help=(
+            "Validation split. "
+            "Split percentage (scaled between 0 - 1) of validation vs. train set. "
+            "Note the validation split is done after splitting test and trainval. "
+            "[default: 0.2]"
+        ),
     )
     group2.add_argument(
         "-ts",
         "--testsplit",
         default=0.2,
-        type=int,
-        help="test vs. trainval split percentage (0 - 1) [default: 0.2]",
+        type=float,
+        help=(
+            "Testing split. "
+            "Split percentage (scaled between 0 - 1) of test vs. trainval set. "
+            "[default: 0.2]"
+        ),
     )
     _add_utils(parser)
 

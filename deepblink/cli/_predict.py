@@ -4,7 +4,6 @@ from typing import List
 import argparse
 import logging
 import os
-import textwrap
 
 import numpy as np
 import pandas as pd
@@ -20,6 +19,7 @@ from ..util import delete_non_unique_columns
 from ..util import predict_shape
 from ._parseutil import CustomFormatter
 from ._parseutil import FileFolderType
+from ._parseutil import FileType
 from ._parseutil import FolderType
 from ._parseutil import ShapeType
 from ._parseutil import _add_utils
@@ -34,48 +34,66 @@ def _parse_args_predict(
         parents=[parent_parser],
         add_help=False,
         formatter_class=CustomFormatter,
-        description="\U0001F914 Prediction submodule",
-        help="\U0001F914 inference / prediction of data with a pre-trained model",
+        description=(
+            "\U0001F914 Prediction submodule \U0001F914\n\n"
+            "Use a pre-trained model to predict blob coordinates on new data. "
+            "In addition to the required model and input file or folder, "
+            "several optional features are accessible as described below."
+        ),
+        help="\U0001F914 Predict on data with a pre-trained model.",
     )
     group1 = parser.add_argument_group("Required")
     group1.add_argument(
         "-i",
         "--input",
         required=True,
-        type=FileFolderType(),
-        help=f"input file/folder location [required] [filetypes: {EXTENSIONS}]",
+        type=FileFolderType(EXTENSIONS),
+        help=(
+            "Image files to predict on. "
+            "Input can either be given as path to a directory containing files or as a single file. "
+            "The path be relative (e.g. ../dir) or absolute (e.g. /Users/myname/). "
+            "Fileglobs are currently not available. "
+            "Note that only the specified filetypes will be processed. "
+            f"[required] [filetypes: {', '.join(EXTENSIONS)}]"
+        ),
     )
     group1.add_argument(
         "-m",
         "--model",
         required=True,
-        type=argparse.FileType("r"),
-        help="model .h5 file location [required]",
+        type=FileType(["h5"]),
+        help=(
+            "DeepBlink model. "
+            'Model has to be of file type ".h5". '
+            'The path can be relative or absolute as described in "--input". '
+            'Model can either be trained on custom data using "deepblink train" or using a pre-trained '
+            'model available through the GitHub wiki on "https://github.com/BBQuercus/deepBlink/wiki". '
+            "[required]"
+        ),
     )
     group2 = parser.add_argument_group("Optional")
     group2.add_argument(
         "-o",
         "--output",
         type=FolderType(),
-        help="output file/folder location [default: input location]",
-    )
-    group2.add_argument(
-        "-t",
-        "--type",
-        type=str,
-        choices=["csv", "txt"],
-        default="csv",
-        help="output file type [options: csv, txt] [default: csv]",
+        help=(
+            "Output folder path. "
+            "Path to the directory into which all output files are saved. "
+            "Output files will automatically take the same name as their corresponding image. "
+            "[default: input location]"
+        ),
     )
     group2.add_argument(
         "-r",
         "--radius",
         type=int,
         default=None,
-        help=textwrap.dedent(
-            """if given, calculate the integrated intensity
-        in the given radius around each coordinate. set radius to zero if only the
-        central pixels intensity should be calculated"""
+        help=(
+            "Intensity radius. "
+            "If given, will calculate the integrated intensity in the specified radius around each coordinate. "
+            "If the radius is set to zero if only the central pixels intensity should be calculated. "
+            'The intensity is added as additional column to the output file called "i". '
+            "[default: None]"
         ),
     )
     group2.add_argument(
@@ -83,10 +101,14 @@ def _parse_args_predict(
         "--shape",
         type=ShapeType(),
         default=None,
-        help=textwrap.dedent(
-            """if given, uses the specified dimension arrangement. otherwise falls
-        back to defaults. must be in the format "(x,y,z,t,c,3)" using the specified
-        characters"""
+        help=(
+            "Image shape."
+            "Used to assess the arrangement of input image axes otherwise known as shape. "
+            "If not given, uses a basic prediction based on common defaults. "
+            'Must be in the format "(x,y,z,t,c,3)" using the specified characters. '
+            'If unsure, use "deepblink check" to determine your images shape '
+            "and more detailed information. "
+            "[default: None]"
         ),
     )
     _add_utils(parser)
@@ -100,7 +122,6 @@ class HandlePredict:
         arg_input: Path to image file / folder with images.
         arg_output: Path to output directory.
         arg_radius: Size of integrated image intensity calculation.
-        arg_type: Output file type.
         arg_shape: Custom shape format to label axes.
         logger: Logger to log verbose output.
     """
@@ -111,7 +132,6 @@ class HandlePredict:
         arg_input: str,
         arg_output: str,
         arg_radius: int,
-        arg_type: str,
         arg_shape: str,
         logger: logging.Logger,
     ):
@@ -119,11 +139,11 @@ class HandlePredict:
         self.raw_input = arg_input
         self.raw_output = arg_output
         self.radius = arg_radius
-        self.type = arg_type
         self.raw_shape = arg_shape
         self.logger = logger
         self.logger.info("\U0001F914 starting prediction submodule")
 
+        self.type = "csv"
         self.extensions = EXTENSIONS
         self.abs_input = os.path.abspath(self.raw_input)
         self.model = load_model(
@@ -185,7 +205,7 @@ class HandlePredict:
     # TODO solve double definition of replace_chars here and in ShapeType
     # TODO solve mypy return type bug
     @property
-    def shape(self):
+    def shape(self) -> List[str]:
         """Resolve input shape."""
         first_image = self.image_list[0]
         if not all([i.ndim == first_image.ndim for i in self.image_list]):
@@ -203,8 +223,8 @@ class HandlePredict:
             self.logger.info(f"\U0001F535 using provided input shape of {shape}")
         for c in ["(", ")", " "]:
             shape = shape.replace(c, "")
-        shape = shape.split(",")
-        return shape
+        shape_list = shape.split(",")
+        return shape_list
 
     def save_output(self, fname_in: str, df: pd.DataFrame) -> None:
         """Save coordinate list to file with appropriate header."""
@@ -212,18 +232,7 @@ class HandlePredict:
         df = delete_non_unique_columns(df)
         self.logger.debug(f"non-unique columns to be saved are {df.columns}")
 
-        if self.type == "txt":
-            header = " ".join(df.columns.to_list())
-            np.savetxt(
-                fname_out,
-                df.values,
-                fmt="%.4f",
-                delimiter=" ",
-                header=header,
-                comments="",
-            )
-        if self.type == "csv":
-            df.to_csv(fname_out, index=False)
+        df.to_csv(fname_out, index=False)
         self.logger.info(
             f"\U0001F3C3 prediction of file {fname_in} saved as {fname_out}"
         )

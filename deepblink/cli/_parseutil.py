@@ -4,23 +4,43 @@ This utility file is used separate to avoid circular dependencies between
 _parser.py and the individual _commands.py.
 """
 
+from typing import Union
 import argparse
 import os
 import re
 
 
-class FileFolderType:
-    """Custom type supporting folders or files."""
+class FileType:
+    """Custom type for files with given extensions."""
 
-    def __init__(self):
-        pass
+    def __init__(self, extensions: Union[tuple, list]):
+        self.extensions = extensions
 
     def __call__(self, value):  # noqa: D102
-        """Python type internal function called by argparse to check input."""
-        if not any((os.path.isdir(value), os.path.isfile(value))):
+        if not os.path.isfile(value):
             raise argparse.ArgumentTypeError(
-                f"Input value must be file or folder. '{value}' is not."
+                f"Input must be a file. '{value}' does not."
             )
+
+        if not any([value.endswith(e) for e in self.extensions]):
+            raise argparse.ArgumentTypeError(
+                f"Input file must have extension {self.extensions}. '{value}' does not."
+            )
+        return value
+
+
+class FileFolderType:
+    """Custom type supporting folders or files with given extensions."""
+
+    def __init__(self, extensions: Union[tuple, list]):
+        self.extensions = extensions
+
+    def __call__(self, value):  # noqa: D102
+        if not os.path.isdir(value):
+            if not FileType(self.extensions)(value):
+                raise argparse.ArgumentTypeError(
+                    f"Input value must be file or folder. '{value}' is not."
+                )
         return value
 
 
@@ -31,7 +51,6 @@ class FolderType:
         pass
 
     def __call__(self, value):  # noqa: D102
-        """Python type internal function called by argparse to check input."""
         if not os.path.isdir(value):
             raise argparse.ArgumentTypeError(
                 f"Input value must be folder and must exist. '{value}' is not."
@@ -48,7 +67,6 @@ class ShapeType:
         self.required_characters = ["x", "y"]
 
     def __call__(self, value):  # noqa: D102
-        """Python type internal function called by argparse to check input."""
         if not isinstance(value, str):
             raise ValueError(f"Input value must be a string. '{value}' is not.")
 
@@ -74,7 +92,7 @@ class ShapeType:
         return raw_value
 
 
-class CustomFormatter(argparse.HelpFormatter):
+class CustomFormatter(argparse.RawDescriptionHelpFormatter):
     """Custom changes to argparse's default help text formatter."""
 
     def add_usage(self, usage, actions, groups, prefix=None):
@@ -93,19 +111,19 @@ def _add_utils(parser: argparse.ArgumentParser):
         "--help",
         action="help",
         default=argparse.SUPPRESS,
-        help="show this help message and exit",
+        help="Show this message.",
     )
     group.add_argument(
         "-V",
         "--version",
         action="version",
         version="%(prog)s 0.0.6",
-        help="show %(prog)s's version number and exit",
+        help="Show %(prog)s's version number.",
     )
     group.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        help="set program output to verbose [default: quiet]",
+        help="Set program output to verbose printing all important steps.",
     )
     group.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)

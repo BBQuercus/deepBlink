@@ -9,8 +9,9 @@ import numpy as np
 import pytest
 
 from deepblink.io import basename
-from deepblink.io import load_npz
 from deepblink.io import grab_files
+from deepblink.io import load_npz
+from deepblink.io import securename
 
 
 @pytest.mark.parametrize(
@@ -23,6 +24,14 @@ from deepblink.io import grab_files
 )
 def test_basename(path, bname):
     assert basename(path) == bname
+
+
+@pytest.mark.parametrize(
+    "fname, safename",
+    [("hello.txt", "hello_txt"), ("./././hello", "______hello"), ("?#42|h", "__42_h")],
+)
+def test_securename(fname, safename):
+    assert securename(fname) == safename
 
 
 def test_load_npz():
