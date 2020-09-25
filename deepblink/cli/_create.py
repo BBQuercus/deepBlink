@@ -264,7 +264,17 @@ class HandleCreate:
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
         Rounds coordinates on borders to prevent Fiji out-of bounds behavior.
         """
-        df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
+        if "X" in df.columns:
+            df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
+        elif "POSITION_X" in df.columns:
+            df = df.rename(columns={"POSITION_X": "c", "POSITION_Y": "r"})[["r", "c"]]
+            df = df.reset_index(drop=True)
+        else:
+            raise ValueError(
+                "Format of input labels not recognized. "
+                "Requires X,Y or POSITION_X,POSITION_Y in columns. "
+                f"Columns found are: {df.columns.to_list()}."
+            )
 
         for name, var in zip(["r", "c"], image.shape):
             df[name] = df[name].where(df[name] < var, var)
