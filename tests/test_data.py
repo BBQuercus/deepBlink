@@ -18,7 +18,9 @@ from deepblink.data import get_prediction_matrix
 EPSILON = 1e-5
 
 
-@pytest.mark.parametrize("value, base, expected", [(5, 2, 8), (6, 3, 9), (12, 7, 49)])
+@pytest.mark.parametrize(
+    "value, base, expected", [(64, 5, 2, 8), (2, 6, 3, 9), (64, 12, 7, 49)]
+)
 def test_next_power(value, base, expected):
     assert next_power(value, base) == expected
 

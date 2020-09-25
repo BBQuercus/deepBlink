@@ -169,7 +169,6 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
     network_args["cell_size"] = dataset_args["cell_size"]
 
     dataset = dataset_class(dataset_args["version"], dataset_args["cell_size"])
-    dataset.load_data()
 
     use_wandb = cfg["use_wandb"]
     model = model_class(
