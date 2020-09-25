@@ -154,7 +154,7 @@ class HandlePredict:
     def __call__(self):
         """Run prediction for all given images."""
         self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found")
-        self.logger.info(f"\U0001F5C4{' '} output will be saved to {self.path_output}")
+        self.logger.info(f"\U0001F5C4 output will be saved to {self.path_output}")
 
         for fname_in, image in zip(self.file_list, self.image_list):
             self.predict_adaptive(fname_in, image)
