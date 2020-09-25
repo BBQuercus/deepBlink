@@ -1,18 +1,7 @@
-"""Module that contains the command line app.
+"""Module that contains the command line interface.
 
-The CLI is modular containing four distinct submodules which will be
-discussed in more detail below:
-----------
-1. Training
-----------
-2. Checking
-----------
-3. Prediction
-Used for inferencing of new data with pretrained models.
-Because the model is loaded into memory for every run, it is faster to
-run multiple images at once by passing a directory as input.
-----------
-4. Evaluation
+Divided into <_command> files containing the parser and a call handler.
+Additionally, utility functions in _logger and _parseutil.
 """
 
 from ._main import main
