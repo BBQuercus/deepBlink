@@ -1,7 +1,6 @@
 """Test run of detnet on given dataset."""
 import re
 import sys
-import textwrap
 
 import numpy as np
 
@@ -33,7 +32,7 @@ def main():
     fname_model = args.model
 
     # Evaluation
-    f1_mean, f1_std, rmse_mean, rmse_std = run_test(
+    run_test(
         benchmark="detnet",
         dataset=dataset,
         output=output,
@@ -42,14 +41,6 @@ def main():
         model_loader=model_loader,
         normalize_fn=normalize_fn,
         coordinate_loader=get_coordinates,
-    )
-
-    print(
-        textwrap.dedent(
-            f"""Metrics on test set:
-        * F1 score: {f1_mean} ± {f1_std}
-        * Mean euclidean distance: {rmse_mean} ± {rmse_std}"""
-        )
     )
 
 

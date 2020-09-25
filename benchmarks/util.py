@@ -3,16 +3,14 @@ from typing import Callable, List, Tuple
 import argparse
 import datetime
 import os
-import warnings
 
-import deepblink as pink
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.spatial
 import seaborn as sns
 import skimage.measure
-import tensorflow as tf
+
+import deepblink as pink
 
 
 class NpzFileType:
@@ -170,6 +168,21 @@ def plot_metrics(fname: str, df: pd.DataFrame) -> None:
     plt.close()
 
 
+def print_scores(df: pd.DataFrame) -> None:
+    """Print calculated metrics."""
+    p = 4
+    f1i_mean = df["f1_integral"].mean().round(p)
+    f1i_std = df["f1_integral"].std().round(p)
+    rmse_mean = df["mean_euclidean"].mean().round(p)
+    rmse_std = df["mean_euclidean"].std().round(p)
+
+    print(
+        "Metrics on test set:\n"
+        f"* F1 integral score: {f1i_mean} ± {f1i_std}\n"
+        f"* Mean euclidean distance: {rmse_mean} ± {rmse_std}"
+    )
+
+
 def run_test(
     benchmark: str,
     dataset: str,
@@ -206,8 +219,9 @@ def run_test(
     # Create output names
     today = datetime.date.today().strftime("%Y%m%d")
     bname_dataset = pink.io.basename(dataset)
-    bname_file = f"{today}_test"
+    bname_file = f"test_{bname_dataset}_{today}"
     bname_output = os.path.join(output, benchmark, bname_dataset)
+
     os.makedirs(os.path.join(bname_output, "metrics"), exist_ok=True)
     fname_metrics = os.path.join(bname_output, "metrics", f"{bname_file}.csv")
     fname_plots = os.path.join(bname_output, "metrics", f"{bname_file}.pdf")
@@ -239,9 +253,4 @@ def run_test(
 
     plot_metrics(fname_plots, df)
 
-    return (
-        df["f1_integral"].mean(),
-        df["f1_integral"].std(),
-        df["mean_euclidean"].mean(),
-        df["mean_euclidean"].std(),
-    )
+    print_scores(df)

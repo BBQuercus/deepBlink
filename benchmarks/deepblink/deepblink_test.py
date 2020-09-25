@@ -1,6 +1,5 @@
 """Test run of deepblink on given dataset."""
 import sys
-import textwrap
 
 import deepblink as pink
 import numpy as np
@@ -33,7 +32,7 @@ def main():
     fname_model = args.model
 
     # Evaluation
-    f1_mean, f1_std, rmse_mean, rmse_std = run_test(
+    run_test(
         benchmark="deepblink",
         dataset=dataset,
         output=output,
@@ -42,14 +41,6 @@ def main():
         model_loader=model_loader,
         normalize_fn=pink.data.normalize_image,
         coordinate_loader=pink.data.get_coordinate_list,
-    )
-
-    print(
-        textwrap.dedent(
-            f"""Metrics on test set:
-        * F1 score: {f1_mean} ± {f1_std}
-        * Mean euclidean distance: {rmse_mean} ± {rmse_std}"""
-        )
     )
 
 
