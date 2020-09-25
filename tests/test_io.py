@@ -7,9 +7,11 @@ import tempfile
 
 import numpy as np
 import pytest
+import skimage.io
 
 from deepblink.io import basename
 from deepblink.io import grab_files
+from deepblink.io import load_image
 from deepblink.io import load_npz
 from deepblink.io import securename
 
@@ -32,6 +34,27 @@ def test_basename(path, bname):
 )
 def test_securename(fname, safename):
     assert securename(fname) == safename
+
+
+def test_load_image():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        fname = os.path.join(temp_dir, "image.png")
+
+        # Basic case
+        arr = np.zeros((20, 20, 1))
+        skimage.io.imsave(fname, arr)
+        assert (load_image(fname, is_rgb=False) == arr.squeeze()).all()
+
+        # RGB case
+        arr = np.ones((20, 20, 3))
+        skimage.io.imsave(fname, arr)
+        assert load_image(fname, is_rgb=True).shape == (20, 20)
+
+        # Multi-channel error
+        with pytest.raises(ValueError):
+            arr = np.zeros((20, 20, 20, 4))
+            skimage.io.imsave(fname, arr)
+            load_image(fname, is_rgb=False)
 
 
 def test_load_npz():
@@ -70,3 +93,6 @@ def test_grab_files():
         output = grab_files(temp_dir, ext)
         expected = [os.path.join(temp_dir, f) for f in ["test.txt", "text.csv"]]
         assert output == expected
+
+    with pytest.raises(OSError):
+        grab_files("some_imaginary_dir/", ["txt"])

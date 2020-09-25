@@ -10,10 +10,16 @@ import pandas as pd
 import pytest
 
 from deepblink.util import delete_non_unique_columns
+from deepblink.util import get_from_module
 from deepblink.util import predict_shape
 from deepblink.util import relative_shuffle
 from deepblink.util import remove_falses
 from deepblink.util import train_valid_split
+
+
+def test_get_from_module():
+    assert get_from_module("deepblink.util", "predict_shape") == predict_shape
+    assert get_from_module("deepblink.util", "train_valid_split") == train_valid_split
 
 
 @given(lists(floats(-100, 100), min_size=1, max_size=100))

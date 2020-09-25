@@ -8,18 +8,18 @@ from hypothesis.strategies import floats
 import numpy as np
 import pytest
 
-from deepblink.data import next_power
-from deepblink.data import next_multiple
-from deepblink.data import normalize_image
 from deepblink.data import get_coordinate_list
 from deepblink.data import get_prediction_matrix
+from deepblink.data import next_multiple
+from deepblink.data import next_power
+from deepblink.data import normalize_image
 
 
 EPSILON = 1e-5
 
 
 @pytest.mark.parametrize(
-    "value, base, expected", [(64, 5, 2, 8), (2, 6, 3, 9), (64, 12, 7, 49)]
+    "value, base, expected", [(5, 2, 8), (6, 3, 9), (12, 7, 49), (64, 2, 64)]
 )
 def test_next_power(value, base, expected):
     assert next_power(value, base) == expected
