@@ -122,6 +122,9 @@ class HandleCreate:
         logger: Logger to log verbose output.
     """
 
+    # pylint: disable=too-many-instance-attributes
+    # We require many attributes for the splits
+
     def __init__(
         self,
         arg_input: str,
@@ -146,37 +149,9 @@ class HandleCreate:
 
     def __call__(self):
         """Run dataset creation."""
-        image_list = []
-        label_list = []
-        for image, label in zip(*self.image_label_lists):
-            label_norm = self.convert_labels(image=image, df=label)
-            image_crops, label_crops = self.crop_images(image=image, df=label_norm)
-            image_list.extend(image_crops)
-            label_list.extend(label_crops)
-        self.logger.debug(f"images converted: {len(image_list)} == {len(label_list)}")
-
-        x_trainval, x_test, y_trainval, y_test = train_valid_split(
-            image_list, label_list, valid_split=self.test_split
-        )
-        x_train, x_valid, y_train, y_valid = train_valid_split(
-            x_trainval, y_trainval, valid_split=self.valid_split
-        )
-        self.logger.info(
-            f"\U0001F4A6 images split: {len(x_train)} train, {len(x_valid)} valid, {len(x_test)} test"
-        )
-
-        y_train = [y.values for y in y_train]
-        y_valid = [y.values for y in y_valid]
-        y_test = [y.values for y in y_test]
-        np.savez_compressed(
-            self.fname_out,
-            x_train=x_train,
-            y_train=y_train,
-            x_valid=x_valid,
-            y_valid=y_valid,
-            x_test=x_test,
-            y_test=y_test,
-        )
+        self.get_file_lists()
+        self.train_val_test_split()
+        self.save_npz()
         self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}")
 
     @property
@@ -264,7 +239,17 @@ class HandleCreate:
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
         Rounds coordinates on borders to prevent Fiji out-of bounds behavior.
         """
-        df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
+        if "X" in df.columns:
+            df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
+        elif "POSITION_X" in df.columns:
+            df = df.rename(columns={"POSITION_X": "c", "POSITION_Y": "r"})[["r", "c"]]
+            df = df.reset_index(drop=True)
+        else:
+            raise ValueError(
+                "Format of input labels not recognized. "
+                "Requires X,Y or POSITION_X,POSITION_Y in columns. "
+                f"Columns found are: {df.columns.to_list()}."
+            )
 
         for name, var in zip(["r", "c"], image.shape):
             df[name] = df[name].where(df[name] < var, var)
@@ -272,10 +257,10 @@ class HandleCreate:
 
         return df
 
-    def crop_images(
+    def crop_image(
         self, image: np.ndarray, df: pd.DataFrame
     ) -> Tuple[List[np.ndarray], List[pd.DataFrame]]:
-        """Crop images to a uniform size and scale labels accordingly."""
+        """Crop a image / label pair to a uniform size and scale labels accordingly."""
         size = self.img_size
         if size is None:
             self.logger.debug(f"using unchanged size in {image.shape}")
@@ -310,3 +295,47 @@ class HandleCreate:
             f"converted original size of {image.shape} into {len(df_list)} crops"
         )
         return img_list, df_list
+
+    def get_file_lists(self):
+        """Create a file list after cropping over-sized images."""
+        self.image_list = []
+        self.label_list = []
+
+        for image, label in zip(*self.image_label_lists):
+            label_normalized = self.convert_labels(image=image, df=label)
+            image_crops, label_crops = self.crop_image(image=image, df=label_normalized)
+            self.image_list.extend(image_crops)
+            self.label_list.extend(label_crops)
+
+        self.logger.debug(
+            f"images converted: {len(self.image_list)} == {len(self.label_list)}"
+        )
+
+    def train_val_test_split(self):
+        """Two-step split of the input data into train/valid/test."""
+        x_trainval, self.x_test, y_trainval, y_test = train_valid_split(
+            x_list=self.image_list, y_list=self.label_list, valid_split=self.test_split
+        )
+        self.x_train, self.x_valid, y_train, y_valid = train_valid_split(
+            x_list=x_trainval, y_list=y_trainval, valid_split=self.valid_split
+        )
+        self.logger.info(
+            f"\U0001F4A6 images split: {len(self.x_train)} train, {len(self.x_valid)} valid, {len(self.x_test)} test"
+        )
+
+        # Convert DataFrame to Numpy array
+        self.y_train = [y.values for y in y_train]
+        self.y_valid = [y.values for y in y_valid]
+        self.y_test = [y.values for y in y_test]
+
+    def save_npz(self):
+        """Save dataset splits as single npz file."""
+        np.savez_compressed(
+            self.fname_out,
+            x_train=self.x_train,
+            y_train=self.y_train,
+            x_valid=self.x_valid,
+            y_valid=self.y_valid,
+            x_test=self.x_test,
+            y_test=self.y_test,
+        )

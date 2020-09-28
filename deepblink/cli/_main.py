@@ -21,7 +21,7 @@ from ._train import _parse_args_train
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-def _parse_args():
+def arg_parser() -> argparse.ArgumentParser:
     """Argument parser."""
     parser = argparse.ArgumentParser(
         prog="deepblink",
@@ -46,13 +46,12 @@ def _parse_args():
     _parse_args_train(subparsers, parent_parser)
     _add_utils(parser)
 
-    args = parser.parse_args()
-    return args
+    return parser
 
 
 def main():
     """Entrypoint for the CLI."""
-    args = _parse_args()
+    args = arg_parser().parse_args()
     logger = _configure_logger(args.verbose, args.debug)
 
     if args.command == "check":

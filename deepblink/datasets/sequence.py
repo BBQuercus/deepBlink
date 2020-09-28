@@ -6,11 +6,7 @@ import warnings
 import numpy as np
 import tensorflow as tf
 
-
-def _shuffle(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """Shuffle x and y maintaining their items relative order."""
-    shuffled_indices = np.random.permutation(x.shape[0])
-    return x[shuffled_indices], y[shuffled_indices]
+from ..util import relative_shuffle
 
 
 class SequenceDataset(tf.keras.utils.Sequence):
@@ -78,4 +74,4 @@ class SequenceDataset(tf.keras.utils.Sequence):
     def on_epoch_end(self) -> None:
         """Shuffle data after every epoch."""
         if not self.overfit:
-            self.x, self.y = _shuffle(self.x, self.y)
+            self.x, self.y = relative_shuffle(self.x, self.y)

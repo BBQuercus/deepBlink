@@ -1,15 +1,12 @@
 """SpotsDataset class."""
 
-import os
-
 import numpy as np
 
 from ..data import get_prediction_matrix
+from ..data import next_power
+from ..data import normalize_image
 from ..io import load_npz
 from ._datasets import Dataset
-from ..data import normalize_image
-
-DATA_DIRNAME = Dataset.data_dirname()
 
 
 class SpotsDataset(Dataset):
@@ -23,24 +20,34 @@ class SpotsDataset(Dataset):
     def __init__(self, name: str, cell_size: int):
         super().__init__(name)
         self.cell_size = cell_size
-
-    @property
-    def data_filename(self) -> str:  # type: ignore[return-value]
-        """Return the absolute path to the dataset."""
-        return os.path.abspath(self.name)  # type: ignore
+        self.load_data()
 
     def load_data(self) -> None:
         """Load dataset into memory."""
-        (
-            self.x_train,
-            self.y_train,
-            self.x_valid,
-            self.y_valid,
-            self.x_test,
-            self.y_test,
-        ) = load_npz(self.data_filename)
+        self.x_train, self.y_train, self.x_valid, self.y_valid, _, _ = load_npz(
+            self.data_filename
+        )
         self.prepare_data()
         self.normalize_dataset()
+
+    @property
+    def image_size(self):
+        """Check if all images have the same square shape."""
+        base_shape = self.x_train[0].shape
+        if not all(
+            base_shape == x.shape
+            for x in dataset
+            for dataset in [self.x_train, self.x_valid]
+        ):
+            raise ValueError("All images must have the same shape.")
+        if not base_shape[0] == base_shape[1]:
+            raise ValueError("Images must be square. ")
+        if not base_shape[0] == next_power(base_shape[0]):
+            raise ValueError(
+                f"Images sidelength must be a power of two. {base_shape[0]} is not."
+            )
+
+        return base_shape[0]
 
     def prepare_data(self) -> None:
         """Convert raw labels into labels usable for training.
@@ -49,9 +56,8 @@ class SpotsDataset(Dataset):
         this format cannot be used for training. Here, this format is converted into
         prediction matrices.
         """
-        image_size = self.x_train[0].shape[0]  # type: ignore
 
-        def __conversion(dataset, image_size, cell_size):
+        def __convert(dataset, image_size, cell_size):
             return np.array(
                 [
                     get_prediction_matrix(coords, image_size, cell_size)
@@ -59,16 +65,14 @@ class SpotsDataset(Dataset):
                 ]
             )
 
-        self.y_train = __conversion(self.y_train, image_size, self.cell_size)
-        self.y_valid = __conversion(self.y_valid, image_size, self.cell_size)
-        self.y_test = __conversion(self.y_test, image_size, self.cell_size)
+        self.y_train = __convert(self.y_train, self.image_size, self.cell_size)
+        self.y_valid = __convert(self.y_valid, self.image_size, self.cell_size)
 
     def normalize_dataset(self) -> None:
         """Normalize all the images to have zero mean and standard deviation 1."""
 
-        def __normalization(dataset):
+        def __normalize(dataset):
             return np.array([normalize_image(image) for image in dataset])
 
-        self.x_train = __normalization(self.x_train)
-        self.x_valid = __normalization(self.x_valid)
-        self.x_test = __normalization(self.x_test)
+        self.x_train = __normalize(self.x_train)
+        self.x_valid = __normalize(self.x_valid)

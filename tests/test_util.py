@@ -4,22 +4,37 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 from hypothesis.strategies import lists
+from hypothesis.extra.numpy import arrays
 import numpy as np
 import pandas as pd
 import pytest
 
 from deepblink.util import delete_non_unique_columns
+from deepblink.util import get_from_module
 from deepblink.util import predict_shape
 from deepblink.util import relative_shuffle
 from deepblink.util import remove_falses
 from deepblink.util import train_valid_split
 
 
+def test_get_from_module():
+    assert get_from_module("deepblink.util", "predict_shape") == predict_shape
+    assert get_from_module("deepblink.util", "train_valid_split") == train_valid_split
+
+
 @given(lists(floats(-100, 100), min_size=1, max_size=100))
-def test_relative_shuffle(mylist):
+def test_relative_shuffle_lists(mylist):
     x, y = relative_shuffle(mylist, mylist)
     assert len(x) == len(mylist)
     assert len(y) == len(mylist)
+    assert sorted(x) == sorted(mylist)
+
+
+@given(arrays(np.int8, (20, 3)))
+def test_relative_shuffle_arrays(myarr):
+    x, y = relative_shuffle(myarr, myarr)
+    assert len(x) == len(myarr)
+    assert len(y) == len(myarr)
 
 
 @given(lists(floats(-100, 100), min_size=3, max_size=100))

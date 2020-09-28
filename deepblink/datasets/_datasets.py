@@ -1,6 +1,6 @@
 """Baseline Dataset class."""
 
-from pathlib import Path
+import os
 
 
 class Dataset:
@@ -19,10 +19,10 @@ class Dataset:
         self.x_test = None
         self.y_test = None
 
-    @classmethod
-    def data_dirname(cls):
-        """Return the absolute path to data files."""
-        return Path(__file__).resolve().parents[2] / "data"
+    @property
+    def data_filename(self) -> str:  # type: ignore[return-value]
+        """Return the absolute path to the dataset."""
+        return os.path.abspath(self.name)  # type: ignore
 
     def load_data(self):
         """Empty method to import or create data."""

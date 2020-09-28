@@ -4,7 +4,7 @@ import logging
 import sys
 
 
-def _configure_logger(verbose: bool, debug: bool):
+def _configure_logger(verbose: bool, debug: bool) -> logging.Logger:
     """Return verbose logger with three levels.
 
     * Verbose false and debug false - no verbose logging.

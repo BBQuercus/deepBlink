@@ -65,12 +65,16 @@ def test_f1_score(tensor_true, tensor_pred):
 
 def test_f1_loss(tensor_true, tensor_pred):
     assert tf.is_tensor(f1_loss(tensor_true, tensor_pred))
+    with pytest.raises(ValueError):
+        f1_loss(tensor_true, tf.constant([[1, 0, 0], [1, 0, 0]]))
 
 
 def test_rmse():
     true_rmse = tf.constant([[[1, 0, 0], [1, 0.5, 0]], [[0, 0, 0], [1, 0.5, 0.5]]])
     pred_rmse = tf.constant([[[1, 0, 0], [1, 0.5, 0]], [[1, 0.5, 0.5], [0, 0.5, 0.5]]])
-    assert rmse(true_rmse[..., 1:], pred_rmse[..., 1:]) == tf.constant(0, dtype=tf.float32)
+    assert rmse(true_rmse[..., 1:], pred_rmse[..., 1:]) == tf.constant(
+        0, dtype=tf.float32
+    )
 
 
 def test_combined_f1_rmse(tensor_true, tensor_pred):

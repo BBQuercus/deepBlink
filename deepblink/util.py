@@ -1,9 +1,10 @@
 """Utility helper functions."""
 
-from typing import Callable, Iterable, Tuple
+from typing import Callable, Iterable, Tuple, Union
 import importlib
 import random
 
+import numpy as np
 import pandas as pd
 
 
@@ -14,12 +15,19 @@ def get_from_module(path: str, attribute: str) -> Callable:
     return attribute  # type: ignore[return-value]
 
 
-def relative_shuffle(x_list: list, y_list: list) -> Tuple[list, list]:
-    """Shuffles two list keeping their relative arrangement."""
-    combined = list(zip(x_list, y_list))
-    random.shuffle(combined)
-    x_tuple, y_tuple = zip(*combined)
-    return list(x_tuple), list(y_tuple)
+def relative_shuffle(
+    x: Union[list, np.ndarray], y: Union[list, np.ndarray]
+) -> Tuple[Union[list, np.ndarray], Union[list, np.ndarray]]:
+    """Shuffles x and y keeping their relative order."""
+    if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
+        shuffled_indices = np.random.permutation(x.shape[0])
+        shuffled_x, shuffled_y = x[shuffled_indices], y[shuffled_indices]
+    else:
+        combined_list = list(zip(x, y))
+        random.shuffle(combined_list)
+        shuffled_x, shuffled_y = zip(*combined_list)
+        shuffled_x, shuffled_y = list(shuffled_x), list(shuffled_y)
+    return shuffled_x, shuffled_y
 
 
 def train_valid_split(
