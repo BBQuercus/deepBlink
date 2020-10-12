@@ -1,5 +1,5 @@
 """Training functions."""
-# pylint: disable=no-member
+# pylint: disable=no-member,missing-function-docstring
 
 from typing import Dict
 import datetime
@@ -61,13 +61,16 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         wandb.log({title: plots}, commit=False)
         plt.close(fig="all")
 
-    def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613,W0221
+    # pylint: disable=W0613,W0221
+    def on_train_begin(self, epochs, logs=None):  # noqa: D102
         self.plot_scatter("Train ground truth", self.train_images, self.train_masks)
         self.plot_scatter("Valid ground truth", self.valid_images, self.valid_masks)
 
-    def on_epoch_end(self, epoch, logs=None):  # pylint: disable=W0613
+    def on_epoch_end(self, epoch, logs=None):  # noqa: ignore=D102
         self.plot_scatter("Train data predictions", self.train_images)
         self.plot_scatter("Valid data predictions", self.valid_images)
+
+    # pylint: enable=W0613,W0221
 
 
 class WandbComputeMetrics(tf.keras.callbacks.Callback):
@@ -135,10 +138,13 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
         plt.legend(loc="upper left")
         wandb.log({"F1 integral histogram": plt})
 
-    def on_train_end(self, logs=None):
+    # pylint: disable=W0613
+    def on_train_end(self, logs=None):  # noqa: D102
         self.df_train = self.log_scores("Train", self.train_images, self.train_labels)
         self.df_valid = self.log_scores("Valid", self.valid_images, self.valid_labels)
         self.log_plots()
+
+    # pylint: enable=W0613
 
 
 def train_model(
