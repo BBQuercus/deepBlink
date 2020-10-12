@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, Union
 import warnings
 
 import numpy as np
+import pandas as pd
 import scipy.optimize
 
 EPS = 1e-12
@@ -259,3 +260,51 @@ def _f1_at_cutoff(
         return f1_value, true_pred_r, true_pred_c
 
     return f1_value
+
+
+def compute_metrics(pred: np.ndarray, true: np.ndarray, mdist: int) -> pd.DataFrame:
+    """Calculate metric scores across cutoffs.
+
+    Args:
+        pred: Predicted set of coordinates.
+        true: Ground truth set of coordinates.
+        mdist: Maximum euclidean distance in px to which F1 scores will be calculated.
+
+    Returns:
+        DataFrame with one row per cutoff containing columns for:
+            * f1_score: Harmonic mean of precision and recall based on the number of coordinates
+                found at different distance cutoffs (around ground truth).
+            * abs_euclidean: Average euclidean distance at each cutoff.
+            * offset: List of (r, c) coordinates denoting offset in pixels.
+            * f1_integral: Area under curve f1_score vs. cutoffs.
+            * mean_euclidean: Normalized average euclidean distance based on the total number of assignments.
+    """
+    f1_scores, offsets, cutoffs = f1_integral(
+        pred, true, max_distance=mdist, n_cutoffs=50, return_raw=True
+    )
+
+    abs_euclideans = []
+    total_euclidean = 0
+    total_assignments = 0
+
+    # Find distances through offsets at every cutoff
+    for c_offset in offsets:
+        abs_euclideans.append(np.mean(offset_euclidean(c_offset)))
+        total_euclidean += np.sum(offset_euclidean(c_offset))
+        try:
+            total_assignments += len(c_offset)
+        except TypeError:
+            continue
+
+    df = pd.DataFrame(
+        {
+            "cutoff": cutoffs,
+            "f1_score": f1_scores,
+            "abs_euclidean": abs_euclideans,
+            "offset": offsets,
+        }
+    )
+    df["f1_integral"] = np.trapz(df["f1_score"], cutoffs) / mdist  # Norm. to 0-1
+    df["mean_euclidean"] = total_euclidean / (total_assignments + 1e-10)
+
+    return df
