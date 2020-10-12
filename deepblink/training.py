@@ -8,11 +8,13 @@ import platform
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import wandb
 
 from .data import get_coordinate_list
 from .datasets import Dataset
+from .metrics import compute_metrics
 from .models import Model
 from .util import get_from_module
 
@@ -30,11 +32,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
     """
 
     def __init__(
-        self,
-        model_wrapper: Model,
-        dataset: Dataset,
-        cell_size: int = 4,
-        n_examples: int = 4,
+        self, model_wrapper: Model, dataset: Dataset, n_examples: int = 4,
     ):
         super().__init__()
         self.model_wrapper = model_wrapper
@@ -42,7 +40,6 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self.train_images = dataset.x_train[:n_examples]  # type: ignore[index]
         self.train_masks = dataset.y_train[:n_examples]  # type: ignore[index]
         self.valid_masks = dataset.y_valid[:n_examples]  # type: ignore[index]
-        self.cell_size = cell_size
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
 
     def plot_scatter(
@@ -65,14 +62,83 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         plt.close(fig="all")
 
     def on_train_begin(self, epochs, logs=None):  # pylint: disable=W0613,W0221
-        """Logs the ground truth at train_begin."""
         self.plot_scatter("Train ground truth", self.train_images, self.train_masks)
         self.plot_scatter("Valid ground truth", self.valid_images, self.valid_masks)
 
     def on_epoch_end(self, epoch, logs=None):  # pylint: disable=W0613
-        """Logs predictions on epoch_end."""
         self.plot_scatter("Train data predictions", self.train_images)
         self.plot_scatter("Valid data predictions", self.valid_images)
+
+
+class WandbComputeMetrics(tf.keras.callbacks.Callback):
+    """Compute the final metrics once training is complete."""
+
+    def __init__(self, model: tf.keras.models.Model, dataset: Dataset, mdist: int):
+        super().__init__()
+        self.model = model
+        self.train_images = dataset.x_train
+        self.train_labels = dataset.y_train
+        self.valid_images = dataset.x_valid
+        self.valid_labels = dataset.y_valid
+        self.mdist = mdist
+
+    def log_scores(
+        self, name: str, images: np.ndarray, labels: np.ndarray
+    ) -> pd.DataFrame:
+        """Prediction and logging function for one set of images and labels."""
+        df = pd.DataFrame()
+
+        for idx, (image, true) in enumerate(zip(images, labels)):
+            pred = self.model.predict(image[None, ..., None]).squeeze()
+            curr_df = compute_metrics(
+                pred=np.array(np.where(np.round(pred[..., 0]))).T,
+                true=np.array(np.where(np.round(true[..., 0]))).T,
+                mdist=self.mdist,
+            )
+            curr_df["image"] = idx
+            df = df.append(curr_df)
+
+        # Log single summary values to wandb
+        f1_mean = df[df["cutoff"] == self.mdist]["f1_score"].mean()
+        f1_std = df[df["cutoff"] == self.mdist]["f1_score"].std()
+        wandb.run.summary[f"{name} f1@{self.mdist} mean"] = f1_mean
+        wandb.run.summary[f"{name} f1@{self.mdist} std"] = f1_std
+        wandb.run.summary[f"{name} integral mean"] = df["f1_integral"].mean()
+        wandb.run.summary[f"{name} integral std"] = df["f1_integral"].std()
+        wandb.run.summary[f"{name} euclidean mean"] = df["mean_euclidean"].mean()
+        wandb.run.summary[f"{name} euclidean std"] = df["mean_euclidean"].std()
+
+        return df
+
+    def log_plots(self) -> None:
+        """Create matplotlib plots and log to wandb."""
+        # F1 score vs. cutoff
+        cutoffs = self.df_train["cutoff"].unique()
+        plt.errorbar(
+            x=cutoffs,
+            y=self.df_train.groupby("cutoff")["f1_score"].mean().values,
+            yerr=self.df_train.groupby("cutoff")["f1_score"].std().values / 2,
+            label="Train",
+        )
+        plt.errorbar(
+            x=cutoffs,
+            y=self.df_valid.groupby("cutoff")["f1_score"].mean().values,
+            yerr=self.df_valid.groupby("cutoff")["f1_score"].std().values / 2,
+            label="Valid",
+        )
+        plt.legend(loc="lower right")
+        wandb.log({"F1 score vs. cutoff": plt})
+
+        # F1 Integral distribution
+        plt.hist(x=self.df_train["f1_integral"], label="Train")
+        plt.hist(x=self.df_valid["f1_integral"], label="Valid")
+        plt.legend(loc="upper left")
+        wandb.log({"F1 integral histogram": plt})
+
+    def on_train_end(self, logs=None):
+        self.df_train = self.log_scores("Train", self.train_images, self.train_labels)
+        self.df_valid = self.log_scores("Valid", self.valid_images, self.valid_labels)
+        self.log_plots()
 
 
 def train_model(
@@ -99,11 +165,10 @@ def train_model(
     callbacks.append(cb_saver)
 
     if use_wandb:
-        cb_image = WandbImageLogger(
-            model, dataset, cell_size=cfg["dataset_args"]["cell_size"]
-        )
+        cb_image = WandbImageLogger(model, dataset)
         cb_wandb = wandb.keras.WandbCallback()
-        callbacks.extend([cb_image, cb_wandb])
+        cb_metrics = WandbComputeMetrics(model, dataset, mdist=3)
+        callbacks.extend([cb_image, cb_wandb, cb_metrics])
 
     model.fit(dataset=dataset, callbacks=callbacks)
 
@@ -122,9 +187,10 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
             Usually through a parsed yaml file (example in bin/) in the following format: ::
 
                 name (str): Name of the Wandb project.
-                comments (str): Comments on runs.
-                savedir (str): Path to where the model should be saved.
+                run_name (str): Name of the current run. Uses format DATE_RUNNAME
                 use_wandb (bool): If Wandb should be used.
+
+                savedir (str): Path to where the model should be saved.
                 dataset (str): Name of dataset class, e.g. "SpotsDataset"
                 dataset_args:
                     version (str): Path to dataset.npz file.
@@ -138,11 +204,7 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
                 network (str): Name of the network architecture, e.g. "resnet"
                 network_args:
                     Arguments passed to the network function.
-                    dropout (float): Percentage of dropout only for resnet architecture, default 0.2.
                     cell_size (int): Size of one cell in the grid, default 4.
-                    filters (int): log2 number of filters in the first convolution layers, default 6.
-                    n_convs (int): number of convolution layers in each convolution block, default 3.
-                    conv_after_res: If True, adds additional convolution block after residual block, default True.
                 loss (str): Primary loss, e.g. "binary_crossentropy"
                 optimizer (str): Optimizer, e.g. "adam"
                 train_args:
@@ -162,7 +224,9 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
     optimizer_fn = get_from_module("deepblink.optimizers", cfg["optimizer"])
     loss_fn = get_from_module("deepblink.losses", cfg["loss"])
 
-    network_args = cfg.get("network_args", {})
+    network_args = (
+        cfg.get("network_args", {}) if cfg.get("network_args", {}) is not None else {}
+    )
     dataset_args = cfg.get("dataset_args", {})
     train_args = cfg.get("train_args", {})
 
@@ -188,18 +252,14 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
     }
 
     now = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-    run_name = f"{now}_{cfg['name']}"
+    run_name = f"{now}_{cfg['run_name']}"
 
     if use_wandb:
-        wandb.init(
-            name=run_name, notes=cfg["comments"], project=cfg["name"], config=cfg
-        )
+        wandb.init(name=run_name, project=cfg["name"], config=cfg)
 
     model = train_model(model, dataset, cfg, run_name, use_wandb)
 
     if use_wandb:
-        score = model.evaluate(dataset.x_valid, dataset.y_valid)
-        wandb.log({"valid_metric": score[0]})  # score[0] corresponds to f1_score
         wandb.join()
 
     if save_weights:
