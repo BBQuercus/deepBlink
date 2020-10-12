@@ -18,7 +18,7 @@ from ._train import HandleTrain
 from ._train import _parse_args_train
 
 # Removes tensorflow's information on CPU / GPU availablity.
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 def arg_parser() -> argparse.ArgumentParser:
