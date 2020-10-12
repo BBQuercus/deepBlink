@@ -124,7 +124,7 @@ def linear_sum_assignment(
 def f1_integral(
     pred: np.ndarray,
     true: np.ndarray,
-    max_distance: float = None,
+    mdist: float = 3.0,
     n_cutoffs: int = 50,
     return_raw: bool = False,
 ) -> Union[float, tuple]:
@@ -137,7 +137,7 @@ def f1_integral(
     Args:
         pred: Array of shape (n, 2) for predicted coordinates.
         true: Array of shape (n, 2) for ground truth coordinates.
-        max_distance: Maximum cutoff distance to calculate F1. Defaults to None.
+        mdist: Maximum cutoff distance to calculate F1. Defaults to None.
         n_cutoffs: Number of intermediate cutoff steps. Defaults to 50.
         return_raw: If True, returns f1_scores, offsets, and cutoffs. Defaults to False.
 
@@ -168,7 +168,7 @@ def f1_integral(
         distances measured across every cutoff and then dividing by the total number of assigned coordinates.
         This automatically weighs models with more detections at lower cutoff scores.
     """
-    cutoffs = np.linspace(start=0, stop=max_distance, num=n_cutoffs)
+    cutoffs = np.linspace(start=0, stop=mdist, num=n_cutoffs)
 
     if pred.size == 0 or true.size == 0:
         warnings.warn(
@@ -181,7 +181,7 @@ def f1_integral(
 
     if not return_raw:
         f1_scores = [_f1_at_cutoff(matrix, pred, true, cutoff) for cutoff in cutoffs]
-        return np.trapz(f1_scores, cutoffs) / max_distance  # Norm. to 0-1
+        return np.trapz(f1_scores, cutoffs) / mdist  # Norm. to 0-1
 
     f1_scores = []
     offsets = []
@@ -262,7 +262,9 @@ def _f1_at_cutoff(
     return f1_value
 
 
-def compute_metrics(pred: np.ndarray, true: np.ndarray, mdist: int) -> pd.DataFrame:
+def compute_metrics(
+    pred: np.ndarray, true: np.ndarray, mdist: float = 3.0
+) -> pd.DataFrame:
     """Calculate metric scores across cutoffs.
 
     Args:
@@ -280,8 +282,8 @@ def compute_metrics(pred: np.ndarray, true: np.ndarray, mdist: int) -> pd.DataFr
             * mean_euclidean: Normalized average euclidean distance based on the total number of assignments.
     """
     f1_scores, offsets, cutoffs = f1_integral(
-        pred, true, max_distance=mdist, n_cutoffs=50, return_raw=True
-    )
+        pred, true, mdist=mdist, n_cutoffs=50, return_raw=True
+    )  # type: ignore[misc]
 
     abs_euclideans = []
     total_euclidean = 0
