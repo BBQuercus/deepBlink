@@ -94,11 +94,11 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
         for idx, (image, true) in enumerate(zip(images, labels)):
             pred = self.model.predict(image[None, ..., None]).squeeze()
             curr_df = compute_metrics(
-                pred=np.array(np.where(np.round(pred[..., 0]))).T,
-                true=np.array(np.where(np.round(true[..., 0]))).T,
+                pred=get_coordinate_list(pred, image_size=image.shape[0]),
+                true=get_coordinate_list(true, image_size=image.shape[0]),
                 mdist=self.mdist,
             )
-            curr_df["image"] = idx
+            curr_df["image"] = idx  # for downstream groupby's
             df = df.append(curr_df)
 
         # Log single summary values to wandb
