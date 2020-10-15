@@ -65,6 +65,14 @@ class SpotsDataset(Dataset):
                 ]
             )
 
+        # def __convert(dataset, image_size, cell_size):
+        #     labels = []
+        #     for coords in dataset:
+        #         matrix = get_prediction_matrix(coords, image_size, cell_size)
+        #         matrix[..., 0] = np.where(matrix[..., 0], 0.8, 0.2)
+        #         labels.append(matrix)
+        #     return np.array(labels)
+
         self.y_train = __convert(self.y_train, self.image_size, self.cell_size)
         self.y_valid = __convert(self.y_valid, self.image_size, self.cell_size)
 
