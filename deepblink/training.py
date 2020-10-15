@@ -165,6 +165,15 @@ def train_model(
     """
     callbacks = []
 
+    # def _scheduler(epoch, lr):
+    #     if epoch < 10:
+    #         return lr
+    #     else:
+    #         return lr * tf.math.exp(-0.05)
+
+    # cb_schedule = tf.keras.callbacks.LearningRateScheduler(_scheduler)
+    # callbacks.append(cb_schedule)
+
     cb_saver = tf.keras.callbacks.ModelCheckpoint(
         os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
     )
