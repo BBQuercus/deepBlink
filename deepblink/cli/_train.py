@@ -92,18 +92,16 @@ class HandleTrain:
         with open(self.raw_config, "r") as config_file:
             config = yaml.safe_load(config_file)
 
-        cfg_clean = {}
-        for key, value in config.items():
-            if "value" in value:
-                cfg_clean[key] = value["value"]
-            else:
-                subdict = {}
-                for subkey, subvalue in value.items():
-                    if "value" in subvalue:
-                        subdict[subkey] = subvalue["value"]
-                cfg_clean[key] = subdict
-        self.logger.info(f"\U0001F4C2 loaded config file: {cfg_clean}")
-        return cfg_clean
+        def _get_values(dct):
+            return {
+                k: v["value"] if "value" in v else _get_values(v)
+                for k, v in dct.items()
+            }
+
+        config = _get_values(config)
+
+        self.logger.info(f"\U0001F4C2 loaded config file: {config}")
+        return config
 
     def set_gpu(self):
         """Set GPU environment variable."""
