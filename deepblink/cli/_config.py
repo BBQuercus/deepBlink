@@ -63,30 +63,84 @@ class HandleConfig:
     def config(self):
         """Default configuration as dictionary."""
         return {
-            "name": "deepBlink",
-            "savedir": "PATH/TO/OUTDIR",
-            "comments": "COMMENT ON WANDB",
-            "use_wandb": False,
-            "dataset": "SpotsDataset",
-            "dataset_args": {
-                "version": "PATH/TO/DATASET.NPZ",
-                "cell_size": 4,
-                "flip": False,
-                "illuminate": False,
-                "rotate": False,
-                "gaussian_noise": False,
-                "translate": False,
+            "name": {
+                "description": "Name of the Wandb/model project",
+                "value": "deepBlink",
             },
-            "model": "SpotsModel",
-            "network": "inception_squeeze",
-            "network_args": {"dropout": 0.0, "filters": 4, "n_extra_down": 0},
-            "loss": "combined_bce_rmse",
-            "optimizer": "adam",
+            "run_name": {
+                "description": "Name of a specific run",
+                "value": "deepBlink_run",
+            },
+            "savedir": {
+                "description": "Path to where the model should be saved",
+                "value": "PATH/TO/OUTDIR",
+            },
+            "use_wandb": {
+                "description": "Boolean variable to specify if Wandb should be used.",
+                "value": False,
+            },
+            "dataset": {
+                "description": "Name of dataset class",
+                "value": "SpotsDataset",
+            },
+            "dataset_args": {
+                "version": {
+                    "description": "Path to dataset.npz file.",
+                    "value": "PATH/TO/DATASET.NPZ",
+                },
+                "cell_size": {
+                    "description": "Size of one cell in the grid.",
+                    "value": 4,
+                },
+                "flip": {
+                    "description": "If flipping should be used as augmentation.",
+                    "value": False,
+                },
+                "illuminate": {
+                    "description": "If illuminate should be used as augmentation.",
+                    "value": False,
+                },
+                "rotate": {
+                    "description": "If rotate should be used as augmentation.",
+                    "value": False,
+                },
+                "gaussian_noise": {
+                    "description": "If gaussian_noise should be used as augmentation.",
+                    "value": False,
+                },
+                "translate": {
+                    "description": "If translate should be used as augmentation.",
+                    "value": False,
+                },
+            },
+            "model": {"description": "Name of the model class", "value": "SpotsModel"},
+            "network": {
+                "description": "Name of the network architecture",
+                "value": "inception_squeeze",
+            },
+            "network_args": {
+                "dropout": {
+                    "description": "Percentage of dropout only for resnet architecture, default 0.2.",
+                    "value": 0.0,
+                },
+                "filters": {
+                    "description": "log2 number of filters in the first convolution layers, default 6.",
+                    "value": 6,
+                },
+            },
+            "loss": {"description": "Primary loss", "value": "combined_bce_rmse"},
+            "optimizer": {"description": "Optimizer", "value": "adam"},
             "train_args": {
-                "batch_size": 2,
-                "epochs": 1000,
-                "learning_rate": 1e-4,
-                "overfit": False,
+                "batch_size": {
+                    "description": "Number of images per mini-batch.",
+                    "value": 2,
+                },
+                "epochs": {"description": "Total rounds of training", "value": 1000},
+                "learning_rate": {"description": "Learning rate", "value": 1e-4},
+                "overfit": {
+                    "description": "If model should overfit to one batch",
+                    "value": False,
+                },
             },
         }
 
