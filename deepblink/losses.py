@@ -142,3 +142,12 @@ def combined_bce_rmse(y_true, y_pred):
     return (
         binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
     )
+
+
+def combined_dice_rmse(y_true, y_pred):
+    """Loss that combines dice for probability and rmse for coordinates.
+
+    The optimal values for dice and rmse are both 0.
+    Bce is considered more important so we weighted rmse with 1/10.
+    """
+    return dice_loss(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) / 10
