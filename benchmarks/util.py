@@ -83,55 +83,6 @@ def offset_euclidean(offset: List[tuple]) -> np.ndarray:
     return np.sqrt(np.sum(np.square(np.array(offset)), axis=-1))
 
 
-def compute_metrics(pred: np.ndarray, true: np.ndarray) -> pd.DataFrame:
-    """Calculate metric scores across cutoffs.
-
-    Args:
-        pred: Predicted set of coordinates.
-        true: Ground truth set of coordinates.
-
-    Returns:
-        DataFrame with one row per cutoff containing columns for:
-            * f1_score: Harmonic mean of precision and recall based on the number of coordinates
-                found at different distance cutoffs (around ground truth).
-            * abs_euclidean: Average euclidean distance at each cutoff.
-            * offset: List of (r, c) coordinates denoting offset in pixels.
-            * f1_integral: Area under curve f1_score vs. cutoffs.
-            * mean_euclidean: Normalized average euclidean distance based on the total number of assignments.
-    """
-    max_distance = 5
-
-    f1_scores, offsets, cutoffs = pink.metrics.f1_integral(
-        pred, true, max_distance=max_distance, n_cutoffs=50, return_raw=True
-    )
-
-    abs_euclideans = []
-    total_euclidean = 0
-    total_assignments = 0
-
-    # Find distances through offsets at every cutoff
-    for c_offset in offsets:
-        abs_euclideans.append(np.mean(offset_euclidean(c_offset)))
-        total_euclidean += np.sum(offset_euclidean(c_offset))
-        try:
-            total_assignments += len(c_offset)
-        except TypeError:
-            continue
-
-    df = pd.DataFrame(
-        {
-            "cutoff": cutoffs,
-            "f1_score": f1_scores,
-            "abs_euclidean": abs_euclideans,
-            "offset": offsets,
-        }
-    )
-    df["f1_integral"] = np.trapz(df["f1_score"], cutoffs) / max_distance  # Norm. to 0-1
-    df["mean_euclidean"] = total_euclidean / (total_assignments + 1e-10)
-
-    return df
-
-
 def plot_metrics(fname: str, df: pd.DataFrame) -> None:
     """Plot F1 scores and prediction distributions."""
     _, ax = plt.subplots(2, 2, figsize=(20, 20))
@@ -246,7 +197,7 @@ def run_test(
     # Calculate metrics and save to file
     df = pd.DataFrame()
     for i, (pred, true) in enumerate(zip(pred_coords, y_test)):
-        curr_df = compute_metrics(pred, true)
+        curr_df = pink.metrics.compute_metrics(pred, true)
         curr_df["image"] = i
         df = df.append(curr_df)
     df.to_csv(fname_metrics)

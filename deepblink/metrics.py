@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, Union
 import warnings
 
 import numpy as np
+import pandas as pd
 import scipy.optimize
 
 EPS = 1e-12
@@ -123,7 +124,7 @@ def linear_sum_assignment(
 def f1_integral(
     pred: np.ndarray,
     true: np.ndarray,
-    max_distance: float = None,
+    mdist: float = 3.0,
     n_cutoffs: int = 50,
     return_raw: bool = False,
 ) -> Union[float, tuple]:
@@ -136,7 +137,7 @@ def f1_integral(
     Args:
         pred: Array of shape (n, 2) for predicted coordinates.
         true: Array of shape (n, 2) for ground truth coordinates.
-        max_distance: Maximum cutoff distance to calculate F1. Defaults to None.
+        mdist: Maximum cutoff distance to calculate F1. Defaults to None.
         n_cutoffs: Number of intermediate cutoff steps. Defaults to 50.
         return_raw: If True, returns f1_scores, offsets, and cutoffs. Defaults to False.
 
@@ -167,7 +168,7 @@ def f1_integral(
         distances measured across every cutoff and then dividing by the total number of assigned coordinates.
         This automatically weighs models with more detections at lower cutoff scores.
     """
-    cutoffs = np.linspace(start=0, stop=max_distance, num=n_cutoffs)
+    cutoffs = np.linspace(start=0, stop=mdist, num=n_cutoffs)
 
     if pred.size == 0 or true.size == 0:
         warnings.warn(
@@ -180,7 +181,7 @@ def f1_integral(
 
     if not return_raw:
         f1_scores = [_f1_at_cutoff(matrix, pred, true, cutoff) for cutoff in cutoffs]
-        return np.trapz(f1_scores, cutoffs) / max_distance  # Norm. to 0-1
+        return np.trapz(f1_scores, cutoffs) / mdist  # Norm. to 0-1
 
     f1_scores = []
     offsets = []
@@ -259,3 +260,53 @@ def _f1_at_cutoff(
         return f1_value, true_pred_r, true_pred_c
 
     return f1_value
+
+
+def compute_metrics(
+    pred: np.ndarray, true: np.ndarray, mdist: float = 3.0
+) -> pd.DataFrame:
+    """Calculate metric scores across cutoffs.
+
+    Args:
+        pred: Predicted set of coordinates.
+        true: Ground truth set of coordinates.
+        mdist: Maximum euclidean distance in px to which F1 scores will be calculated.
+
+    Returns:
+        DataFrame with one row per cutoff containing columns for:
+            * f1_score: Harmonic mean of precision and recall based on the number of coordinates
+                found at different distance cutoffs (around ground truth).
+            * abs_euclidean: Average euclidean distance at each cutoff.
+            * offset: List of (r, c) coordinates denoting offset in pixels.
+            * f1_integral: Area under curve f1_score vs. cutoffs.
+            * mean_euclidean: Normalized average euclidean distance based on the total number of assignments.
+    """
+    f1_scores, offsets, cutoffs = f1_integral(
+        pred, true, mdist=mdist, n_cutoffs=50, return_raw=True
+    )  # type: ignore[misc]
+
+    abs_euclideans = []
+    total_euclidean = 0
+    total_assignments = 0
+
+    # Find distances through offsets at every cutoff
+    for c_offset in offsets:
+        abs_euclideans.append(np.mean(offset_euclidean(c_offset)))
+        total_euclidean += np.sum(offset_euclidean(c_offset))
+        try:
+            total_assignments += len(c_offset)
+        except TypeError:
+            continue
+
+    df = pd.DataFrame(
+        {
+            "cutoff": cutoffs,
+            "f1_score": f1_scores,
+            "abs_euclidean": abs_euclideans,
+            "offset": offsets,
+        }
+    )
+    df["f1_integral"] = np.trapz(df["f1_score"], cutoffs) / mdist  # Norm. to 0-1
+    df["mean_euclidean"] = total_euclidean / (total_assignments + 1e-10)
+
+    return df

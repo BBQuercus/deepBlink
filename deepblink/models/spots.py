@@ -31,8 +31,6 @@ class SpotsModel(Model):
     def metrics(self) -> list:
         """List of all metrics recorded during training."""
         return [
-            "accuracy",
-            "mse",
             f1_score,
             rmse,
             combined_f1_rmse,

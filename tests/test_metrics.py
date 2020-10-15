@@ -113,7 +113,7 @@ def test_f1_at_cutoff():
 @given(arrays(np.uint8, (10, 2)))
 def test_f1_integral_v0(true):
     # Equal inputs
-    output = f1_integral(true, true, max_distance=5, n_cutoffs=20, return_raw=False)
+    output = f1_integral(true, true, mdist=5, n_cutoffs=20, return_raw=False)
     assert output == pytest.approx(1)
 
 
@@ -121,11 +121,11 @@ def test_f1_integral_v1():
     # Unequal inputs
     true = np.ones((10, 2))
     pred = np.zeros((10, 2))
-    output = f1_integral(pred, true, max_distance=2, n_cutoffs=11, return_raw=False)
+    output = f1_integral(pred, true, mdist=2, n_cutoffs=11, return_raw=False)
     assert output == pytest.approx(0.25)
 
     # Raw output
-    output = f1_integral(true, true, max_distance=5, n_cutoffs=20, return_raw=True)
+    output = f1_integral(true, true, mdist=5, n_cutoffs=20, return_raw=True)
     assert len(output) == 3
     assert len(output[1]) == 20  # 20 cutoffs
     assert len(output[1][0]) == 10  # 10 coord inputs -> offsets

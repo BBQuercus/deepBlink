@@ -36,8 +36,8 @@ class SpotsDataset(Dataset):
         base_shape = self.x_train[0].shape
         if not all(
             base_shape == x.shape
-            for x in dataset
             for dataset in [self.x_train, self.x_valid]
+            for x in dataset
         ):
             raise ValueError("All images must have the same shape.")
         if not base_shape[0] == base_shape[1]:
