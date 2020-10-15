@@ -27,7 +27,6 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
     Attributes:
         model_wrapper: Model used for predictions.
         dataset: Dataset class containing data.
-        cell_size: Size of one cell in the grid.
         n_examples: Number of examples saved for display.
     """
 
@@ -184,45 +183,12 @@ def train_model(
 def run_experiment(cfg: Dict, save_weights: bool = False):
     """Run a training experiment.
 
-    An example of the configuration file below can be viewed in the bin/ directory of the github repository.
-    NOTE - There are currently only one type of dataset and model option. This is intentional to make
-    future development easier of new models such as 3D / 4D options.
+    Configuration file can be generated using deepblink config.
+    NOTE - There are currently only one type of dataset and model option. This is intentional
+    to make future development easier of new models such as 3D / 4D options.
 
     Args:
         cfg: Dictionary configuration file.
-            Usually through a parsed yaml file (example in bin/) in the following format: ::
-
-                name (str): Name of the Wandb project.
-                run_name (str): Name of the current run. Uses format DATE_RUNNAME
-                use_wandb (bool): If Wandb should be used.
-
-                savedir (str): Path to where the model should be saved.
-                dataset (str): Name of dataset class, e.g. "SpotsDataset"
-                dataset_args:
-                    version (str): Path to dataset.npz file.
-                    cell_size (int): Size of one cell in the grid.
-                    flip (bool): If flipping should be used as augmentation.
-                    illuminate (bool): If illumination should be used as augmentation.
-                    rotate (bool): If rotation should be used as augmentation.
-                    gaussian_noise (bool): If gaussian noise should be added as augmentation.
-                    translate (bool): If translation should be used as augmentation.
-                model (str): Name of the model class, e.g. "SpotsModel"
-                network (str): Name of the network architecture, e.g. "resnet"
-                network_args:
-                    Arguments passed to the network function.
-                    cell_size (int): Size of one cell in the grid, default 4.
-                loss (str): Primary loss, e.g. "binary_crossentropy"
-                optimizer (str): Optimizer, e.g. "adam"
-                train_args:
-                    batch_size (int): Number of images per mini-batch.
-                    epochs (int): Total rounds of training.
-                    learning_rate (float): Learning rate, e.g. 1e-4
-                    overfit (bool): If model should overfit to one batch.
-                    pretrained (str): Optional weights file to jumpstart training.
-
-
-        save_weights: If model weights should be saved separately.
-            The complete model is automatically saved.
     """
     dataset_class = get_from_module("deepblink.datasets", cfg["dataset"])
     model_class = get_from_module("deepblink.models", cfg["model"])
