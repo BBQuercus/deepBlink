@@ -189,6 +189,8 @@ def run_experiment(cfg: Dict, save_weights: bool = False):
 
     Args:
         cfg: Dictionary configuration file.
+        save_weights: If model weights should be saved separately.
+            The complete model is automatically saved.
     """
     dataset_class = get_from_module("deepblink.datasets", cfg["dataset"])
     model_class = get_from_module("deepblink.models", cfg["model"])
