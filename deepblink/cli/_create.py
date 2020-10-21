@@ -271,6 +271,10 @@ class HandleCreate:
         if size is None:
             self.logger.debug(f"using unchanged size in {image.shape}")
             return [image], [df]
+        
+        if any([size > s for s in image.shape]):
+            self.logger.debug(f"skipping image due to small size {image.shape}")
+            return [], []
 
         windows = skimage.util.view_as_windows(
             image, window_shape=(size, size), step=size
