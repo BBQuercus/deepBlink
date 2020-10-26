@@ -90,26 +90,47 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
     ) -> pd.DataFrame:
         """Prediction and logging function for one set of images and labels."""
         df = pd.DataFrame()
+        mdist = self.mdist
 
         for idx, (image, true) in enumerate(zip(images, labels)):
             pred = self.model.predict(image[None, ..., None]).squeeze()
             curr_df = compute_metrics(
-                pred=np.array(np.where(np.round(pred[..., 0]))).T,
-                true=np.array(np.where(np.round(true[..., 0]))).T,
-                mdist=self.mdist,
+                pred=get_coordinate_list(pred, image_size=image.shape[0]),
+                true=get_coordinate_list(true, image_size=image.shape[0]),
+                mdist=mdist,
             )
             curr_df["image"] = idx
             df = df.append(curr_df)
 
         # Log single summary values to wandb
-        f1_mean = df[df["cutoff"] == self.mdist]["f1_score"].mean()
-        f1_std = df[df["cutoff"] == self.mdist]["f1_score"].std()
-        wandb.run.summary[f"{name} f1@{self.mdist} mean"] = f1_mean
-        wandb.run.summary[f"{name} f1@{self.mdist} std"] = f1_std
-        wandb.run.summary[f"{name} integral mean"] = df["f1_integral"].mean()
-        wandb.run.summary[f"{name} integral std"] = df["f1_integral"].std()
-        wandb.run.summary[f"{name} euclidean mean"] = df["mean_euclidean"].mean()
-        wandb.run.summary[f"{name} euclidean std"] = df["mean_euclidean"].std()
+        values = {
+            f"{name} f1@{mdist} mean": df[df["cutoff"] == mdist]["f1_score"].mean(),
+            f"{name} f1@{mdist} std": df[df["cutoff"] == mdist]["f1_score"].std(),
+            f"{name} integral mean": df["f1_integral"].mean(),
+            f"{name} integral std": df["f1_integral"].std(),
+            f"{name} euclidean mean": df["mean_euclidean"].mean(),
+            f"{name} euclidean std": df["mean_euclidean"].std(),
+        }
+
+        for k, v in values.items():
+            wandb.run.summary[k] = v
+
+        # Barplot with all metrics
+        try:
+            wandb.log(
+                {
+                    f"{name} metrics": wandb.plot.bar(
+                        wandb.Table(
+                            data=list(values.items()), columns=["label", "value"]
+                        ),
+                        "label",
+                        "value",
+                        title=f"{name} metrics",
+                    )
+                }
+            )
+        except TypeError:
+            print(list(values.items()))
 
         return df
 
@@ -165,14 +186,14 @@ def train_model(
     """
     callbacks = []
 
-    # def _scheduler(epoch, lr):
-    #     if epoch < 10:
-    #         return lr
-    #     else:
-    #         return lr * tf.math.exp(-0.05)
+    def _scheduler(epoch, lr):
+        if epoch < 100:
+            return lr
+        else:
+            return lr * tf.math.exp(-0.05)
 
-    # cb_schedule = tf.keras.callbacks.LearningRateScheduler(_scheduler)
-    # callbacks.append(cb_schedule)
+    cb_schedule = tf.keras.callbacks.LearningRateScheduler(_scheduler)
+    callbacks.append(cb_schedule)
 
     cb_saver = tf.keras.callbacks.ModelCheckpoint(
         os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
