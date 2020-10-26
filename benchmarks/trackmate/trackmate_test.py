@@ -1,19 +1,13 @@
 """Test run of trackmate after prediction in FIJI."""
+import argparse
 import glob
 import os
-import sys
 
 from dask.distributed import Client
 import dask
 import deepblink as pink
 import numpy as np
 import pandas as pd
-
-sys.path.append("../")
-from util import _parse_args_fiji
-from util import compute_metrics
-from util import print_scores
-
 
 DTYPES = {
     "radius": np.float16,
@@ -22,6 +16,14 @@ DTYPES = {
     "y": np.float16,
     "q": np.float64,
 }
+
+
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--basedir")
+    parser.add_argument("--threshold")
+    args = parser.parse_args()
+    return args
 
 
 @dask.delayed(nout=2)
@@ -49,7 +51,7 @@ def load_true(basedir, fname):
 @dask.delayed
 def process(fname, pred, true):
     """Processes a single prediction / true set returning a DataFrame with all metrics."""
-    df = compute_metrics(pred, true)
+    df = pink.metrics.compute_metrics(pred, true)
     df["fname"] = fname
     return df
 
@@ -69,9 +71,9 @@ def main():
     2. Process all files distributed outputting the F1 score across thresholds
     3. Meaning across images and determination of best parameters
     """
-    args = _parse_args_fiji(test=True)
+    args = _parse_args()
     basedir = args.basedir
-    threshold = args.threshold
+    threshold = float(args.threshold)
 
     # Start dask client with default: localhost:8787
     client = Client()
@@ -94,9 +96,6 @@ def main():
 
     result = dask.compute(f(files))[0]  # Returns tuple
     print("Files processed.")
-
-    df = pd.concat([pd.read_csv(file) for file in result])
-    print_scores(df)
 
     client.shutdown()
 

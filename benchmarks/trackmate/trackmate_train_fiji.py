@@ -73,6 +73,8 @@ def run_trackmate(
         q = spot.getFeature("QUALITY")
         spots.append([fname, detector, radius, threshold, median_filter, x, y, q])
 
+    print(spots)
+
     # Save output
     outname = os.path.splitext(os.path.basename(fname))[0] + "_" + str(radius) + ".csv"
     with open(os.path.join(path_out, outname), "wb") as f:

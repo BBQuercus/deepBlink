@@ -4,6 +4,7 @@ import glob
 import os
 import re
 import sys
+import pickle
 import textwrap
 import warnings
 
@@ -16,7 +17,6 @@ import pandas as pd
 import scipy.spatial
 
 sys.path.append("../")
-from util import _parse_args_fiji
 
 
 DTYPES = {
@@ -28,7 +28,14 @@ DTYPES = {
 }
 
 
-def get_thresholds(files: list, num: int = 20) -> list:
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--basedir")
+    args = parser.parse_args()
+    return args
+
+
+def get_thresholds(basedir: str, files: list, num: int = 20) -> list:
     """Compute all relative thresholds.
 
     Because quality scores depend on local pixel intensities and contrast ratios,
@@ -42,6 +49,7 @@ def get_thresholds(files: list, num: int = 20) -> list:
     dask dataframes. PRs solving this issue are welcome.
 
     Args:
+        basedir: 
         files: A list of all csv files.
         num: Number of percentile based thresholds.
     """
@@ -50,11 +58,24 @@ def get_thresholds(files: list, num: int = 20) -> list:
         ResourceWarning,
     )
 
-    df = pd.concat([pd.read_csv(f, dtype=DTYPES) for f in files])
-    df["norm_q"] = df["q"] - df.groupby(["fname", "radius"])["q"].transform("median")
+    fname = os.path.join(basedir, "thresholds.txt")
 
-    quantiles = np.linspace(0.01, 0.99, num=num)
-    return [df["norm_q"].quantile(q) for q in quantiles]
+    if os.path.isfile(fname):
+        with open(fname, "rb") as f:
+            thresholds = pickle.load(f)
+    else:
+        df = pd.concat([pd.read_csv(f, dtype=DTYPES) for f in files])
+        df["norm_q"] = df["q"] - df.groupby(["fname", "radius"])["q"].transform(
+            "median"
+        )
+
+        quantiles = np.linspace(0.01, 0.99, num=num)
+        thresholds = [df["norm_q"].quantile(q) for q in quantiles]
+
+        with open(fname, "wb") as f:
+            pickle.dump(thresholds, f)
+
+    return thresholds
 
 
 @dask.delayed(nout=4)
@@ -84,18 +105,19 @@ def load_true(basedir, fname):
 def process(fname, detector, radius, pred_all, true, thresholds):
     """Processes a single prediction / true set returning a DataFrame with all metrics."""
 
+    cutoff = 3
     scores = []
 
     for threshold in thresholds:
         pred = pred_all[:, :2][(pred_all[:, 2] >= threshold)]
 
-        if (length := len(pred)) != 0:
+        if len(pred):
             matrix = scipy.spatial.distance.cdist(pred, true, metric="euclidean")
             pred_true_r, pred_true_c = pink.metrics.linear_sum_assignment(
-                matrix, cutoff=5
+                matrix, cutoff=cutoff
             )
             true_pred_r, true_pred_c = pink.metrics.linear_sum_assignment(
-                matrix.T, cutoff=5
+                matrix.T, cutoff=cutoff
             )
 
             true_positive = len(true_pred_r)
@@ -107,7 +129,7 @@ def process(fname, detector, radius, pred_all, true, thresholds):
         else:
             f1_value = 0.0
 
-        scores.append([fname, detector, radius, threshold, length, f1_value])
+        scores.append([fname, detector, radius, threshold, len(pred), f1_value])
 
     df = pd.DataFrame(
         scores,
@@ -146,7 +168,7 @@ def main():
     2. Process all files distributed outputting the F1 score across thresholds
     3. Meaning across images and determination of best parameters
     """
-    args = _parse_args_fiji()
+    args = _parse_args()
     basedir = args.basedir
 
     # Start dask client with default: localhost:8787
@@ -155,8 +177,8 @@ def main():
 
     # Calculate thresholds
     files = glob.glob(os.path.join(basedir, "train_predictions", "*.csv"))
-    thresholds = get_thresholds(files)
-    print("Thresholds calculated.")
+    thresholds = get_thresholds(basedir, files)
+    print("Thresholds calculated / loaded.")
 
     # Process files
     def f(files):
@@ -181,15 +203,13 @@ def main():
 
     # Compute maximal scores
     df_max = get_max_scores(basedir)
-    print(
-        textwrap.dedent(
-            f"""Optimal metrics found are:
-        * F1 score: {df_max["f1_score"][0]}
-        * Detector: {df_max["detector"][0]}
-        * Radius: {df_max["radius"][0]}
-        * Threshold: {df_max["threshold"][0]}"""
-        )
-    )
+
+    with open(os.path.join(basedir, "info.txt"), "a") as f:
+        f.write(f"Optimal parameters found are:")
+        f.write(f'... F1 score: {df_max["f1_score"][0]}')
+        f.write(f'... Detector: {df_max["detector"][0]}')
+        f.write(f'... Radius: {df_max["radius"][0]}')
+        f.write(f'... Threshold: {df_max["threshold"][0]}')
 
     client.shutdown()
 
