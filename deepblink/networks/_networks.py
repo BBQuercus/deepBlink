@@ -25,7 +25,7 @@ def inception_naive_block(
     Args:
         inputs: Input layer.
         filters: Number of convolutional filters applied.
-        efficient: If the 
+        efficient: If the. 
     """
     args = {
         "activation": tf.nn.leaky_relu,
@@ -141,15 +141,15 @@ def residual_block(
     Conv2D -> ReLU (skip) -> Conv2D -> ReLU -> Conv2D -> Addition with skip -> ReLU.
     """
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(inputs)
-    x = tf.keras.layers.Activation("relu")(x)
+    x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
     skip = x
 
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
-    x = tf.keras.layers.Activation("relu")(x)
+    x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
 
     x = tf.keras.layers.Add()([x, skip])
-    x = tf.keras.layers.Activation("relu")(x)
+    x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
 
     return x
 
