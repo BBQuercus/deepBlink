@@ -126,8 +126,8 @@ def get_prediction_matrix(
     prediction_matrix = np.zeros((nrow, ncol, 3))
     for r, c in coords:
         # Position of cell coordinate in prediction matrix
-        cell_r = int(np.floor(r)) // cell_size
-        cell_c = int(np.floor(c)) // cell_size
+        cell_r = min(nrow - 1, int(np.floor(r)) // cell_size)
+        cell_c = min(ncol - 1, int(np.floor(c)) // cell_size)
 
         # Relative position within cell
         relative_r = (r - cell_r * cell_size) / cell_size
