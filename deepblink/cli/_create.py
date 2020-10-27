@@ -208,6 +208,8 @@ class HandleCreate:
         self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}")
         self.logger.debug(f"labels - found {len(fname_labels)} files: {fname_labels}")
 
+        size = self.img_size
+
         images = []
         labels = []
         for image, label in zip(fname_images, fname_labels):
@@ -221,8 +223,12 @@ class HandleCreate:
                     f"\U000026A0 labels for {label} empty. will not be used"
                 )
                 continue
-            images.append(load_image(image, is_rgb=False))
-            labels.append(df)
+
+            img = load_image(image, is_rgb=False)
+
+            if all(shape > size for shape in img.shape):
+                images.append(load_image(image, is_rgb=False))
+                labels.append(df)
 
         if len(images) != len(labels):
             raise ValueError(
@@ -265,6 +271,10 @@ class HandleCreate:
         if size is None:
             self.logger.debug(f"using unchanged size in {image.shape}")
             return [image], [df]
+
+        if any([size > s for s in image.shape]):
+            self.logger.debug(f"skipping image due to small size {image.shape}")
+            return [], []
 
         windows = skimage.util.view_as_windows(
             image, window_shape=(size, size), step=size
