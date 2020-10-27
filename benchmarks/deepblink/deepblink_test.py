@@ -1,4 +1,5 @@
 import argparse
+import dask
 import glob
 import re
 import sys
@@ -36,6 +37,7 @@ def model_loader_pink(fname):
             "rmse": pink.losses.rmse,
             "combined_dice_rmse": pink.losses.combined_dice_rmse,
             "combined_f1_rmse": pink.losses.combined_f1_rmse,
+            "leaky_relu": tf.nn.leaky_relu,
         },
     )
     return model
