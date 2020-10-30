@@ -25,7 +25,7 @@ def inception_naive_block(
     Args:
         inputs: Input layer.
         filters: Number of convolutional filters applied.
-        efficient: If the. 
+        efficient: If defined, use a more efficient inception block.
     """
     args = {
         "activation": tf.nn.leaky_relu,
@@ -184,52 +184,3 @@ def squeeze_block(x: tf.keras.layers.Layer, ratio: int = 8):
     x1 = tf.keras.layers.Activation("sigmoid")(x1)
     x = tf.keras.layers.Multiply()([x1, x])
     return x
-
-
-def inception_squeeze_block(
-    inputs: tf.keras.layers.Layer, filters: int, ratio: int = 8
-) -> tf.keras.layers.Layer:
-    """Inception naive block.
-    [Conv2d(1,1), Conv2D(3,3), Conv2D(5,5), MaxPooling2D(3,3)] -> output
-    Args:
-        inputs: Input layer.
-        filters: Number of convolutional filters applied.
-    """
-    # 1x1 conv
-    conv1 = tf.keras.layers.Conv2D(
-        filters,
-        (1, 1),
-        activation=tf.nn.leaky_relu,
-        padding="same",
-        kernel_initializer="he_normal",
-        kernel_regularizer=tf.keras.regularizers.l2(0.0002),
-    )(inputs)
-    # 3x3 conv
-    conv3 = tf.keras.layers.Conv2D(
-        filters * 2,
-        (3, 3),
-        activation=tf.nn.leaky_relu,
-        padding="same",
-        kernel_initializer="he_normal",
-        kernel_regularizer=tf.keras.regularizers.l2(0.0002),
-    )(inputs)
-    # 5x5 conv
-    conv5 = tf.keras.layers.Conv2D(
-        filters * 4,
-        (5, 5),
-        activation=tf.nn.leaky_relu,
-        padding="same",
-        kernel_initializer="he_normal",
-        kernel_regularizer=tf.keras.regularizers.l2(0.0002),
-    )(inputs)
-    # 3x3 max pooling
-    pool = tf.keras.layers.MaxPooling2D((3, 3), strides=(1, 1), padding="same")(inputs)
-
-    # squeeze before concat
-    conv1 = squeeze_block(conv1)
-    conv3 = squeeze_block(conv3)
-    conv5 = squeeze_block(conv5)
-    pool = squeeze_block(pool)
-    # concatenate filters, assumes filters/channels last
-    layer_out = tf.keras.layers.concatenate([conv1, conv3, conv5, pool], axis=-1)
-    return layer_out
