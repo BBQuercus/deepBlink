@@ -91,6 +91,15 @@ class HandleTrain:
             )
         with open(self.raw_config, "r") as config_file:
             config = yaml.safe_load(config_file)
+
+        def _get_values(dct):
+            return {
+                k: v["value"] if "value" in v else _get_values(v)
+                for k, v in dct.items()
+            }
+
+        config = _get_values(config)
+
         self.logger.info(f"\U0001F4C2 loaded config file: {config}")
         return config
 
