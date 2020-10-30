@@ -65,7 +65,9 @@ def conv_block(
     inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2, dropout: float = 0
 ) -> tf.keras.layers.Layer:
     """Convolutional block with optional dropout layer.
+
     n_convs * (Conv2D -> ReLU -> Optional Dropout).
+
     Args:
         inputs: Input layer.
         filters: Number of convolutional filters applied.
@@ -94,6 +96,7 @@ def convpool_skip_block(
     inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2
 ) -> Tuple[tf.keras.layers.Layer, tf.keras.layers.Layer]:
     """Conv_block with skip connection.
+
     Returns:
         skip: Layer to be used as skip connection. Output from conv_block.
         x: Layer to be used in next process. Output from 2D MaxPooling.
@@ -112,7 +115,9 @@ def upconv_block(
     dropout: float = 0,
 ) -> tf.keras.layers.Layer:
     """Upconvolutional block with skip connection concatenation.
+
     Upsampling -> Conv2D -> ReLU -> Concatenation with skip -> Conv_block.
+
     Args:
         inputs: Input layer.
         skip: Skip connection input layer.
@@ -138,6 +143,7 @@ def residual_block(
     inputs: tf.keras.layers.Layer, filters: int
 ) -> tf.keras.layers.Layer:
     """Simple residual block with skip connection addition.
+
     Conv2D -> ReLU (skip) -> Conv2D -> ReLU -> Conv2D -> Addition with skip -> ReLU.
     """
     x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(inputs)
@@ -170,7 +176,9 @@ def logit_block(
 # TODO: add input and type checks
 def squeeze_block(x: tf.keras.layers.Layer, ratio: int = 8):
     """Squeeze and excitation block.
+
     ref: https://arxiv.org/pdf/1709.01507.pdf.
+    
     Args:
         x: Input tensor.
         ratio: Number of output filters.

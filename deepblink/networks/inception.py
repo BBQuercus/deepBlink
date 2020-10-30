@@ -11,11 +11,7 @@ from ._networks import squeeze_block
 
 
 def inception(
-    dropout: float = 0.2,
-    cell_size: int = 4,
-    filters: int = 6,
-    n_extra_down: int = 0,
-    spatial: bool = False,
+    dropout: float = 0.2, cell_size: int = 4, filters: int = 6, n_extra_down: int = 0,
 ) -> tf.keras.models.Model:
     """Inception combined with squeeze network with interspersed dropout.
 
@@ -24,7 +20,6 @@ def inception(
         cell_size: Size of one cell in the prediction matrix.
         filters: Log2 number of filters in the first inception block.
         n_extra_down: extra downsampling followed by same number of up sampling.
-        spatial: If true, spatial dropout will be used instead of standard dropout.
     """
     if not math.log(cell_size, 2).is_integer():
         raise ValueError(f"cell_size must be a power of 2, but is {cell_size}.")
