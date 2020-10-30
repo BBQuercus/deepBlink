@@ -186,13 +186,13 @@ def train_model(
     """
     callbacks = []
 
-    def _scheduler(epoch, lr):
-        if epoch < 100:
-            return lr
-        else:
-            return lr * tf.math.exp(-0.05)
+    # def _scheduler(epoch, lr):
+    #    if epoch < 100:
+    #        return lr
+    #    else:
+    #        return lr * tf.math.exp(-0.05)
 
-    cb_schedule = tf.keras.callbacks.LearningRateScheduler(_scheduler)
+    # cb_schedule = tf.keras.callbacks.LearningRateScheduler(_scheduler)
     # callbacks.append(cb_schedule)
 
     cb_saver = tf.keras.callbacks.ModelCheckpoint(
