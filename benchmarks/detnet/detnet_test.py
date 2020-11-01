@@ -1,48 +1,47 @@
-"""Test run of detnet on given dataset."""
+import argparse
+import glob
 import re
 import sys
 
-import numpy as np
+import numpy
+import skimage.util
+
+from detnet_train import detnet
 
 sys.path.append("../")
-from detnet_train import detnet
-from util import _parse_args
-from util import get_coordinates
-from util import run_test
+from util import delayed_results
+from util import delayed_normalize
+from util import delayed_coordinates
 
 
-def model_loader(fname, img_size):
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--datasets")
+    parser.add_argument("--models")
+    args = parser.parse_args()
+    return args
+
+
+def model_loader_detnet(fname):
     """Load spotlearn model with weights."""
-    alpha = float(re.search(r"\d{8}_(\d\.\d+)\.h5", fname)[1])
-    model = detnet(img_size, alpha)
+    alpha = float(re.search(r"_(0\.\d{4})\.", fname)[1])
+    model = detnet(image_size=512, alpha=alpha)
     model.load_weights(fname)
     return model
 
 
-def normalize_fn(image):
-    """Normalize a single input image."""
-    return image.astype(np.float32)
-
-
-def main():
-    # Argparse
-    args = _parse_args(test=True)
-    dataset = args.dataset
-    output = args.output
-    fname_model = args.model
-
-    # Evaluation
-    run_test(
-        benchmark="detnet",
-        dataset=dataset,
-        output=output,
-        fname_model=fname_model,
-        img_size=512,
-        model_loader=model_loader,
-        normalize_fn=normalize_fn,
-        coordinate_loader=get_coordinates,
-    )
-
-
 if __name__ == "__main__":
-    main()
+    args = _parse_args()
+    models = sorted(glob.glob(f"{args.models}/*.h5"))
+    datasets = sorted(glob.glob(f"{args.datasets}/*.npz"))
+    md_detnet = [
+        (re.search(r"detnet_([a-z]+)_", m)[1], m, d) for m, d in zip(models, datasets)
+    ]
+    results_detnet = delayed_results(
+        model_dataset=md_detnet,
+        model_loader=model_loader_detnet,
+        delayed_normalize=delayed_normalize,
+        delayed_coordinates=delayed_coordinates,
+    )
+    results_detnet.to_csv("detnet.csv")
+

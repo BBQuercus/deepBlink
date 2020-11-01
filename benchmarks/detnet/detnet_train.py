@@ -1,24 +1,36 @@
-"""Train detnet on given dataset with automatic hyperparameter search."""
-import datetime
+import argparse
 import glob
 import itertools
 import os
-import sys
-import textwrap
+import shutil
 
-from tensorflow.keras import backend as K
 import deepblink as pink
 import numpy as np
 import pandas as pd
+import skimage.measure
+import skimage.morphology
 import skimage.util
 import tensorflow as tf
+import tensorflow.keras.backend as K
 import tensorflow_addons as tfa
+import wandb
 
-sys.path.append("../")
-from util import _parse_args
-from util import compute_metrics
-from util import get_coordinates
-from util import plot_metrics
+
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset")
+    parser.add_argument("--savedir")
+    args = parser.parse_args()
+    return args
+
+
+def get_coordinates(mask: np.ndarray) -> np.ndarray:
+    """Segmentation mask -> coordinate list."""
+    binary = np.round(mask.squeeze())
+    label = skimage.measure.label(binary)
+    props = skimage.measure.regionprops(label)
+    coords = np.array([p.centroid for p in props])
+    return coords
 
 
 def get_seg_maps(arr: np.ndarray, size: int = 512):
@@ -44,11 +56,11 @@ def detnet(image_size: int = None, alpha: float = 0.0) -> tf.keras.models.Model:
         return K.sigmoid(x - alpha)
 
     def conv_norm(inputs, filters):
-        conv = tf.keras.layers.Conv2D(filters, **OPTS_CONV)(inputs)
+        conv = tf.keras.layers.Conv2D(filters, **conv_args)(inputs)
         norm = tfa.layers.InstanceNormalization()(conv)
         return norm
 
-    OPTS_CONV = {"kernel_size": (3, 3), "padding": "same", "activation": "relu"}
+    conv_args = {"kernel_size": (3, 3), "padding": "same", "activation": "relu"}
 
     inputs = tf.keras.Input((image_size, image_size, 1))
 
@@ -179,139 +191,173 @@ def rmse_score(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
 
 
-def run_train_eval(
-    dataset: str, output: str, img_size: int, alpha: float, batch_size: int = 8
-) -> None:
-    """Main training loop with one set of hyperparameters.
+class DetNet:
+    def __init__(
+        self,
+        savedir: str,
+        bname_file: str,
+        x_train: np.ndarray,
+        y_train: np.ndarray,
+        x_valid: np.ndarray,
+        y_valid: np.ndarray,
+        img_size: int,
+        alpha: float,
+        epochs: int,
+    ):
+        self.savedir = savedir
+        self.bname_file = bname_file
+        self.x_train = x_train
+        self.y_train = y_train
+        self.x_valid = x_valid
+        self.y_valid = y_valid
+        self.img_size = img_size
+        self.alpha = alpha
+        self.epochs = epochs
 
-    Args:
-        img_size: See function detnet.
-        alpha: See function detnet.
-        batch_size: Number of images used for one mini-batch.
+    def __call__(self):
+        self.touch()
+        self.create()
+        self.train()
+        self.evaluate()
+        return self.score
 
-    Returns:
-        None. Automatically saves training log and the best model in
-        directories "./logs" and "./models" respectively.
-    """
-    # Create output names
-    today = datetime.date.today().strftime("%Y%m%d")
-    bname_dataset = pink.io.extract_basename(dataset)
-    bname_file = f"{today}_{alpha}"
-    bname_output = os.path.join(output, "detnet", bname_dataset)
+    def touch(self):
+        self.fname_model = os.path.join(self.savedir, "models", f"{self.bname_file}.h5")
+        self.fname_logs = os.path.join(self.savedir, "logs", f"{self.bname_file}.csv")
+        self.fname_metrics = os.path.join(
+            self.savedir, "metrics", f"{self.bname_file}.csv"
+        )
 
-    for folder in ["models", "logs", "metrics"]:
-        os.makedirs(os.path.join(bname_output, folder), exist_ok=True)
+    def create(self):
+        # Convert Images
+        # Assumed as normalization isn't mentioned in publication
+        train_imgs = self.x_train.astype(np.float32)
+        train_imgs /= 255
+        valid_imgs = self.x_valid.astype(np.float32)
+        valid_imgs /= 255
 
-    fname_model = os.path.join(bname_output, "models", f"{bname_file}.h5")
-    fname_logs = os.path.join(bname_output, "logs", f"{bname_file}.csv")
-    fname_metrics = os.path.join(bname_output, "metrics", f"{bname_file}.csv")
-    fname_plots = os.path.join(bname_output, "metrics", f"{bname_file}.pdf")
+        # Convert coordinates to masks
+        train_masks = get_seg_maps(self.y_train, self.img_size)
+        valid_masks = get_seg_maps(self.y_valid, self.img_size)
 
-    # Verbose output
-    print(f"Starting training of {bname_file}.")
+        # Parameters
+        data_params = {
+            "batch_size": 8,
+            "image_size": self.img_size,
+            "shuffle": True,
+        }
 
-    # Import data from prepared dataset
+        # Data Generators
+        training_generator = DataGenerator(valid_masks, train_masks, **data_params)
+        validation_generator = DataGenerator(valid_imgs, valid_masks, **data_params)
+
+        self.valid_imgs = valid_imgs
+        self.training_generator = training_generator
+        self.validation_generator = validation_generator
+
+    def train(self):
+        # compilation
+        model = detnet(image_size=self.img_size, alpha=self.alpha)
+        model.compile(
+            optimizer=pink.optimizers.amsgrad(learning_rate=0.001),
+            loss=soft_dice,
+            metrics=[f1_score, rmse_score],
+        )
+
+        wandb.init(name=self.bname_file, project="detnet")
+
+        # Callbacks
+        callbacks = [
+            tf.keras.callbacks.EarlyStopping(patience=10),
+            tf.keras.callbacks.ModelCheckpoint(self.fname_model, save_best_only=True),
+            tf.keras.callbacks.CSVLogger(self.fname_logs),
+            wandb.keras.WandbCallback(),
+        ]
+
+        # Fitting
+        model.fit(
+            self.training_generator,
+            validation_data=self.validation_generator,
+            epochs=self.epochs,
+            callbacks=callbacks,
+            verbose=2,
+        )
+
+        self.model = model
+
+    def evaluate(self):
+        pred_masks = [self.model.predict(i[None, :, :, None]) for i in self.valid_imgs]
+        pred_coords = [get_coordinates(m) for m in pred_masks]
+
+        # Metric calculation per image
+        df = pd.DataFrame()
+        for i, (pred, true) in enumerate(zip(pred_coords, self.y_valid)):
+            curr_df = pink.metrics.compute_metrics(pred, true, mdist=3)
+            curr_df["image"] = i
+            df = df.append(curr_df)
+        df.to_csv(self.fname_metrics)
+
+        self.score = df["f1_integral"].mean()
+
+
+def run_sweep(
+    dataset: str, savedir: str, alphas: iter = None,
+):
+    print(f"Running detnet on {dataset}.")
+
+    # Import data
     x_train, y_train, x_valid, y_valid, _, _ = pink.io.load_npz(dataset)
     if x_train.dtype == float:
         x_train = skimage.util.img_as_ubyte(x_train)
     if x_valid.dtype == float:
         x_valid = skimage.util.img_as_ubyte(x_valid)
 
-    # Convert Images
-    # Normalization isn't mentioned in publication
-    train_imgs = x_train.astype(np.float32)
-    train_imgs /= 255
-    valid_imgs = x_valid.astype(np.float32)
-    valid_imgs /= 255
+    # Create output names
+    for folder in ["models", "logs", "metrics", "best"]:
+        os.makedirs(os.path.join(savedir, folder), exist_ok=True)
 
-    # Convert masks
-    train_masks = get_seg_maps(y_train, img_size)
-    valid_masks = get_seg_maps(y_valid, img_size)
-
-    # Parameters
-    data_params = {
-        "batch_size": batch_size,
-        "image_size": img_size,
-        "shuffle": True,
-    }
-
-    # Data Generators
-    training_generator = DataGenerator(valid_masks, train_masks, **data_params)
-    validation_generator = DataGenerator(valid_imgs, valid_masks, **data_params)
-
-    # compilation
-    model = detnet(image_size=img_size, alpha=alpha)
-    model.compile(
-        optimizer=pink.optimizers.amsgrad(learning_rate=0.001),
-        loss=soft_dice,
-        metrics=[f1_score, rmse_score],
-    )
-
-    # Callbacks
-    callbacks = [
-        tf.keras.callbacks.EarlyStopping(patience=10),
-        tf.keras.callbacks.ModelCheckpoint(fname_model, save_best_only=True),
-        tf.keras.callbacks.CSVLogger(fname_logs),
-    ]
-
-    # Fitting
-    model.fit(
-        training_generator,
-        validation_data=validation_generator,
-        epochs=250,
-        callbacks=callbacks,
-        verbose=2,
-    )
-
-    # Verbose output
-    print(f"Training for {bname_file} complete.")
-
-    # Prediction
-    pred_masks = [model.predict(m[None, :, :, None]) for m in valid_imgs]
-    pred_coords = [get_coordinates(m) for m in pred_masks]
-
-    # Metric calculation per image
-    df = pd.DataFrame()
-    for i, (pred, true) in enumerate(zip(pred_coords, y_valid)):
-        curr_df = compute_metrics(pred, true)
-        curr_df["image"] = i
-        df = df.append(curr_df)
-    df.to_csv(fname_metrics)
-
-    plot_metrics(fname_plots, df)
-
-    return df["f1_integral"].mean()
-
-
-def main():
-    # Argparse
-    args = _parse_args()
-    dataset = args.dataset
-    output = args.output
-
-    # Training and evaluation
-    alphas = np.round(np.linspace(0, 1, 20), 4)
-    best_hparam = {
+    # Setup the scoreboard
+    params = {
+        "fname": None,
         "score": 0,
-        "alpha": 0,
+        "alpha": None,
     }
 
+    # Sweep on detnet
     for alpha in alphas:
-        f1_score = run_train_eval(
-            dataset=dataset, output=output, img_size=512, alpha=alpha, batch_size=8
+        bname_file = f"detnet_{pink.io.basename(dataset)}_{alpha}"
+        dn = DetNet(
+            savedir,
+            bname_file,
+            x_train,
+            y_train,
+            x_valid,
+            y_valid,
+            img_size=512,
+            alpha=alpha,
+            epochs=200,
         )
-        if f1_score > best_hparam["score"]:
-            best_hparam["score"] = f1_score
-            best_hparam["alpha"] = alpha
+        score = dn()
 
-    print(
-        textwrap.dedent(
-            f"""Optimal metrics found are:
-        * Score: {best_hparam["score"]}
-        * Alpha: {best_hparam["alpha"]}"""
-        )
+        if score > params["score"]:
+            params["fname"] = bname_file
+            params["score"] = score
+            params["alpha"] = alpha
+
+    # Save the best model
+    with open(os.path.join(savedir, "best", "info.txt"), "a") as f:
+        f.write(f"For datasets {dataset}...\n")
+        f.write(f"...best model: {params['fname']}\n")
+        f.write(f"...best score: {params['score']}\n")
+
+    shutil.copy(
+        os.path.join(savedir, "models", f"{params['fname']}.h5"),
+        os.path.join(savedir, "best"),
     )
 
 
 if __name__ == "__main__":
-    main()
+    args = _parse_args()
+    alphas = np.round(np.linspace(0, 1, 20), 4)
+
+    run_sweep(args.dataset, args.savedir, alphas=alphas)

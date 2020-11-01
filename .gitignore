@@ -48,6 +48,7 @@ htmlcov
 *.iml
 *.komodoproject
 .vscode/
+.ipynb_checkpoints/
 
 # Complexity
 output/*.html
@@ -77,6 +78,7 @@ docs/_build
 *.h5
 !model512x512.h5
 wandb/
+Fiji.app/
 
 # Tests
 .hypothesis/

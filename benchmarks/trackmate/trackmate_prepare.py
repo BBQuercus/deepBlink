@@ -1,14 +1,19 @@
 """Dataset preparation for to allow trackmate to access all files easily."""
+import argparse
 import os
-import sys
 
 import deepblink as pink
 import numpy as np
 import skimage.util
 import tifffile
 
-sys.path.append("../")
-from util import _parse_args
+
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset")
+    parser.add_argument("--output")
+    args = parser.parse_args()
+    return args
 
 
 def save_images(images, location, basename):
@@ -43,7 +48,7 @@ def main():
         "train_predictions",
         "train_processed",
     ]
-    bname_dataset = os.path.join(output, pink.io.extract_basename(dataset))
+    bname_dataset = os.path.join(output, pink.io.basename(dataset))
     os.makedirs(bname_dataset, exist_ok=True)
     for subdir in subdirs:
         os.makedirs(os.path.join(bname_dataset, subdir), exist_ok=True)
