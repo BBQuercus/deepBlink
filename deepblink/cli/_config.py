@@ -76,7 +76,7 @@ class HandleConfig:
                 "value": "PATH/TO/OUTDIR",
             },
             "use_wandb": {
-                "description": "Boolean variable to specify if Wandb should be used.",
+                "description": "Boolean variable to specify if Wandb should be used",
                 "value": False,
             },
             "dataset": {
@@ -85,31 +85,31 @@ class HandleConfig:
             },
             "dataset_args": {
                 "version": {
-                    "description": "Path to dataset.npz file.",
+                    "description": "Path to dataset.npz file",
                     "value": "PATH/TO/DATASET.NPZ",
                 },
                 "cell_size": {
-                    "description": "Size of one cell in the grid.",
+                    "description": "Size of one cell in the grid",
                     "value": 4,
                 },
                 "flip": {
-                    "description": "If flipping should be used as augmentation.",
+                    "description": "If flipping should be used as augmentation",
                     "value": False,
                 },
                 "illuminate": {
-                    "description": "If illuminate should be used as augmentation.",
+                    "description": "If illuminate should be used as augmentation",
                     "value": False,
                 },
                 "rotate": {
-                    "description": "If rotate should be used as augmentation.",
+                    "description": "If rotate should be used as augmentation",
                     "value": False,
                 },
                 "gaussian_noise": {
-                    "description": "If gaussian_noise should be used as augmentation.",
+                    "description": "If gaussian_noise should be used as augmentation",
                     "value": False,
                 },
                 "translate": {
-                    "description": "If translate should be used as augmentation.",
+                    "description": "If translate should be used as augmentation",
                     "value": False,
                 },
             },
@@ -120,15 +120,15 @@ class HandleConfig:
             },
             "network_args": {
                 "dropout": {
-                    "description": "Percentage of dropout only for resnet architecture, default 0.2.",
+                    "description": "Percentage of dropout only for resnet architecture",
                     "value": 0.3,
                 },
                 "filters": {
-                    "description": "log2 number of filters in the first convolution layers, default 6.",
+                    "description": "log2 number of filters in the first convolution layers",
                     "value": 5,
                 },
                 "n_extra_down": {
-                    "description": "Number of further down steps in the Unet",
+                    "description": "Number of further down steps in the UNet",
                     "value": 0,
                 },
             },
@@ -136,7 +136,7 @@ class HandleConfig:
             "optimizer": {"description": "Optimizer", "value": "amsgrad"},
             "train_args": {
                 "batch_size": {
-                    "description": "Number of images per mini-batch.",
+                    "description": "Number of images per mini-batch",
                     "value": 2,
                 },
                 "epochs": {"description": "Total rounds of training", "value": 200},
