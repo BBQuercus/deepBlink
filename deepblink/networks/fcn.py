@@ -51,13 +51,7 @@ def fcn(
         x = conv_block(
             inputs=x, filters=2 ** (filters + 1 - n), n_convs=n_convs, dropout=dropout
         )
-        x = upconv_block(
-            inputs=x,
-            skip=skip_layers[-(n + 1)],
-            filters=2 ** (filters + 1),
-            n_convs=1,
-            dropout=dropout,
-        )
+        x = upconv_block(inputs=x, skip=skip_layers[-(n + 1)])
 
     # Connected
     x = conv_block(

@@ -108,11 +108,7 @@ def convpool_skip_block(
 
 
 def upconv_block(
-    inputs: tf.keras.layers.Layer,
-    skip: tf.keras.layers.Layer,
-    filters: int,
-    n_convs: int = 2,
-    dropout: float = 0,
+    inputs: tf.keras.layers.Layer, skip: tf.keras.layers.Layer
 ) -> tf.keras.layers.Layer:
     """Upconvolutional block with skip connection concatenation.
 
@@ -121,20 +117,10 @@ def upconv_block(
     Args:
         inputs: Input layer.
         skip: Skip connection input layer.
-        filters: Number of convolutional filters applied.
-        n_convs: Number of convolution+relu blocks after concatenation.
-        dropout: If > 0, a dropout layer will be added.
     """
     x = inputs
-    x = tf.keras.layers.Conv2DTranspose(
-        filters=filters, kernel_size=(2, 2), strides=(2, 2), padding="same"
-    )(x)
-    # x = tf.keras.layers.UpSampling2D()(x)
-    x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
-    x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.Dropout(dropout)(x)
+    x = tf.keras.layers.UpSampling2D()(x)
     x = tf.keras.layers.Concatenate()([skip, x])
-    x = conv_block(inputs=x, filters=filters, n_convs=n_convs, dropout=dropout)
 
     return x
 

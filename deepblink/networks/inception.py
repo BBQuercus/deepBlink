@@ -4,7 +4,6 @@ import math
 
 import tensorflow as tf
 
-from ._networks import OPTIONS_CONV
 from ._networks import inception_naive_block
 from ._networks import upconv_block
 from ._networks import squeeze_block
@@ -28,12 +27,6 @@ def inception(
     x = inputs
     skip_layers = []
 
-    # First conv block
-    for _ in range(2):
-        x = tf.keras.layers.Conv2D(2 ** filters, **OPTIONS_CONV)(x)
-        x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
-        x = tf.keras.layers.SpatialDropout2D(dropout)(x)
-
     # Encoder
     for n in range(2 + n_extra_down):
         x = inception_naive_block(inputs=x, filters=2 ** (filters + n))
@@ -43,18 +36,23 @@ def inception(
         skip_layers.append(x)
         x = tf.keras.layers.MaxPool2D(pool_size=(2, 2))(x)
 
+    skip_bottom = x
+
     # Decoder
     for n, skip in enumerate(reversed(skip_layers)):
         x = inception_naive_block(inputs=x, filters=2 ** (filters + 1 - n))
         x = squeeze_block(x=x)
-        x = upconv_block(inputs=x, skip=skip, filters=2 ** (filters + 1), n_convs=1)
+        x = upconv_block(inputs=x, skip=skip)
 
     # # Going back down again
     n_down = int(math.log(cell_size, 2))
     for n in range(n_down):
         x = inception_naive_block(inputs=x, filters=2 ** (filters + n))
         x = squeeze_block(x=x)
+        x = tf.keras.layers.SpatialDropout2D(dropout)(x)
         x = tf.keras.layers.MaxPool2D(pool_size=(2, 2))(x)
+
+    x = tf.keras.layers.Concatenate()([skip_bottom, x])
 
     # Connected
     x = inception_naive_block(inputs=x, filters=2 ** (filters + n_down))

@@ -43,9 +43,7 @@ def resnet(
     for n in range(n_up + n_extra_down):
         x = residual_block(inputs=x, filters=2 ** (filters + 1 - n))
         x = tf.keras.layers.Dropout(dropout)(x)
-        x = upconv_block(
-            inputs=x, skip=skip_layers[-(n + 1)], filters=2 ** (filters + 1), n_convs=2
-        )
+        x = upconv_block(inputs=x, skip=skip_layers[-(n + 1)])
 
     # Connected
     x = residual_block(inputs=x, filters=2 ** (filters + n_down - n_up))
