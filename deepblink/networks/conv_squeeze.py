@@ -17,9 +17,9 @@ def conv_squeeze(
     """Convolutions combined with squeeze network with interspersed dropout.
 
     Arguments:
-        dropout: Percentage of dropout after each inception block.
+        dropout: Percentage of dropout after each convolution+squeeze block.
         cell_size: Size of one cell in the prediction matrix.
-        filters: Log2 number of filters in the first inception block.
+        filters: Log2 number of filters in the first convolution+squeeze block.
         n_extra_down: extra downsampling followed by same number of up sampling.
     """
     if not math.log(cell_size, 2).is_integer():
