@@ -54,7 +54,8 @@ def conv_squeeze(
         x = tf.keras.layers.SpatialDropout2D(dropout)(x)
         x = tf.keras.layers.MaxPool2D(pool_size=(2, 2))(x)
 
-    x = tf.keras.layers.Concatenate()([skip_bottom, x])
+    if cell_size == 4:
+        x = tf.keras.layers.Concatenate()([skip_bottom, x])
 
     # Connected
     x = conv_block(inputs=x, filters=2 ** (filters + n), n_convs=3)
