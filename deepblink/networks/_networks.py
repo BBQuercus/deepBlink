@@ -31,7 +31,8 @@ def inception_block(
         "activation": tf.nn.leaky_relu,
         "padding": "same",
         "kernel_initializer": "he_normal",
-        # "kernel_regularizer": tf.keras.regularizers.l2(REG),
+        "kernel_regularizer": tf.keras.regularizers.l2(REG),
+        "bias_regularizer": tf.keras.regularizers.l2(REG),
     }
 
     # 1x1 conv
