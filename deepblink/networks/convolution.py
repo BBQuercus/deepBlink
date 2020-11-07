@@ -1,6 +1,6 @@
 # pylint: skip-file
 
-"""Fully convolutional networks with / without dropout."""
+"""Fully convolutional networks with spatial dropout and squeeze blocks."""
 
 import math
 
@@ -11,7 +11,7 @@ from ._networks import squeeze_block
 from ._networks import upconv_block
 
 
-def conv_squeeze(
+def convolution(
     dropout: float = 0.2, cell_size: int = 4, filters: int = 5, n_extra_down: int = 0,
 ) -> tf.keras.models.Model:
     """Convolutions combined with squeeze network with interspersed dropout.
