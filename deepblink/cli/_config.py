@@ -116,7 +116,7 @@ class HandleConfig:
             "model": {"description": "Name of the model class", "value": "SpotsModel"},
             "network": {
                 "description": "Name of the network architecture",
-                "value": "inception",
+                "value": "convolution",
             },
             "network_args": {
                 "dropout": {

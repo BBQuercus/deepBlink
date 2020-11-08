@@ -15,10 +15,10 @@ OPTIONS_CONV = {
 }
 
 
-def inception_naive_block(
+def inception_block(
     inputs: tf.keras.layers.Layer, filters: int, efficient: bool = True
 ) -> tf.keras.layers.Layer:
-    """Inception naive block.
+    """Inception block.
 
     [Conv2d(1,1), Conv2D(3,3), Conv2D(5,5), MaxPooling2D(3,3)] -> output
 
@@ -31,7 +31,8 @@ def inception_naive_block(
         "activation": tf.nn.leaky_relu,
         "padding": "same",
         "kernel_initializer": "he_normal",
-        # "kernel_regularizer": tf.keras.regularizers.l2(REG),
+        "kernel_regularizer": tf.keras.regularizers.l2(REG),
+        "bias_regularizer": tf.keras.regularizers.l2(REG),
     }
 
     # 1x1 conv
