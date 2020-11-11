@@ -11,6 +11,7 @@ import skimage.io
 import tensorflow as tf
 
 from .losses import combined_bce_rmse
+from .losses import combined_dice_rmse
 from .losses import combined_f1_rmse
 from .losses import f1_score
 from .losses import rmse
@@ -89,10 +90,12 @@ def load_model(fname: str) -> tf.keras.models.Model:
         model = tf.keras.models.load_model(
             fname,
             custom_objects={
-                "f1_score": f1_score,
-                "rmse": rmse,
                 "combined_bce_rmse": combined_bce_rmse,
+                "combined_dice_rmse": combined_dice_rmse,
                 "combined_f1_rmse": combined_f1_rmse,
+                "f1_score": f1_score,
+                "leaky_relu": tf.nn.leaky_relu,
+                "rmse": rmse,
             },
         )
         return model
