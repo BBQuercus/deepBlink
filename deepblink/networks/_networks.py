@@ -1,7 +1,5 @@
 """Network utility functions."""
 
-from typing import Tuple
-
 import tensorflow as tf
 
 # Default options used in all non-logit convolutional layers.
@@ -15,23 +13,26 @@ OPTIONS_CONV = {
 }
 
 
-def inception_naive_block(
-    inputs: tf.keras.layers.Layer, filters: int, efficient: bool = True
+def inception_block(
+    inputs: tf.keras.layers.Layer,
+    filters: int,
+    efficient: bool = True,
+    l2_regularizer: float = 1e-6,
 ) -> tf.keras.layers.Layer:
-    """Inception naive block.
-
-    [Conv2d(1,1), Conv2D(3,3), Conv2D(5,5), MaxPooling2D(3,3)] -> output
+    """Inception block.
 
     Args:
         inputs: Input layer.
         filters: Number of convolutional filters applied.
         efficient: If defined, use a more efficient inception block.
+        l2_regularizer: L2 value for kernel and bias regularization.
     """
     args = {
         "activation": tf.nn.leaky_relu,
         "padding": "same",
         "kernel_initializer": "he_normal",
-        # "kernel_regularizer": tf.keras.regularizers.l2(REG),
+        "kernel_regularizer": tf.keras.regularizers.l2(l2_regularizer),
+        "bias_regularizer": tf.keras.regularizers.l2(l2_regularizer),
     }
 
     # 1x1 conv
@@ -62,97 +63,54 @@ def inception_naive_block(
 
 
 def conv_block(
-    inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2, dropout: float = 0
+    inputs: tf.keras.layers.Layer,
+    filters: int,
+    n_convs: int = 2,
+    opts_conv: dict = OPTIONS_CONV,
 ) -> tf.keras.layers.Layer:
     """Convolutional block with optional dropout layer.
-
-    n_convs * (Conv2D -> ReLU -> Optional Dropout).
 
     Args:
         inputs: Input layer.
         filters: Number of convolutional filters applied.
         n_convs: Number of convolution+relu blocks.
-        dropout: If > 0, a dropout layer will be added.
+        opts_conv: Options passed to Conv2D.
     """
     x = inputs
     for _ in range(n_convs):
-        x = tf.keras.layers.Conv2D(filters, **OPTIONS_CONV)(x)
+        x = tf.keras.layers.Conv2D(filters, **opts_conv)(x)
         x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
-        x = tf.keras.layers.Dropout(dropout)(x)
     return x
-
-
-def convpool_block(
-    inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2
-) -> tf.keras.layers.Layer:
-    """Conv_block with added 2D MaxPooling."""
-    x = conv_block(inputs=inputs, filters=filters, n_convs=n_convs)
-    x = tf.keras.layers.MaxPooling2D()(x)
-
-    return x
-
-
-def convpool_skip_block(
-    inputs: tf.keras.layers.Layer, filters: int, n_convs: int = 2
-) -> Tuple[tf.keras.layers.Layer, tf.keras.layers.Layer]:
-    """Conv_block with skip connection.
-
-    Returns:
-        skip: Layer to be used as skip connection. Output from conv_block.
-        x: Layer to be used in next process. Output from 2D MaxPooling.
-    """
-    skip = conv_block(inputs=inputs, filters=filters, n_convs=n_convs)
-    x = tf.keras.layers.MaxPooling2D()(skip)
-
-    return skip, x
 
 
 def upconv_block(
-    inputs: tf.keras.layers.Layer,
-    skip: tf.keras.layers.Layer,
-    filters: int,
-    n_convs: int = 2,
-    dropout: float = 0,
+    inputs: tf.keras.layers.Layer, skip: tf.keras.layers.Layer
 ) -> tf.keras.layers.Layer:
     """Upconvolutional block with skip connection concatenation.
-
-    Upsampling -> Conv2D -> ReLU -> Concatenation with skip -> Conv_block.
 
     Args:
         inputs: Input layer.
         skip: Skip connection input layer.
-        filters: Number of convolutional filters applied.
-        n_convs: Number of convolution+relu blocks after concatenation.
-        dropout: If > 0, a dropout layer will be added.
     """
     x = inputs
-    x = tf.keras.layers.Conv2DTranspose(
-        filters=filters, kernel_size=(2, 2), strides=(2, 2), padding="same"
-    )(x)
-    # x = tf.keras.layers.UpSampling2D()(x)
-    x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
-    x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.Dropout(dropout)(x)
+    x = tf.keras.layers.UpSampling2D()(x)
     x = tf.keras.layers.Concatenate()([skip, x])
-    x = conv_block(inputs=x, filters=filters, n_convs=n_convs, dropout=dropout)
 
     return x
 
 
 def residual_block(
-    inputs: tf.keras.layers.Layer, filters: int
+    inputs: tf.keras.layers.Layer, filters: int, opts_conv: dict = OPTIONS_CONV
 ) -> tf.keras.layers.Layer:
-    """Simple residual block with skip connection addition.
+    """Simple residual block."""
 
-    Conv2D -> ReLU (skip) -> Conv2D -> ReLU -> Conv2D -> Addition with skip -> ReLU.
-    """
-    x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(inputs)
+    x = tf.keras.layers.Conv2D(filters=filters, **opts_conv)(inputs)
     x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
     skip = x
 
-    x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
+    x = tf.keras.layers.Conv2D(filters=filters, **opts_conv)(x)
     x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
-    x = tf.keras.layers.Conv2D(filters=filters, **OPTIONS_CONV)(x)
+    x = tf.keras.layers.Conv2D(filters=filters, **opts_conv)(x)
 
     x = tf.keras.layers.Add()([x, skip])
     x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
@@ -160,23 +118,9 @@ def residual_block(
     return x
 
 
-def logit_block(
-    inputs: tf.keras.layers.Layer, n_channels: int
-) -> tf.keras.layers.Layer:
-    """Final decision output with sigmoid/softmax activation depending on n_channels."""
-    x = tf.keras.layers.Conv2D(filters=n_channels, kernel_size=1)(inputs)
-    if n_channels == 1:
-        x = tf.keras.layers.Activation("sigmoid")(x)
-    else:
-        x = tf.keras.layers.Activation("softmax")(x)
-
-    return x
-
-
 # TODO: add input and type checks
 def squeeze_block(x: tf.keras.layers.Layer, ratio: int = 8):
     """Squeeze and excitation block.
-
     ref: https://arxiv.org/pdf/1709.01507.pdf.
 
     Args:
