@@ -1,43 +1,10 @@
 """CLI submodule for configuration."""
 
-import argparse
 import logging
 import os
 import yaml
 
 from ..io import securename
-from ._parseutil import CustomFormatter
-from ._parseutil import _add_utils
-
-
-def _parse_args_config(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
-):
-    """Subparser for configuration."""
-    parser = subparsers.add_parser(
-        "config",
-        parents=[parent_parser],
-        add_help=False,
-        formatter_class=CustomFormatter,
-        description=(
-            "\U0001F528 Configuration submodule \U0001F528\n\n"
-            "Prepare a configuration file used to adjust parameters during training. "
-        ),
-        help="\U0001F528 Create a configuration file for training.",
-    )
-    group2 = parser.add_argument_group("Optional")
-    group2.add_argument(
-        "-n",
-        "--name",
-        type=str,
-        default="config",
-        help=(
-            "Custom configuration name. "
-            'The file extension "yaml" will be added automatically to the given name.'
-            '[default: "config"]'
-        ),
-    )
-    _add_utils(parser)
 
 
 class HandleConfig:

@@ -1,47 +1,11 @@
 """CLI submodule for checking image shapes."""
 
-import argparse
 import logging
 import os
 import textwrap
 
-from ..io import EXTENSIONS
 from ..io import load_image
 from ..util import predict_shape
-from ._parseutil import CustomFormatter
-from ._parseutil import FileType
-from ._parseutil import _add_utils
-
-
-def _parse_args_check(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
-):
-    """Subparser for checking."""
-    parser = subparsers.add_parser(
-        "check",
-        parents=[parent_parser],
-        formatter_class=CustomFormatter,
-        add_help=False,
-        description=(
-            "\U0001F537 Checking submodule \U0001F537\n\n"
-            "Check the arrangement of your image's axis also known as image shape. "
-        ),
-        help="\U0001F537 Determine your input image's shape.",
-    )
-    group1 = parser.add_argument_group("Required")
-    group1.add_argument(
-        "INPUT",
-        type=FileType(EXTENSIONS),
-        help=(
-            "Input image. "
-            "Path to the image file to be checked. "
-            "The path be relative (e.g. ../dir) or absolute (e.g. /Users/myname/). "
-            "Input can either be given as path to a directory containing files or as a single file. "
-            "Note that only the specified filetypes will be processed. "
-            f"[required] [filetypes: {', '.join(EXTENSIONS)}]"
-        ),
-    )
-    _add_utils(parser)
 
 
 class HandleCheck:
