@@ -102,10 +102,21 @@ class CustomFormatter(argparse.RawDescriptionHelpFormatter):
         return super(CustomFormatter, self).add_usage(usage, actions, groups, prefix)
 
 
+class Color:
+    """Addition of fancy colors in help text."""
+
+    ispos = os.name == "posix"
+    title = "\033[1m" if ispos else ""  # bold
+    general = "\033[94m" if ispos else ""  # blue
+    optional = "\033[92m" if ispos else ""  # green
+    required = "\033[91m" if ispos else ""  # red
+    end = "\033[0m" if ispos else ""
+
+
 # TODO find a simpler and safer solution
 def _add_utils(parser: argparse.ArgumentParser):
     """A very hacky way of trying to move this group to the bottom of help text."""
-    group = parser.add_argument_group("General utilities")
+    group = parser.add_argument_group(f"{Color.general}General utilities{Color.end}")
     group.add_argument(
         "-h",
         "--help",
@@ -117,7 +128,7 @@ def _add_utils(parser: argparse.ArgumentParser):
         "-V",
         "--version",
         action="version",
-        version="%(prog)s 0.0.6",
+        version="%(prog)s 0.0.7",
         help="Show %(prog)s's version number.",
     )
     group.add_argument(
