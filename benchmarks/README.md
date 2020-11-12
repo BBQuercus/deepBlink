@@ -3,17 +3,26 @@
 ## Table of contents
 
  1. [General Information](#general-information)
- 2. [TrackMate](#trackmate)
- 3. [SpotLearn](#spotlearn)
- 4. [DetNet](#detnet)
+ 2. [deepBlink](#deepblink)
+ 3. [TrackMate](#trackmate)
+ 4. [SpotLearn](#spotlearn)
+ 5. [DetNet](#detnet)
 
 
 ## General Information
 
-Benchmarking of deepBlink against comparable methods. In all cases, the methods were allowed to train / be optimized on the training and validation dataset while being evaluated on the test dataset. The mentioned scripts are available in the directory with corresponding names. Please run all scripts from inside the directories. In all subsequent benchmarks, the terminology is as follows:
-* `DATABASE(S)`: the path to the npz dataset file
+Benchmarking of deepBlink against comparable methods. In all cases, the methods were allowed to train / be optimized on the training and validation dataset while being evaluated on the test dataset. The mentioned scripts are available in the directory with corresponding names. Please run all scripts from inside the directories. Alternatively you can adapt the `run.sh` files found in all directories containing all fully written out commands. In all subsequent benchmarks, the terminology is as follows:
+* `DATASET(S)`: the path to the npz dataset file
 * `MODEL(S)`: the path to the pre-trained h5 model file
-* `OUTPUT/SAVEDIR`: the directory into which output will be saved into (the structure is: OUTPUT/DATABASE_name/sub_directories)
+* `OUTPUT/SAVEDIR`: the directory into which output will be saved into (the structure is: OUTPUT/DATASET/sub_directories)
+
+
+## deepBlink
+
+deepBlink was trained with the command line interface as described in the publication. Testing was performed as described below with both `DATASETS` and `MODELS` being the path to the directory containing the corresponding files.
+```bash
+python deepblink_test.py --datasets DATASETS --models MODELS
+```
 
 
 ## TrackMate

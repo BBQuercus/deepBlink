@@ -11,6 +11,7 @@ exclude tox.ini
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
 
 include *.md
+include *.txt
 include LICENSE
 include README.rst
 include requirements.txt environment.yml

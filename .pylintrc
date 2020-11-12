@@ -34,7 +34,7 @@ ignored-classes = numpy, skimage, tensorflow
 [BASIC]
 
 # Good variable names which should always be accepted, separated by a comma
-good-names = _, a, b, c, d, e, f, i, j, k, n, N, m, M, D, p, r, t, v, x, X, y, Y, w, h, W, H, x1, x2, y1, y2, ax, df, xy, xyz, x0, y0, z0, z, xx, yy, app, log, tp, fp, fn
+good-names = _, a, b, c, d, e, f, i, j, k, n, N, m, M, D, p, r, t, v, x, X, y, Y, w, h, W, H, x1, x2, y1, y2, ax, df, xy, xyz, x0, y0, z0, z, xx, yy, app, log, tp, fp, fn, l2
 
 # Regular expression which should only match correct function names
 function-rgx = [a-z_][a-z0-9_]{2,70}$
