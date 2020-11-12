@@ -30,88 +30,60 @@ class HandleConfig:
     def config(self):
         """Default configuration as dictionary."""
         return {
-            "name": {
-                "description": "Name of the Wandb/model project",
-                "value": "deepBlink",
+            "name": {"description": "Wandb/model name", "value": "deepBlink",},
+            "run_name": {"description": "Current run", "value": "deepBlink_is_sweet",},
+            "savedir": {"description": "Model saving path", "value": "PATH/TO/OUTDIR",},
+            "use_wandb": {"description": "If wandb.ai should be used", "value": False,},
+            "augmentation_args": {
+                "flip": {"description": "Flipping", "value": False,},
+                "illuminate": {"description": "Illumination changes", "value": False,},
+                "rotate": {"description": "Rotation", "value": False,},
+                "gaussian_noise": {"description": "Gaussian_noise", "value": False,},
+                "translate": {"description": "Translation", "value": False,},
             },
-            "run_name": {
-                "description": "Name of a specific run",
-                "value": "deepBlink_run",
-            },
-            "savedir": {
-                "description": "Path to where the model should be saved",
-                "value": "PATH/TO/OUTDIR",
-            },
-            "use_wandb": {
-                "description": "Boolean variable to specify if Wandb should be used",
-                "value": False,
-            },
-            "dataset": {
-                "description": "Name of dataset class",
-                "value": "SpotsDataset",
-            },
+            "dataset": {"description": "Dataset class", "value": "SpotsDataset",},
             "dataset_args": {
-                "version": {
-                    "description": "Path to dataset.npz file",
+                "name": {
+                    "description": "Dataset.npz file",
                     "value": "PATH/TO/DATASET.NPZ",
                 },
                 "cell_size": {
                     "description": "Size of one cell in the grid",
                     "value": 4,
                 },
-                "flip": {
-                    "description": "If flipping should be used as augmentation",
-                    "value": False,
-                },
-                "illuminate": {
-                    "description": "If illuminate should be used as augmentation",
-                    "value": False,
-                },
-                "rotate": {
-                    "description": "If rotate should be used as augmentation",
-                    "value": False,
-                },
-                "gaussian_noise": {
-                    "description": "If gaussian_noise should be used as augmentation",
-                    "value": False,
-                },
-                "translate": {
-                    "description": "If translate should be used as augmentation",
-                    "value": False,
+                "smooth_factor": {
+                    "description": "True label smoothing factor",
+                    "value": 1,
                 },
             },
             "model": {"description": "Name of the model class", "value": "SpotsModel"},
             "network": {
-                "description": "Name of the network architecture",
-                "value": "convolution",
+                "description": "Network architecture function",
+                "value": "unet",
             },
             "network_args": {
                 "dropout": {
-                    "description": "Percentage of dropout only for resnet architecture",
+                    "description": "Fraction of input units to drop",
                     "value": 0.3,
                 },
                 "filters": {
-                    "description": "log2 number of filters in the first convolution layers",
+                    "description": "2 ** filters in the first layer",
                     "value": 5,
                 },
-                "n_extra_down": {
-                    "description": "Number of further down steps in the UNet",
-                    "value": 0,
+                "ndown": {"description": "Network depth (encoding steps)", "value": 2,},
+                "l2": {"description": "L2 regularization factor", "value": 1e-6,},
+                "block": {
+                    "description": "Basic architectural block",
+                    "value": "convolutional",
                 },
             },
-            "loss": {"description": "Primary loss", "value": "combined_dice_rmse"},
-            "optimizer": {"description": "Optimizer", "value": "amsgrad"},
+            "loss": {"description": "Loss function", "value": "combined_dice_rmse",},
+            "optimizer": {"description": "Optimizer function", "value": "amsgrad"},
             "train_args": {
-                "batch_size": {
-                    "description": "Number of images per mini-batch",
-                    "value": 2,
-                },
+                "batch_size": {"description": "Samples per mini-batch", "value": 2,},
                 "epochs": {"description": "Total rounds of training", "value": 200},
-                "learning_rate": {"description": "Learning rate", "value": 1e-4},
-                "overfit": {
-                    "description": "If model should overfit to one batch",
-                    "value": False,
-                },
+                "learning_rate": {"description": "Learning rate", "value": 1e-4,},
+                "overfit": {"description": "Single batch overfitting", "value": False,},
             },
         }
 
