@@ -33,6 +33,7 @@ class Model:
 
     def __init__(
         self,
+        augmentation_args: Dict,
         dataset_args: Dict,
         dataset_cls: Dataset,
         network_args: Dict,
@@ -45,13 +46,13 @@ class Model:
     ):
         self.name = f"{DATESTRING}_{self.__class__.__name__}_{dataset_cls.name}_{network_fn.__name__}"
 
+        self.augmentation_args = augmentation_args
+        self.batch_augment_fn = batch_augment_fn
+        self.batch_format_fn = batch_format_fn
+        self.dataset_args = dataset_args
         self.loss_fn = loss_fn
         self.optimizer_fn = optimizer_fn
-
-        self.dataset_args = dataset_args
         self.train_args = train_args
-        self.batch_format_fn = batch_format_fn
-        self.batch_augment_fn = batch_augment_fn
 
         try:
             self.network = network_fn(**network_args)
@@ -110,8 +111,6 @@ class Model:
             callbacks=callbacks,
             validation_data=valid_sequence,
             shuffle=True,
-            # use_multiprocessing=False,
-            # workers=1,
         )
 
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> List[float]:
