@@ -15,11 +15,14 @@ class SpotsDataset(Dataset):
     Args:
         cell_size: Number of pixels (from original image) constituting
             one cell in the prediction matrix.
+        smooth_factor: Value used to weigh true cells, weighs false cells
+            with 1-smooth_factor.
     """
 
-    def __init__(self, name: str, cell_size: int):
+    def __init__(self, name: str, cell_size: int, smooth_factor: float = 1):
         super().__init__(name)
         self.cell_size = cell_size
+        self.smooth_factor = smooth_factor
         self.load_data()
 
     def load_data(self) -> None:
@@ -58,20 +61,14 @@ class SpotsDataset(Dataset):
         """
 
         def __convert(dataset, image_size, cell_size):
-            return np.array(
-                [
-                    get_prediction_matrix(coords, image_size, cell_size)
-                    for coords in dataset
-                ]
-            )
-
-        # def __convert(dataset, image_size, cell_size):
-        #     labels = []
-        #     for coords in dataset:
-        #         matrix = get_prediction_matrix(coords, image_size, cell_size)
-        #         matrix[..., 0] = np.where(matrix[..., 0], 0.8, 0.2)
-        #         labels.append(matrix)
-        #     return np.array(labels)
+            labels = []
+            for coords in dataset:
+                matrix = get_prediction_matrix(coords, image_size, cell_size)
+                matrix[..., 0] = np.where(
+                    matrix[..., 0], self.smooth_factor, 1 - self.smooth_factor
+                )
+                labels.append(matrix)
+            return np.array(labels)
 
         self.y_train = __convert(self.y_train, self.image_size, self.cell_size)
         self.y_valid = __convert(self.y_valid, self.image_size, self.cell_size)

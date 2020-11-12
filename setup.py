@@ -11,7 +11,7 @@ from setuptools import setup
 setup(
     # Description
     name="deepblink",
-    version="0.0.6",
+    version="0.0.7",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description_content_type="text/plain",
@@ -30,7 +30,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.6, <=3.8.*",
+    python_requires=">=3.6, <3.9",
     install_requires=[
         "matplotlib",
         "numpy>=1.16.0,<1.19.0",
@@ -41,7 +41,6 @@ setup(
         "scikit-image",
         "scipy==1.4.1",
         "tensorflow>=2.0",
-        "wandb>=0.7.0",
     ],
     entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
     # Metadata

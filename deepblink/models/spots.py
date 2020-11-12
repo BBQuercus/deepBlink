@@ -19,11 +19,11 @@ class SpotsModel(Model):
 
         self.batch_augment_fn = functools.partial(
             augment_batch_baseline,
-            flip_=self.dataset_args["flip"],
-            illuminate_=self.dataset_args["illuminate"],
-            gaussian_noise_=self.dataset_args["gaussian_noise"],
-            rotate_=self.dataset_args["rotate"],
-            translate_=self.dataset_args["translate"],
+            flip_=self.augmentation_args["flip"],
+            illuminate_=self.augmentation_args["illuminate"],
+            gaussian_noise_=self.augmentation_args["gaussian_noise"],
+            rotate_=self.augmentation_args["rotate"],
+            translate_=self.augmentation_args["translate"],
             cell_size=self.dataset_args["cell_size"],
         )
 

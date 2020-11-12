@@ -9,6 +9,7 @@ prune tests
 exclude .*
 exclude tox.ini
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
+recursive-include deepblink *.txt
 
 include *.md
 include LICENSE

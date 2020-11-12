@@ -3,13 +3,9 @@
 Contains functions returning the base architectures of used models.
 """
 
-from .convolution import convolution
-from .inception import inception
-from .resnet import resnet
+from .unet import unet
 
 
 __all__ = [
-    "convolution",
-    "inception",
-    "resnet",
+    "unet",
 ]
