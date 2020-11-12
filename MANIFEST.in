@@ -9,9 +9,9 @@ prune tests
 exclude .*
 exclude tox.ini
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
+recursive-include deepblink *.txt
 
 include *.md
-include *.txt
 include LICENSE
 include README.rst
 include requirements.txt environment.yml
