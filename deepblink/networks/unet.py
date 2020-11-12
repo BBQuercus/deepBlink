@@ -47,7 +47,7 @@ def unet(
     l2: float = 1e-6,
     block: str = "convolutional",
 ) -> tf.keras.models.Model:
-    """UNet model with second, cell size dependent encoder.
+    """Unet model with second, cell size dependent encoder.
 
     Note that "convolution" is the currently best block.
 

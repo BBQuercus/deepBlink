@@ -62,7 +62,7 @@ class HandleDownload:
     @property
     def models(self) -> dict:
         """Dictionary with all models listed."""
-        raw_models = request.urlopen(self.model_url).read().decode("utf-8")
+        raw_models = request.urlopen(self.model_url).read().decode("utf-8")  # nosec
         models = ast.literal_eval(raw_models)
         self.logger.debug(f"found models {models}")
         return models

@@ -62,7 +62,7 @@ def inception_block(
     return layer_out
 
 
-def conv_block(
+def conv_block(  # pylint: disable=W0102
     inputs: tf.keras.layers.Layer,
     filters: int,
     n_convs: int = 2,
@@ -99,11 +99,10 @@ def upconv_block(
     return x
 
 
-def residual_block(
+def residual_block(  # pylint: disable=W0102
     inputs: tf.keras.layers.Layer, filters: int, opts_conv: dict = OPTIONS_CONV
 ) -> tf.keras.layers.Layer:
     """Simple residual block."""
-
     x = tf.keras.layers.Conv2D(filters=filters, **opts_conv)(inputs)
     x = tf.keras.layers.Activation(tf.nn.leaky_relu)(x)
     skip = x
@@ -121,6 +120,7 @@ def residual_block(
 # TODO: add input and type checks
 def squeeze_block(x: tf.keras.layers.Layer, ratio: int = 8):
     """Squeeze and excitation block.
+
     ref: https://arxiv.org/pdf/1709.01507.pdf.
 
     Args:

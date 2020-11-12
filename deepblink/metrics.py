@@ -281,9 +281,7 @@ def compute_metrics(
             * f1_integral: Area under curve f1_score vs. cutoffs.
             * mean_euclidean: Normalized average euclidean distance based on the total number of assignments.
     """
-    f1_scores, offsets, cutoffs = f1_integral(
-        pred, true, mdist=mdist, n_cutoffs=50, return_raw=True
-    )  # type: ignore[misc]
+    f1_scores, offsets, cutoffs = f1_integral(pred, true, mdist=mdist, n_cutoffs=50, return_raw=True)  # type: ignore
 
     abs_euclideans = []
     total_euclidean = 0

@@ -30,18 +30,18 @@ class HandleConfig:
     def config(self):
         """Default configuration as dictionary."""
         return {
-            "name": {"description": "Wandb/model name", "value": "deepBlink",},
-            "run_name": {"description": "Current run", "value": "deepBlink_is_sweet",},
-            "savedir": {"description": "Model saving path", "value": "PATH/TO/OUTDIR",},
-            "use_wandb": {"description": "If wandb.ai should be used", "value": False,},
+            "name": {"description": "Wandb/model name", "value": "deepBlink"},
+            "run_name": {"description": "Current run", "value": "deepBlink_is_sweet"},
+            "savedir": {"description": "Model saving path", "value": "PATH/TO/OUTDIR"},
+            "use_wandb": {"description": "If wandb.ai should be used", "value": False},
             "augmentation_args": {
-                "flip": {"description": "Flipping", "value": False,},
-                "illuminate": {"description": "Illumination changes", "value": False,},
-                "rotate": {"description": "Rotation", "value": False,},
-                "gaussian_noise": {"description": "Gaussian_noise", "value": False,},
-                "translate": {"description": "Translation", "value": False,},
+                "flip": {"description": "Flipping", "value": False},
+                "illuminate": {"description": "Illumination changes", "value": False},
+                "rotate": {"description": "Rotation", "value": False},
+                "gaussian_noise": {"description": "Gaussian_noise", "value": False},
+                "translate": {"description": "Translation", "value": False},
             },
-            "dataset": {"description": "Dataset class", "value": "SpotsDataset",},
+            "dataset": {"description": "Dataset class", "value": "SpotsDataset"},
             "dataset_args": {
                 "name": {
                     "description": "Dataset.npz file",
@@ -70,20 +70,20 @@ class HandleConfig:
                     "description": "2 ** filters in the first layer",
                     "value": 5,
                 },
-                "ndown": {"description": "Network depth (encoding steps)", "value": 2,},
-                "l2": {"description": "L2 regularization factor", "value": 1e-6,},
+                "ndown": {"description": "Network depth (encoding steps)", "value": 2},
+                "l2": {"description": "L2 regularization factor", "value": 1e-6},
                 "block": {
                     "description": "Basic architectural block",
                     "value": "convolutional",
                 },
             },
-            "loss": {"description": "Loss function", "value": "combined_dice_rmse",},
+            "loss": {"description": "Loss function", "value": "combined_dice_rmse"},
             "optimizer": {"description": "Optimizer function", "value": "amsgrad"},
             "train_args": {
-                "batch_size": {"description": "Samples per mini-batch", "value": 2,},
+                "batch_size": {"description": "Samples per mini-batch", "value": 2},
                 "epochs": {"description": "Total rounds of training", "value": 200},
-                "learning_rate": {"description": "Learning rate", "value": 1e-4,},
-                "overfit": {"description": "Single batch overfitting", "value": False,},
+                "learning_rate": {"description": "Learning rate", "value": 1e-4},
+                "overfit": {"description": "Single batch overfitting", "value": False},
             },
         }
 

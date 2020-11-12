@@ -1,7 +1,6 @@
 """CLI submodule for predicting on images."""
 
 from typing import List
-import argparse
 import logging
 import os
 

@@ -28,7 +28,7 @@ def arg_parser() -> argparse.ArgumentParser:
     """Argument parser."""
     parser = argparse.ArgumentParser(
         prog="deepblink",
-        description=f"{Color.title}deepBlink's CLI \U0001F469\U0000200D\U0001F4BB to ferret out all of your spots.{Color.end}",
+        description=f"{Color.title}deepBlink's CLI \U0001F469\U0000200D\U0001F4BB to ferret out all of your spots.{Color.end}",  # noqa: E501, pylint: disable=C0301
         epilog=(
             'See "deepblink <command> --help" to read about the specific subcommand.\n'
             'See the online wiki at "https://github.com/BBQuercus/deepBlink/wiki" for an overview.\n'

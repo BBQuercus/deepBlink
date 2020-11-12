@@ -1,4 +1,5 @@
 """Training functions."""
+# pylint: disable=C0415
 
 from typing import Dict
 import datetime
@@ -99,7 +100,9 @@ def run_experiment(cfg: Dict):
     if use_wandb:
         try:
             import wandb
-            assert wandb.__version__ >= "0.10.03"
+
+            if wandb.__version__ >= "0.10.03":
+                raise AssertionError
         except (ModuleNotFoundError, AttributeError, AssertionError):
             raise ImportError(
                 (
@@ -107,9 +110,11 @@ def run_experiment(cfg: Dict):
                     "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
                 )
             )
+
+        # pylint:disable=E1101
         wandb.init(name=run_name, project=cfg["name"], config=cfg)
 
     model = train_model(model, dataset, cfg, run_name, use_wandb)
 
     if use_wandb:
-        wandb.join()
+        wandb.join()  # pylint:disable=E1101

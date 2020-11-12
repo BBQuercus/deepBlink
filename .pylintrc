@@ -51,7 +51,16 @@ max-line-length = 120
 logging-format-style = new
 
 # Change minimum number of identical files for R0801 to trigger.
-min-similarity-lines=10
+min-similarity-lines=12
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+# Ignore imports when computing similarities.
+ignore-imports=no
 
 [DESIGN]
 # Minimum number of public methods for a class (see R0903).

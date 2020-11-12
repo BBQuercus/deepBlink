@@ -1,4 +1,5 @@
 """Model class, to be extended by specific types of models."""
+# pylint: disable=R0913
 
 from typing import Callable, Dict, List
 import datetime

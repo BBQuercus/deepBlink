@@ -8,7 +8,9 @@ import tensorflow as tf
 
 try:
     import wandb
-    assert wandb.__version__ >= "0.10.03"
+
+    if wandb.__version__ >= "0.10.03":
+        raise AssertionError
 except (ModuleNotFoundError, AttributeError, AssertionError):
     raise ImportError(
         (
@@ -17,21 +19,15 @@ except (ModuleNotFoundError, AttributeError, AssertionError):
         )
     )
 
+
 from .data import get_coordinate_list
 from .datasets import Dataset
 from .metrics import compute_metrics
 from .models import Model
 
 
-def wandb_init(name, project, config):
-    wandb.init(name=name, project=project, config=config)
-
-
-def wandb_join():
-    wandb.join()
-
-
 def wandb_callback():
+    """Callback function to avoid double imports."""
     return wandb.keras.WandbCallback()
 
 
