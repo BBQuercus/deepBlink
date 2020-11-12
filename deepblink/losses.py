@@ -83,8 +83,7 @@ def f1_score(y_true, y_pred):
     The equally weighted average of precision and recall.
     The best value is 1 and the worst value is 0.
     """
-    # f1_score, when used as metrics, takes as input the full y_true, y_pred.
-    # therefore, do not move the selection outside the function.
+    # Do not move outside of function. See RMSE.
     precision = precision_score(y_true[..., 0], y_pred[..., 0])
     recall = recall_score(y_true[..., 0], y_pred[..., 0])
     f1_value = 2 * ((precision * recall) / (precision + recall + K.epsilon()))
@@ -104,10 +103,11 @@ def f1_loss(y_true, y_pred):
 
 def rmse(y_true, y_pred):
     """Calculate root mean square error (rmse) between true and predicted coordinates."""
-    # rmse, when used as metrics, takes as input the full y_true, y_pred.
-    # therefore, do not move the selection outside the function.
+    # RMSE, takes in the full y_true/y_pred when used as metric.
+    # Therefore, do not move the selection outside the function.
     y_true = y_true[..., 1:]
     y_pred = y_pred[..., 1:]
+
     comparison = tf.equal(y_true, tf.constant(0, dtype=tf.float32))
 
     y_true_new = tf.where(comparison, tf.zeros_like(y_true), y_true)
@@ -137,17 +137,15 @@ def combined_bce_rmse(y_true, y_pred):
     """Loss that combines binary cross entropy for probability and rmse for coordinates.
 
     The optimal values for binary crossentropy (bce) and rmse are both 0.
-    Bce is considered more important so we weighted rmse with 1/10.
     """
     return (
         binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) * 2
-    )  # / 10
+    )
 
 
 def combined_dice_rmse(y_true, y_pred):
     """Loss that combines dice for probability and rmse for coordinates.
 
     The optimal values for dice and rmse are both 0.
-    Dice is considered more important so we weighted rmse with 1/10.
     """
     return dice_loss(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) * 2
