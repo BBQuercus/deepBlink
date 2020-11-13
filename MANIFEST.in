@@ -10,6 +10,7 @@ exclude .*
 exclude tox.ini
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
 recursive-include deepblink *.txt
+recursive-include conda *.yaml
 
 include *.md
 include LICENSE
