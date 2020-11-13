@@ -1,6 +1,6 @@
 package:
     name: "deepblink"
-    version: PKG_HASH
+    version: 0.0.7
 source:
     path: ..
 
