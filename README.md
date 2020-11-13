@@ -51,6 +51,12 @@ This package is built for [Python](https://www.python.org/downloads/) versions n
 pip install deepblink
 ```
 
+Or using conda:
+```bash
+conda install -c bbquercus deepblink
+```
+
+
 Additionally for GPU support, install `tensorflow-gpu` through pip and with the
 appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html).
 
