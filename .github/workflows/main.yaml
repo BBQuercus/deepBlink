@@ -44,3 +44,8 @@ jobs:
       run: tox -e safety
     - name: run tox style
       run: tox -e style
+
+  # Direct upload to conda
+  conda:
+    - name: Publish Conda
+      uses: fcakyon/conda-publish-action@v1.3
