@@ -1,6 +1,6 @@
 package:
     name: "deepblink"
-    version: {{ steps.vars.outputs.sha_short }}
+    version: PKG_HASH
 source:
     path: ..
 
