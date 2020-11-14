@@ -9,7 +9,7 @@ import tensorflow as tf
 try:
     import wandb
 
-    if wandb.__version__ >= "0.10.03":
+    if wandb.__version__ <= "0.10.03":
         raise AssertionError
 except (ModuleNotFoundError, AttributeError, AssertionError):
     raise ImportError(

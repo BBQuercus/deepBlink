@@ -21,7 +21,7 @@ def __block(inputs, filters, block, l2):
     if block == "inception":
         x = inception_block(inputs=inputs, filters=filters, l2_regularizer=l2)
     if block == "residual":
-        x = residual_block(inputs=x, filters=filters, opts_conv=opts_conv)
+        x = residual_block(inputs=inputs, filters=filters, opts_conv=opts_conv)
     x = squeeze_block(x=x)
     return x
 
