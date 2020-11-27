@@ -91,15 +91,15 @@ def delayed_results(
                 image = delayed_normalize(image)
                 pred = delayed_predict(model, image)
                 try:
-                    pred = delayed_coordinates(image, pred)
-                except:
                     pred = delayed_coordinates(pred)
+                except:
+                    pred = delayed_coordinates(image, pred)
                 df = delayed_compute(pred, true, idx)
                 results.append(df)
-
             return results
 
         # Compute results
+
         result = dask.compute(f(x_test, y_test))[0]  # Returns tuple
         df = pd.concat(result)
         df["name"] = name
