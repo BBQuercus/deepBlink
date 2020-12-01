@@ -18,9 +18,7 @@ class FileType:
 
     def __call__(self, value):  # noqa: D102
         if not os.path.isfile(value):
-            raise argparse.ArgumentTypeError(
-                f"Input must be a file. '{value}' does not."
-            )
+            raise argparse.ArgumentTypeError(f"Input must be a file. '{value}' is not.")
 
         if not any([value.endswith(e) for e in self.extensions]):
             raise argparse.ArgumentTypeError(

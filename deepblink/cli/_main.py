@@ -63,7 +63,7 @@ def main():
         handler = HandleCheck(arg_input=args.INPUT, logger=logger)
 
     if args.command == "config":
-        handler = HandleConfig(arg_name=args.name, logger=logger)
+        handler = HandleConfig(arg_name=args.name, arg_raw=args.raw, logger=logger)
 
     if args.command == "create":
         handler = HandleCreate(
