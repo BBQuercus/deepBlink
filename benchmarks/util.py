@@ -90,10 +90,12 @@ def delayed_results(
             for idx, (image, true) in enumerate(zip(images, trues)):
                 image = delayed_normalize(image)
                 pred = delayed_predict(model, image)
-                pred = delayed_coordinates(pred)
+                try:
+                    pred = delayed_coordinates(pred)
+                except:
+                    pred = delayed_coordinates(image, pred)
                 df = delayed_compute(pred, true, idx)
                 results.append(df)
-
             return results
 
         # Compute results
