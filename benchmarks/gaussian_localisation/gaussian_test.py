@@ -67,18 +67,13 @@ def gauss_single_spot(
     xx, yy = np.meshgrid(x, y)
 
     # Guess intial parameters
-    # x0, y0 center of gaussian
-    # sigma: standard deviation of the gaussian
-    # amplitude_max: height of gaussian
-    x0 = int(crop.shape[0] // 2)  # Middle of the crop
-    y0 = int(crop.shape[1] // 2)  # Middle of the crop
-    sigma = max(*crop.shape) * 0.1  # 10% of the crop
-    amplitude_max = max(np.max(crop) / 2, np.min(crop))  # Maximum value of the crop
-
+    x0 = int(crop.shape[0] // 2)  # Center of gaussian, middle of the crop 
+    y0 = int(crop.shape[1] // 2)  # Center of gaussian, middle of the crop 
+    sigma = max(*crop.shape) * 0.1  # SD of gaussian, 10% of the crop
+    amplitude_max = max(np.max(crop) / 2, np.min(crop))  # Height of gaussian, maximum value
     initial_guess = [amplitude_max, x0, y0, sigma, 0]
 
-    # lower: lower bound for parameter search space
-    # upper: upper bound for parameter search space
+    # Parameter search space bounds
     lower = [np.min(crop), 0, 0, 0, -np.inf]
     upper = [
         np.max(crop) + EPS,
@@ -102,7 +97,7 @@ def gauss_single_spot(
     x0 = popt[1] + start_dim2
     y0 = popt[2] + start_dim1
 
-    # if predicted spot is out of the border of the image
+    # If predicted spot is out of the border of the image
     if x0 >= image.shape[1] or y0 >= image.shape[0]:
         return r_coord, c_coord
 
