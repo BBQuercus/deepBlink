@@ -72,6 +72,15 @@ def _parse_args_config(
             '[default: "config"]'
         ),
     )
+    group2.add_argument(
+        "-r",
+        "--raw",
+        action="store_true",
+        help=(
+            "Save configuration file without description of values. "
+            "Shorter but not descriptive."
+        ),
+    )
     _add_utils(parser)
 
 

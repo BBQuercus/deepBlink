@@ -7,6 +7,18 @@ import yaml
 from ..training import run_experiment
 
 
+def _get_values(dct: dict) -> dict:
+    """Remove description / value metadata from dictionary recursively."""
+    return {
+        k: v["value"]
+        if isinstance(v, dict) and "value" in v
+        else _get_values(v)
+        if isinstance(v, dict)
+        else v
+        for k, v in dct.items()
+    }
+
+
 class HandleTrain:
     """Handle checking submodule for CLI.
 
@@ -42,12 +54,6 @@ class HandleTrain:
             )
         with open(self.raw_config, "r") as config_file:
             config = yaml.safe_load(config_file)
-
-        def _get_values(dct):
-            return {
-                k: v["value"] if "value" in v else _get_values(v)
-                for k, v in dct.items()
-            }
 
         config = _get_values(config)
 

@@ -5,19 +5,22 @@ import os
 import yaml
 
 from ..io import securename
+from ._train import _get_values
 
 
 class HandleConfig:
     """Handle configuration submodule for CLI.
 
     Args:
-        arg_output: Name of output file.
+        arg_name: Name of output file.
+        arg_raw: If "description" / "value" should be removed.
         logger: Logger to log verbose output.
     """
 
-    def __init__(self, arg_name: str, logger: logging.Logger):
+    def __init__(self, arg_name: str, arg_raw: bool, logger: logging.Logger):
+        self.raw = arg_raw
         self.logger = logger
-        self.logger.info("\U00002699 starting config submodule")
+        self.logger.info(f"\U00002699 starting config submodule, raw {arg_raw}")
 
         self.abs_output = os.path.abspath(securename(arg_name) + ".yaml")
 
@@ -29,7 +32,7 @@ class HandleConfig:
     @property
     def config(self):
         """Default configuration as dictionary."""
-        return {
+        configuration = {
             "name": {"description": "Wandb/model name", "value": "deepBlink"},
             "run_name": {"description": "Current run", "value": "deepBlink_is_sweet"},
             "savedir": {"description": "Model saving path", "value": "PATH/TO/OUTDIR"},
@@ -86,6 +89,11 @@ class HandleConfig:
                 "overfit": {"description": "Single batch overfitting", "value": False},
             },
         }
+
+        if self.raw:
+            configuration = _get_values(configuration)
+
+        return configuration
 
     def save_yaml(self):
         """Dump configuration into yaml file."""
