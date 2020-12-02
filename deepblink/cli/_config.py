@@ -13,7 +13,7 @@ class HandleConfig:
 
     Args:
         arg_name: Name of output file.
-        arg_raw: If "descrption" / "value" should be removed.
+        arg_raw: If "description" / "value" should be removed.
         logger: Logger to log verbose output.
     """
 
