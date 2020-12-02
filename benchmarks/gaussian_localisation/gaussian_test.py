@@ -111,7 +111,7 @@ def gauss_single_spot(
 
 @dask.delayed
 def gauss_single_image(image: np.ndarray, mask: np.ndarray, crop_size: int = 4):
-    """Gaussian localization on a single image using initialized on deepblink output (mask)."""
+    """Gaussian localization on a single image initialized on deepblink output (mask)."""
     coord_list = pink.data.get_coordinate_list(mask.squeeze(), 512)
 
     prediction_coord = []
