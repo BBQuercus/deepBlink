@@ -99,7 +99,6 @@ def delayed_results(
             return results
 
         # Compute results
-
         result = dask.compute(f(x_test, y_test))[0]  # Returns tuple
         df = pd.concat(result)
         df["name"] = name
