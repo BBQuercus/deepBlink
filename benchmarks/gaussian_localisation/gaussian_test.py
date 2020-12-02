@@ -67,22 +67,27 @@ def gauss_single_spot(
     xx, yy = np.meshgrid(x, y)
 
     # Guess intial parameters
+    # x0, y0 center of gaussian
+    # sigma: standard deviation of the gaussian
+    # amplitude_max: height of gaussian
     x0 = int(crop.shape[0] // 2)  # Middle of the crop
     y0 = int(crop.shape[1] // 2)  # Middle of the crop
     sigma = max(*crop.shape) * 0.1  # 10% of the crop
-    amplitude_max = np.max(crop) / 2  # Maximum value of the crop
+    amplitude_max = max(np.max(crop) / 2, np.min(crop))  # Maximum value of the crop
+
     initial_guess = [amplitude_max, x0, y0, sigma, 0]
 
-    lower = [np.min(crop), 0, 0, 0, np.min(crop)]
+    # lower: lower bound for parameter search space
+    # upper: upper bound for parameter search space
+    lower = [np.min(crop), 0, 0, 0, -np.inf]
     upper = [
         np.max(crop) + EPS,
-        crop.shape[0],
-        crop.shape[1],
+        crop_size * 2,
+        crop_size * 2,
         np.inf,
-        np.max(crop) + EPS,
+        np.inf,
     ]
     bounds = [lower, upper]
-
     try:
         popt, _ = opt.curve_fit(
             gauss_2d,
@@ -91,7 +96,7 @@ def gauss_single_spot(
             p0=initial_guess,
             bounds=bounds,
         )
-    except:
+    except RuntimeError:
         return r_coord, c_coord
 
     x0 = popt[1] + start_dim2
@@ -106,7 +111,7 @@ def gauss_single_spot(
 
 @dask.delayed
 def gauss_single_image(image: np.ndarray, mask: np.ndarray, crop_size: int = 4):
-    """Gaussian prediction on a single image."""
+    """Gaussian localization on a single image using initialized on deepblink output (mask)."""
     coord_list = pink.data.get_coordinate_list(mask.squeeze(), 512)
 
     prediction_coord = []
@@ -134,4 +139,4 @@ if __name__ == "__main__":
         delayed_normalize=delayed_normalize_pink,
         delayed_coordinates=gauss_single_image,
     )
-    results_deepblink.to_csv("deepblink.csv")
+    results_deepblink.to_csv("deepblink_gaussian.csv")
