@@ -17,7 +17,7 @@ from .losses import f1_score
 from .losses import rmse
 
 # List of currently supported image file extensions.
-EXTENSIONS = ("tif", "jpeg", "jpg", "png")
+EXTENSIONS = ("tif", "tiff", "jpeg", "jpg", "png")
 
 
 def basename(path: str) -> str:
