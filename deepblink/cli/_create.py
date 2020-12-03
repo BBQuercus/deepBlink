@@ -132,9 +132,18 @@ class HandleCreate:
 
             img = load_image(image, is_rgb=False)
 
-            if all(shape > size for shape in img.shape):
+            if all(shape >= size for shape in img.shape):
                 images.append(load_image(image, is_rgb=False))
                 labels.append(df)
+            else:
+                self.logger.warning(
+                    f"\U000026A0 image {image} was too small! {img.shape} < {size}"
+                )
+
+        if not images:
+            raise ValueError(
+                "No images matched the format criteria. Please check image size and labelling."
+            )
 
         if len(images) != len(labels):
             raise ValueError(
