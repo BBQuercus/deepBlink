@@ -62,7 +62,7 @@ appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nv
 
 
 ## Usage
-Inferencing on deepBlink is performed at the command line as follows:
+A video overview can be found [here](https://www.youtube.com/watch?v=vlXMg4k79LQ). Inferencing on deepBlink is performed at the command line as follows:
 
 ```bash
 deepblink predict -m MODEL -i INPUT [-o OUTPUT] [-r RADIUS] [-s SHAPE]
