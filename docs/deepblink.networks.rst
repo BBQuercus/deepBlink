@@ -7,9 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
-   deepblink.networks.fcn
-   deepblink.networks.inception
-   deepblink.networks.resnet
+   deepblink.networks.unet
 
 Module contents
 ---------------
