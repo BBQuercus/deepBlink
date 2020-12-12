@@ -11,7 +11,7 @@ from setuptools import setup
 setup(
     # Description
     name="deepblink",
-    version="0.0.8",
+    version="0.1.0",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description_content_type="text/plain",
@@ -48,14 +48,14 @@ setup(
     author_email="bastian@eichenbergers.ch, yinxiuzhan89@gmail.com",
     url="https://github.com/bbquercus/deepblink/",
     project_urls={
-        "Documentation": "https://deepblink.readthedocs.io/",
-        "Changelog": "https://deepblink.readthedocs.io/en/latest/changelog.html",
+        "Documentation": "https://github.com/BBQuercus/deepBlink/wiki",
+        "Changelog": "https://github.com/BBQuercus/deepBlink/releases",
         "Issue Tracker": "https://github.com/bbquercus/deepblink/issues",
     },
     keywords=["deep-learning", "biomedical", "image analysis", "spot detection"],
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
