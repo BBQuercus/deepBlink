@@ -44,4 +44,3 @@ if __name__ == "__main__":
         delayed_coordinates=delayed_coordinates,
     )
     results_detnet.to_csv("detnet.csv")
-
