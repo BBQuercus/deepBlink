@@ -126,7 +126,7 @@ def _add_utils(parser: argparse.ArgumentParser):
         "-V",
         "--version",
         action="version",
-        version="%(prog)s 0.0.8",
+        version="%(prog)s 0.1.0",
         help="Show %(prog)s's version number.",
     )
     group.add_argument(

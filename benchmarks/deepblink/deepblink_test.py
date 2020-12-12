@@ -45,4 +45,3 @@ if __name__ == "__main__":
         delayed_coordinates=delayed_coordinates_pink,
     )
     results_deepblink.to_csv("deepblink.csv")
-
