@@ -16,6 +16,7 @@ Threshold independent detection and localization of diffraction-limited spots.
 - [Documentation](#documentation)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Citation](#citation)
 
 ## Overview
 In biomedical microscopy data, a common task involves the detection of
@@ -69,3 +70,19 @@ deepblink predict -m MODEL -i INPUT [-o OUTPUT] [-r RADIUS] [-s SHAPE]
 ```
 
 With `MODEL` being a pre-trained or custom model and `INPUT` being the path to a input image or folder containing images.
+
+
+## Citation
+deepBlink is currently available as preprint on bioRxiv [here](https://www.biorxiv.org/content/10.1101/2020.12.14.422631v1). If you find deepBlink useful, consider citing us:
+
+```bibtex
+@article{eichenberger_deepblink_2020,
+	title = {{deepBlink}: {Threshold}-independent detection and localization of diffraction-limited spots},
+	url = {http://biorxiv.org/content/early/2020/12/15/2020.12.14.422631.abstract},
+	doi = {10.1101/2020.12.14.422631},
+	journal = {bioRxiv},
+	author = {Eichenberger, Bastian Th. and Zhan, YinXiu and Rempfler, Markus and Giorgetti, Luca and Chao, Jeffrey},
+	year = {2020},
+	pages = {2020.12.14.422631}
+}
+```
