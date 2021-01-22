@@ -90,6 +90,28 @@ class ShapeType:
         return raw_value
 
 
+class ProbabilityType:
+    """Custom type for probability (range 0-1)."""
+
+    def __init__(self):
+        pass
+
+    def __call__(self, value):
+        try:
+            value = float(value)
+        except ValueError:
+            raise argparse.ArgumentTypeError(
+                f"Input value must be a float. '{value}' is not."
+            )
+
+        if value < 0.0 or value > 1.0:
+            raise argparse.ArgumentTypeError(
+                f"Input '{value}' not in range [0.0, 1.0]."
+            )
+
+        return value
+
+
 class CustomFormatter(argparse.RawDescriptionHelpFormatter):
     """Custom changes to argparse's default help text formatter."""
 
