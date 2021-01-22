@@ -88,6 +88,7 @@ def main():
             arg_output=args.output,
             arg_radius=args.radius,
             arg_shape=args.shape,
+            arg_probability=args.probability,
             logger=logger,
         )
 

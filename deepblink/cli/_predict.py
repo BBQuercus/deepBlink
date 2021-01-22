@@ -37,6 +37,7 @@ class HandlePredict:
         arg_output: str,
         arg_radius: int,
         arg_shape: str,
+        arg_probability: float,
         logger: logging.Logger,
     ):
         self.fname_model = arg_model
@@ -44,6 +45,7 @@ class HandlePredict:
         self.raw_output = arg_output
         self.radius = arg_radius
         self.raw_shape = arg_shape
+        self.probability = arg_probability
         self.logger = logger
         self.logger.info("\U0001F914 starting prediction submodule")
 
@@ -145,8 +147,11 @@ class HandlePredict:
         self, image: np.ndarray, c_idx: int, t_idx: int, z_idx: int
     ) -> pd.DataFrame:
         """Predict a single (x,y) image at given c, t, z positions."""
-        coords = predict(image, self.model)
-        df = pd.DataFrame(coords, columns=["y", "x"])  # originally r, c
+        columns = (
+            ["y", "x"] if self.probability is None else ["y", "x", "p"]
+        )  # originally r, c
+        coords = predict(image, self.model, self.probability)
+        df = pd.DataFrame(coords, columns=columns)
         df["c"] = c_idx
         df["t"] = t_idx
         df["z"] = z_idx
