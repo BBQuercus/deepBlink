@@ -96,7 +96,7 @@ class ProbabilityType:
     def __init__(self):
         pass
 
-    def __call__(self, value):
+    def __call__(self, value):  # noqa: D102
         try:
             value = float(value)
         except ValueError:

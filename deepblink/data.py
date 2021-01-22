@@ -62,7 +62,7 @@ def get_coordinate_list(
     grid = np.array([c * cell_size for c in range(matrix_size)])
 
     # Coordinates of cells > 0.5
-    matrix_r, matrix_c = np.where(matrix[..., 0] > probability, 1, 0).nonzero()
+    matrix_r, matrix_c, *_ = np.where(matrix[..., 0] > probability, 1, 0).nonzero()
     for r, c in zip(matrix_r, matrix_c):
 
         grid_r = grid[r]
