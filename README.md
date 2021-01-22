@@ -1,12 +1,14 @@
 [![Github Actions Status](https://github.com/bbquercus/deepblink/workflows/main/badge.svg)](https://github.com/bbquercus/deepblink/actions)
 [![GitHub code licence is MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/BBQuercus/deepBlink/master/LICENSE)
 [![Pypi package version number](https://badge.fury.io/py/deepblink.svg)](https://badge.fury.io/py/deepblink)
+[![Pypi download statistics](https://img.shields.io/pypi/dm/deepblink.svg)](https://badge.fury.io/py/deepblink)
 [![DOI for deepBlink](https://zenodo.org/badge/DOI/10.5281/zenodo.3992543.svg)](https://doi.org/10.5281/zenodo.3992543)
 <!-- [![Codecov test coverage](https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg)](https://codecov.io/gh/BBQuercus/deepBlink) -->
 
 <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">
 
-# deepBlink
+
+# deepBlink [![Tweet](https://img.shields.io/twitter/url/https/github.com/bbquercus/deepblink.svg?style=social)](https://twitter.com/intent/tweet?text=%23deepBlink%20automatically%20finds%20spots%20in%20smFISH%20and%20live%20cell%20imaging%20data!%20Check%20it%20out%20on%20@biorxivpreprint%20https://www.biorxiv.org/content/10.1101/2020.12.14.422631v1)
 
 Threshold independent detection and localization of diffraction-limited spots.
 
