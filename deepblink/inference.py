@@ -1,5 +1,8 @@
 """Model prediction / inference functions."""
 
+from typing import Union
+import math
+
 import numpy as np
 import skimage.morphology
 import tensorflow as tf
@@ -9,12 +12,17 @@ from .data import next_power
 from .data import normalize_image
 
 
-def predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
+def predict(
+    image: np.ndarray,
+    model: tf.keras.models.Model,
+    probability: Union[None, float] = None,
+) -> np.ndarray:
     """Returns a binary or categorical model based prediction of an image.
 
     Args:
         image: Image to be predicted.
         model: Model used to predict the image.
+        probability: Cutoff value to round model prediction probability.
 
     Returns:
         List of coordinates [r, c].
@@ -27,7 +35,10 @@ def predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
 
     # Predict on image
     pred = model.predict(image_pad[None, ..., None]).squeeze()
-    coords = get_coordinate_list(pred, image_pad.shape[0])
+    prob = 0.5 if probability is None else probability
+    coords = get_coordinate_list(
+        pred, image_size=max(image_pad.shape), probability=prob
+    )
 
     # Remove spots in padded part of image
     coords = np.array([coords[..., 0], coords[..., 1]])
@@ -36,8 +47,42 @@ def predict(image: np.ndarray, model: tf.keras.models.Model) -> np.ndarray:
         np.where((coords[0] > image.shape[0]) | (coords[1] > image.shape[1])),
         axis=1,
     )
+    coords = coords.T  # Transposition to save as rows
 
-    return coords.T  # Transposition to save as rows
+    # Add third, probability containing column
+    if probability is not None:
+        probs = get_probabilities(pred, coords, image_size=max(image_pad.shape))
+        probs = np.expand_dims(probs, axis=-1)
+        coords = np.append(coords, probs, axis=-1)
+
+    return coords
+
+
+def get_probabilities(
+    matrix: np.ndarray, coordinates: np.ndarray, image_size: int = 512
+) -> np.ndarray:
+    """Find prediction probability given the matrix and coordinates.
+
+    Args:
+        matrix: Matrix representation of spot coordinates.
+        coordinates: Coordinates at which the probability should be determined.
+        image_size: Default image size the grid was layed on.
+
+    Returns:
+        Array with all probabilities matching the coordinates.
+    """
+    matrix_size = max(matrix.shape)
+    cell_size = image_size // matrix_size
+    nrow = ncol = math.ceil(image_size / cell_size)
+
+    probabilities = []
+    for r, c in coordinates:
+        # Position of cell coordinate in prediction matrix
+        cell_r = min(nrow - 1, int(np.floor(r)) // cell_size)
+        cell_c = min(ncol - 1, int(np.floor(c)) // cell_size)
+
+        probabilities.append(matrix[cell_r, cell_c, 0])
+    return np.array(probabilities)
 
 
 def get_intensities(

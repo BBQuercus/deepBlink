@@ -30,7 +30,9 @@ def normalize_image(image: np.ndarray) -> np.ndarray:
     return image.astype(np.float32)
 
 
-def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray:
+def get_coordinate_list(
+    matrix: np.ndarray, image_size: int = 512, probability: float = 0.5
+) -> np.ndarray:
     """Convert the prediction matrix into a list of coordinates.
 
     NOTE - plt.scatter uses the x, y system. Therefore any plots
@@ -39,6 +41,7 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     Args:
         matrix: Matrix representation of spot coordinates.
         image_size: Default image size the grid was layed on.
+        probability: Cutoff value to round model prediction probability.
 
     Returns:
         Array of r, c coordinates with the shape (n, 2).
@@ -50,7 +53,7 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     if not matrix.shape[0] == matrix.shape[1] and not matrix.shape[0] >= 1:
         raise ValueError("Matrix must have equal length >= 1 of r, c.")
 
-    matrix_size = max(matrix.shape)  # Handles non-square images
+    matrix_size = max(matrix.shape)
     cell_size = image_size // matrix_size
     coords_r = []
     coords_c = []
@@ -59,7 +62,7 @@ def get_coordinate_list(matrix: np.ndarray, image_size: int = 512) -> np.ndarray
     grid = np.array([c * cell_size for c in range(matrix_size)])
 
     # Coordinates of cells > 0.5
-    matrix_r, matrix_c = np.round(matrix[..., 0]).nonzero()
+    matrix_r, matrix_c, *_ = np.where(matrix[..., 0] > probability, 1, 0).nonzero()
     for r, c in zip(matrix_r, matrix_c):
 
         grid_r = grid[r]
