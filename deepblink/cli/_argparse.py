@@ -8,6 +8,7 @@ from ._parseutil import CustomFormatter
 from ._parseutil import FileFolderType
 from ._parseutil import FileType
 from ._parseutil import FolderType
+from ._parseutil import ProbabilityType
 from ._parseutil import ShapeType
 from ._parseutil import _add_utils
 
@@ -298,12 +299,27 @@ def _parse_args_predict(
         type=ShapeType(),
         default=None,
         help=(
-            "Image shape."
+            "Image shape. "
             "Used to assess the arrangement of input image axes otherwise known as shape. "
             "If not given, uses a basic prediction based on common defaults. "
             'Must be in the format "(x,y,z,t,c,3)" using the specified characters. '
             'If unsure, use "deepblink check" to determine your images shape '
             "and more detailed information. "
+            "[default: None]"
+        ),
+    )
+    group2.add_argument(
+        "-p",
+        "--probability",
+        type=ProbabilityType(),
+        default=None,
+        help=(
+            "Prediction probability. "
+            "By default, the model's output probability map is rounded. "
+            "I.e. probabilities above 0.5 are included in the final output. "
+            "Setting this flag will first change this rounding behaviour to the "
+            "number provided (0.0 - 1.0) and secondly, add a probability / p "
+            "column in the output csv file. "
             "[default: None]"
         ),
     )
