@@ -32,7 +32,7 @@ extensions = [
 ]
 
 source_suffix = ".rst"
-master_doc = "deepblink"
+master_doc = "index"
 project = "deepblink"
 year = "2020"
 author = "Bastian Eichenberger"
