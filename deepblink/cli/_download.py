@@ -4,8 +4,8 @@ from urllib import request
 from urllib.error import URLError
 import ast
 import logging
-import requests
 import socket
+import requests
 
 
 class HandleDownload:
@@ -37,7 +37,7 @@ class HandleDownload:
             self.logger.debug("selected all models for download")
             for name, url in self.models.items():
                 self.logger.info(f"Downloading model {name}")
-                self.download_model(name, url)
+                self.download_model(name, url, self.timeout_download)
 
         if self.list:
             print(f"Found the following {len(self.models)} models:")

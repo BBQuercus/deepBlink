@@ -86,10 +86,7 @@ def get_probabilities(
 
 
 def get_intensities(
-    image: np.ndarray,
-    coordinate_list: np.ndarray,
-    radius: int,
-    method: str = "sum",
+    image: np.ndarray, coordinate_list: np.ndarray, radius: int, method: str = "sum",
 ) -> np.ndarray:
     """Finds integrated intensities in a radius around each coordinate.
 
