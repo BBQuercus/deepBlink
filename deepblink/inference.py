@@ -86,7 +86,10 @@ def get_probabilities(
 
 
 def get_intensities(
-    image: np.ndarray, coordinate_list: np.ndarray, radius: int
+    image: np.ndarray,
+    coordinate_list: np.ndarray,
+    radius: int,
+    method: str = "sum",
 ) -> np.ndarray:
     """Finds integrated intensities in a radius around each coordinate.
 
@@ -94,6 +97,8 @@ def get_intensities(
         image: Input image with pixel values.
         coordinate_list: List of r, c coordinates in shape (n, 2).
         radius: Radius of kernel to determine intensities.
+        method: How the integrated intensity should be calculated
+            [options: sum, mean, std].
 
     Returns:
         Array with all integrated intensities.
@@ -117,6 +122,14 @@ def get_intensities(
                 max(radius - c, 0) : radius + image.shape[1] - c,
             ]
         )
-        intensities[idx] = np.sum(area)
+        if method == "sum":
+            intensities[idx] = np.sum(area)
+        elif method == "mean":
+            intensities[idx] = np.mean(area)
+        elif method == "std":
+            intensities[idx] = np.std(area)
+        else:
+            options = ["sum", "mean", "std"]
+            raise ValueError(f'Method must be one of "{options}". {method} is not.')
 
     return intensities
