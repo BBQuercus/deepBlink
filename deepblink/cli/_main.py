@@ -98,4 +98,4 @@ def main():
     try:
         handler()
     except UnboundLocalError:
-        logger.error(f"args.command defined as {args.command}. no handler defined")
+        logger.warning(f"args.command defined as {args.command}. no handler defined")
