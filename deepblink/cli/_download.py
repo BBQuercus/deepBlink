@@ -1,9 +1,11 @@
 """CLI submodule for downloading pre-trained models."""
 
 from urllib import request
+from urllib.error import URLError
 import ast
 import logging
 import requests
+import socket
 
 
 class HandleDownload:
@@ -25,6 +27,8 @@ class HandleDownload:
         self.logger = logger
         self.logger.info("\U0001F4E5 starting download submodule")
 
+        self.timeout_list = 10
+        self.timeout_download = 30
         self.model_url = "https://raw.githubusercontent.com/BBQuercus/deepBlink/master/deepblink/cli/models.txt"
 
     def __call__(self) -> None:
@@ -50,7 +54,7 @@ class HandleDownload:
             inp = self.input.lower()
             if inp in self.models:
                 self.logger.info(f"Downloading model {inp}")
-                self.download_model(inp, self.models[inp])
+                self.download_model(inp, self.models[inp], self.timeout_download)
             else:
                 raise ValueError(
                     (
@@ -62,13 +66,27 @@ class HandleDownload:
     @property
     def models(self) -> dict:
         """Dictionary with all models listed."""
-        raw_models = request.urlopen(self.model_url).read().decode("utf-8")  # nosec
+        try:
+            req = request.urlopen(self.model_url, timeout=self.timeout_list)  # nosec
+        except (URLError, socket.timeout) as e:
+            self.logger.debug(f"url timeout occurred: {e}")
+            print(
+                "Response time was exceeded. "
+                "Please wait and try again with a better connection."
+            )
+        raw_models = req.read().decode("utf-8")
         models = ast.literal_eval(raw_models)
         self.logger.debug(f"found models {models}")
         return models
 
     @staticmethod
-    def download_model(name: str, url: str):
+    def download_model(name: str, url: str, timeout: int):
         """Load a single model."""
-        req = requests.get(url, allow_redirects=True)
+        try:
+            req = requests.get(url, allow_redirects=True, timeout=timeout)
+        except requests.exceptions.Timeout:
+            print(
+                "Response time was exceeded. "
+                "Please wait and try again with a better connection."
+            )
         open(f"{name}.h5", "wb").write(req.content)
