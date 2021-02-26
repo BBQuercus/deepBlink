@@ -2,6 +2,7 @@ prune benchmarks
 prune bin
 prune ci
 prune docs
+prune examples
 prune extras
 prune images
 prune tests
