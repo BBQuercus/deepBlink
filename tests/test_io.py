@@ -42,18 +42,18 @@ def test_load_image():
 
         # Basic case
         arr = np.zeros((20, 20, 1))
-        skimage.io.imsave(fname, arr)
+        skimage.io.imsave(fname, arr, check_contrast=False)
         assert (load_image(fname, is_rgb=False) == arr.squeeze()).all()
 
         # RGB case
         arr = np.ones((20, 20, 3))
-        skimage.io.imsave(fname, arr)
+        skimage.io.imsave(fname, arr, check_contrast=False)
         assert load_image(fname, is_rgb=True).shape == (20, 20)
 
         # Multi-channel error
         with pytest.raises(ValueError):
             arr = np.zeros((20, 20, 20, 4))
-            skimage.io.imsave(fname, arr)
+            skimage.io.imsave(fname, arr, check_contrast=False)
             load_image(fname, is_rgb=False)
 
 
