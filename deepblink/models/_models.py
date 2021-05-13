@@ -3,7 +3,6 @@
 
 from typing import Callable, Dict, List
 import datetime
-import pathlib
 
 import numpy as np
 
@@ -12,7 +11,6 @@ from ..datasets import SequenceDataset
 from ..losses import f1_score
 from ..losses import rmse
 
-DIRNAME = pathlib.Path(__file__).parents[1].resolve() / "weights"
 DATESTRING = datetime.datetime.now().strftime("%Y%d%m_%H%M")
 
 
@@ -127,11 +125,3 @@ class Model:
         f1_score_ = f1_score(y_float32, preds)
 
         return [f1_score_.numpy(), rmse_.numpy()]
-
-    def load_weights(self) -> None:
-        """Load model weights from file."""
-        self.network.load_weights(self.train_args["pretrained"])
-
-    def save_weights(self) -> None:
-        """Save model weights."""
-        self.network.save_weights(self.weights_filename)
