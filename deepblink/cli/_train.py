@@ -4,6 +4,7 @@ import logging
 import os
 import yaml
 
+from ..io import load_model
 from ..training import run_experiment
 
 
@@ -37,8 +38,9 @@ class HandleTrain:
     def __call__(self):
         """Set configuration and start training loop."""
         self.set_gpu()
+        self.logger.info(f"\U0001F4C2 loaded config file: {self. config}")
         self.logger.info("\U0001F3C3 beginning with training")
-        run_experiment(self.config)
+        run_experiment(self.config, pre_model=self.model)
         self.logger.info("\U0001F3C1 training complete")
 
     @property
@@ -56,9 +58,25 @@ class HandleTrain:
             config = yaml.safe_load(config_file)
 
         config = _get_values(config)
-
-        self.logger.info(f"\U0001F4C2 loaded config file: {config}")
         return config
+
+    @property
+    def model(self):
+        """Load pre-trained model if defined."""
+        pre_train = self.config["train_args"]["pre_train"]
+        if pre_train is not None:
+            try:
+                model = load_model(pre_train)
+                self.logger.info(
+                    f"Pre-trained model found and loaded - using {pre_train}."
+                )
+                return model
+            except (ValueError, ImportError):
+                self.logger.info(
+                    f"Pre-trained model not found or faulty - {pre_train} could not be imported. "
+                    "Training from scratch."
+                )
+        return None
 
     def set_gpu(self):
         """Set GPU environment variable."""
