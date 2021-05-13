@@ -5,6 +5,7 @@ from typing import Callable, Dict, List
 import datetime
 
 import numpy as np
+import tensorflow as tf
 
 from ..datasets import Dataset
 from ..datasets import SequenceDataset
@@ -26,6 +27,9 @@ class Model:
         loss_fn: Loss function.
         optimizer_fn: Optimizer function.
         train_args: Training arguments containing - batch_size, epochs, learning_rate.
+        pre_model: Loaded, pre-trained model to bypass a new network creation.
+
+    Kwargs:
         batch_format_fn: Formatting function added in the specific model, e.g. spots.
         batch_augment_fn: Same as batch_format_fn for augmentation.
     """
@@ -40,35 +44,28 @@ class Model:
         loss_fn: Callable,
         optimizer_fn: Callable,
         train_args: Dict,
-        batch_format_fn: Callable = None,
-        batch_augment_fn: Callable = None,
+        pre_model: tf.keras.models.Model = None,
+        **kwargs,
     ):
         self.name = f"{DATESTRING}_{self.__class__.__name__}_{dataset_cls.name}_{network_fn.__name__}"
 
         self.augmentation_args = augmentation_args
-        self.batch_augment_fn = batch_augment_fn
-        self.batch_format_fn = batch_format_fn
+        self.batch_augment_fn = kwargs.get("batch_augment_fn", None)
+        self.batch_format_fn = kwargs.get("batch_format_fn", None)
         self.dataset_args = dataset_args
         self.loss_fn = loss_fn
         self.optimizer_fn = optimizer_fn
         self.train_args = train_args
+        self.has_pre_model = pre_model is not None
 
-        try:
-            self.network = network_fn(**network_args)
-        except TypeError:
-            print("Default network args used.")
-            self.network = network_fn()
-
-        try:
-            self.load_weights()
-        except KeyError:
-            print("Training from scratch.")
-
-    @property
-    def weights_filename(self) -> str:
-        """Return the absolute path to weight file."""
-        DIRNAME.mkdir(parents=True, exist_ok=True)
-        return str(DIRNAME / f"{self.name}_weights.h5")
+        if self.has_pre_model:
+            self.network: tf.keras.models.Model = pre_model
+        else:
+            try:
+                self.network = network_fn(**network_args)
+            except TypeError:
+                print("Default network args used.")
+                self.network = network_fn()
 
     @property
     def metrics(self) -> list:
@@ -82,11 +79,12 @@ class Model:
         if callbacks is None:
             callbacks = []
 
-        self.network.compile(
-            loss=self.loss_fn,
-            optimizer=self.optimizer_fn(float(self.train_args["learning_rate"])),
-            metrics=self.metrics,
-        )
+        if not self.has_pre_model:
+            self.network.compile(
+                loss=self.loss_fn,
+                optimizer=self.optimizer_fn(float(self.train_args["learning_rate"])),
+                metrics=self.metrics,
+            )
 
         train_sequence = SequenceDataset(
             dataset.x_train,
