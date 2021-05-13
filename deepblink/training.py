@@ -51,13 +51,14 @@ def train_model(
     return model
 
 
-def run_experiment(cfg: Dict):
+def run_experiment(cfg: Dict, pre_model: tf.keras.models.Model = None):
     """Run a training experiment.
 
     Configuration file can be generated using deepblink config.
 
     Args:
         cfg: Dictionary configuration file.
+        pre_model: Pre-trained model if not training from scratch.
     """
     # Classes / functions
     dataset_class = get_from_module("deepblink.datasets", cfg["dataset"])
@@ -85,6 +86,7 @@ def run_experiment(cfg: Dict):
         network_fn=network_fn,
         optimizer_fn=optimizer_fn,
         train_args=train_args,
+        pre_model=pre_model,
     )
 
     cfg["system"] = {
