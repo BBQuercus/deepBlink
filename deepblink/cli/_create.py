@@ -65,9 +65,11 @@ class HandleCreate:
     @property
     def abs_labels(self):
         """Return absolute path to directory with labels."""
+        # Full path name
         if self.raw_labels is not None:
             path = os.path.abspath(self.raw_labels)
             self.logger.debug(f"using provided label path at {path}")
+        # Default path with labels/ subdirectory
         elif os.path.isdir(os.path.join(self.abs_input, "labels")):
             path = os.path.join(self.abs_input, "labels")
             self.logger.debug(f"using default label path at {path}")
@@ -86,22 +88,28 @@ class HandleCreate:
     @property
     def fname_out(self):
         """Return the absolute path to the dataset."""
-        raw_name = self.raw_name
-        if raw_name is not None:
-            if os.path.isfile(raw_name):
-                path = raw_name
+        if self.raw_name is not None:
+            # Full path and file given
+            if os.path.isfile(self.raw_name):
+                path = self.raw_name
                 self.logger.warning(
-                    f"\U000026A0 input name {raw_name} is already a file"
+                    f"\U000026A0 input name {self.raw_name} is already a file"
                 )
-            elif os.path.isdir(raw_name):
-                path = os.path.join(raw_name, "dataset.npz")
+            # Full path only
+            elif os.path.isdir(self.raw_name):
+                path = os.path.join(self.raw_name, "dataset.npz")
                 self.logger.warning(
-                    f"\U000026A0 input name {raw_name} is already a file"
+                    f"\U000026A0 input name {self.raw_name} is already a file"
                 )
+            # Name only
             else:
-                fname = raw_name[:-4] if raw_name.endswith(".npz") else raw_name
-                path = os.path.join(self.abs_input, f"{fname}.npz")
-                self.logger.debug(f"using given name {raw_name}")
+                fname = (
+                    self.raw_name[:-4]
+                    if self.raw_name.endswith(".npz")
+                    else self.raw_name
+                )
+                path = os.path.join(os.getcwd(), f"{fname}.npz")
+                self.logger.debug(f"using given name {self.raw_name}")
         else:
             path = os.path.join(self.raw_name, "dataset.npz")
             self.logger.debug(f"using default output at {path}")
