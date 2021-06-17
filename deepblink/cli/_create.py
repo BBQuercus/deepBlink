@@ -132,7 +132,11 @@ class HandleCreate:
                 )
 
             # Read label
-            df = pd.read_csv(label, index_col=0)
+            try:
+                df = pd.read_csv(label, index_col=0)
+            except pd.errors.EmptyDataError:
+                self.logger.warning(f"\U0000274C label empty! {label} won't be used")
+                continue
             if len(df) <= 1:
                 self.logger.warning(
                     f"\U000026A0 labels for {label} empty. will not be used"

@@ -87,6 +87,10 @@ class HandleConfig:
                 "epochs": {"description": "Total rounds of training", "value": 200},
                 "learning_rate": {"description": "Learning rate", "value": 1e-4},
                 "overfit": {"description": "Single batch overfitting", "value": False},
+                "pre_train": {
+                    "description": "Path to pre-trained model to fine-tune",
+                    "value": None,
+                },
             },
         }
 
