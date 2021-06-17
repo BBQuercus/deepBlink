@@ -39,6 +39,7 @@ class HandleCreate:
         arg_size: int,
         arg_testsplit: int,
         arg_validsplit: int,
+        arg_minspots: int,
         logger: logging.Logger,
     ):
         self.raw_input = arg_input
@@ -47,6 +48,7 @@ class HandleCreate:
         self.img_size = arg_size
         self.test_split = arg_testsplit
         self.valid_split = arg_validsplit
+        self.minspots = max(1, arg_minspots)
         self.logger = logger
         self.logger.info("\U0001F5BC starting creation submodule")
 
@@ -110,11 +112,8 @@ class HandleCreate:
         """Return lists with all images and labels."""
         fname_images = grab_files(self.abs_input, self.extensions)
         fname_labels = grab_files(self.abs_labels, extensions=("csv",))
-
         self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}")
         self.logger.debug(f"labels - found {len(fname_labels)} files: {fname_labels}")
-
-        size = self.img_size
 
         images = []
         labels = []
@@ -123,6 +122,8 @@ class HandleCreate:
                 self.logger.warning(
                     f"\U0000274C file basenames do not match! {image} != {label}"
                 )
+
+            # Read label
             df = pd.read_csv(label, index_col=0)
             if len(df) <= 1:
                 self.logger.warning(
@@ -130,27 +131,21 @@ class HandleCreate:
                 )
                 continue
 
+            # Read image
             img = load_image(image, is_rgb=False)
-
-            if all(shape >= size for shape in img.shape):
-                images.append(load_image(image, is_rgb=False))
+            if all(shape >= self.img_size for shape in img.shape):
+                images.append(img)
                 labels.append(df)
             else:
                 self.logger.warning(
-                    f"\U000026A0 image {image} was too small! {img.shape} < {size}"
+                    f"\U000026A0 image {image} was too small! {img.shape} < {self.img_size}"
                 )
 
         if not images:
             raise ValueError(
                 "No images matched the format criteria. Please check image size and labelling."
             )
-
-        if len(images) != len(labels):
-            raise ValueError(
-                f"Number of images and labels must match. {len(images)} != {len(labels)}."
-            )
         self.logger.debug(f"using {len(images)} non-empty files")
-
         return images, labels
 
     @staticmethod
@@ -160,9 +155,11 @@ class HandleCreate:
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
         Rounds coordinates on borders to prevent Fiji out-of bounds behavior.
         """
-        if "X" in df.columns:
+        # Fiji point label format
+        if all(c in df.columns for c in ("X", "Y")):
             df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
-        elif "POSITION_X" in df.columns:
+        # TrackMate export format
+        elif all(c in df.columns for c in ("POSITION_X", "POSITION_Y")):
             df = df.rename(columns={"POSITION_X": "c", "POSITION_Y": "r"})[["r", "c"]]
             df = df.reset_index(drop=True)
         else:
@@ -172,6 +169,7 @@ class HandleCreate:
                 f"Columns found are: {df.columns.to_list()}."
             )
 
+        # Clip upper and lower bounds of coordinates
         for name, var in zip(["r", "c"], image.shape):
             df[name] = df[name].where(df[name] < var, var)
             df[name] = df[name].where(df[name] > 0, 0)
@@ -182,39 +180,40 @@ class HandleCreate:
         self, image: np.ndarray, df: pd.DataFrame
     ) -> Tuple[List[np.ndarray], List[pd.DataFrame]]:
         """Crop a image / label pair to a uniform size and scale labels accordingly."""
-        size = self.img_size
-        if size is None:
+        if self.img_size is None:
             self.logger.debug(f"using unchanged size in {image.shape}")
             return [image], [df]
 
-        if any([size > s for s in image.shape]):
+        if any([self.img_size > s for s in image.shape]):
             self.logger.debug(f"skipping image due to small size {image.shape}")
             return [], []
 
         windows = skimage.util.view_as_windows(
-            image, window_shape=(size, size), step=size
+            image, window_shape=(self.img_size, self.img_size), step=self.img_size
         )
 
         img_list = []
         df_list = []
         for r, cimages in enumerate(windows):
             for c, img in enumerate(cimages):
-                img_list.append(img)
-
-                r_min = r * size
-                c_min = c * size
+                # Extract coordinates from crop
+                r_min = r * self.img_size
+                c_min = c * self.img_size
                 df_slice = df.loc[
                     (
                         (df["r"] >= r_min)
-                        & (df["r"] <= r_min + size)
+                        & (df["r"] <= r_min + self.img_size)
                         & (df["c"] >= c_min)
-                        & (df["c"] <= c_min + size)
+                        & (df["c"] <= c_min + self.img_size)
                     )
                 ]
                 df_norm = df_slice.copy()
                 df_norm.loc[:, "r"] = df_slice["r"] - r_min
                 df_norm.loc[:, "c"] = df_slice["c"] - c_min
-                df_list.append(df_norm)
+
+                if len(df_norm) >= self.minspots:
+                    img_list.append(img)
+                    df_list.append(df_norm)
 
         self.logger.debug(
             f"converted original size of {image.shape} into {len(df_list)} crops"

@@ -151,6 +151,17 @@ def _parse_args_create(
         ),
     )
     group2.add_argument(
+        "-m",
+        "--minspots",
+        default=1,
+        type=int,
+        help=(
+            "Minimum number of spots per crop. "
+            "Ignores fields of view generated with fewer than minspots number of spots. "
+            "[default: 1]"
+        ),
+    )
+    group2.add_argument(
         "-vs",
         "--validsplit",
         default=0.2,
