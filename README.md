@@ -61,8 +61,7 @@ conda install -c bbquercus deepblink
 
 
 Additionally for GPU support, install `tensorflow-gpu` through pip and with the
-appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html).
-
+appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html). Lastly, you can also use our [KNIME node](https://kni.me/c/phip4SLhBhzPtMwI) for inference. Please follow the installation instructions on KNIME hub.
 
 ## Usage
 A video overview can be found [here](https://www.youtube.com/watch?v=vlXMg4k79LQ). Inferencing on deepBlink is performed at the command line as follows:

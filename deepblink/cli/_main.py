@@ -73,6 +73,7 @@ def main():
             arg_size=args.size,
             arg_testsplit=args.testsplit,
             arg_validsplit=args.validsplit,
+            arg_minspots=args.minspots,
             logger=logger,
         )
 
