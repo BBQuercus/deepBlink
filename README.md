@@ -8,7 +8,7 @@
 <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">
 
 
-# deepBlink [![Tweet](https://img.shields.io/twitter/url/https/github.com/bbquercus/deepblink.svg?style=social)](https://twitter.com/intent/tweet?text=%23deepBlink%20automatically%20finds%20spots%20in%20smFISH%20and%20live%20cell%20imaging%20data!%20Check%20it%20out%20on%20@biorxivpreprint%20https://www.biorxiv.org/content/10.1101/2020.12.14.422631v1)
+# deepBlink [![Tweet](https://img.shields.io/twitter/url/https/github.com/bbquercus/deepblink.svg?style=social)](https://twitter.com/intent/tweet?text=%23deepBlink%20automatically%20finds%20spots%20in%20smFISH%20and%20live%20cell%20imaging%20data!%20Check%20it%20out%20on%20@NAR_Open%20https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab546/6312733)
 
 Threshold independent detection and localization of diffraction-limited spots.
 
@@ -74,16 +74,19 @@ With `MODEL` being a pre-trained or custom model and `INPUT` being the path to a
 
 
 ## Citation
-deepBlink is currently available as preprint on bioRxiv [here](https://www.biorxiv.org/content/10.1101/2020.12.14.422631v1). If you find deepBlink useful, consider citing us:
+deepBlink is currently available on Nucleic Acid Research [here](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab546/6312733). If you find deepBlink useful, consider citing us:
 
 ```bibtex
-@article{eichenberger_deepblink_2020,
-	title = {{deepBlink}: {Threshold}-independent detection and localization of diffraction-limited spots},
-	url = {http://biorxiv.org/content/early/2020/12/15/2020.12.14.422631.abstract},
-	doi = {10.1101/2020.12.14.422631},
-	journal = {bioRxiv},
-	author = {Eichenberger, Bastian Th. and Zhan, YinXiu and Rempfler, Markus and Giorgetti, Luca and Chao, Jeffrey},
-	year = {2020},
-	pages = {2020.12.14.422631}
+@article{10.1093/nar/gkab546,
+    author = {Eichenberger, Bastian Th and Zhan, YinXiu and Rempfler, Markus and Giorgetti, Luca and Chao, Jeffrey A},
+    title = "{deepBlink: threshold-independent detection and localization of diffraction-limited spots}",
+    journal = {Nucleic Acids Research},
+    year = {2021},
+    month = {07},
+    issn = {0305-1048},
+    doi = {10.1093/nar/gkab546},
+    url = {https://doi.org/10.1093/nar/gkab546},
+    note = {gkab546},
+    eprint = {https://academic.oup.com/nar/advance-article-pdf/doi/10.1093/nar/gkab546/38848972/gkab546.pdf},
 }
 ```
