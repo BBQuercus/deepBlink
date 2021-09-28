@@ -134,10 +134,12 @@ class HandleCreate:
             # Read label
             try:
                 df = pd.read_csv(label, index_col=0)
-                df = df[~df.index.isna()] # remove unused headers, where index will be NaN
+                df = df[
+                    ~df.index.isna()
+                ]  # remove unused headers, where index will be NaN
                 df.index.name = "label"
                 digital_cols = ["POSITION_X", "POSITION_Y"]
-                for col in digital_cols: # convert dtype to float32 for labelled spots
+                for col in digital_cols:  # convert dtype to float32 for labelled spots
                     df[col] = df[col].astype(np.float32)
             except pd.errors.EmptyDataError:
                 self.logger.warning(f"\U0000274C label empty! {label} won't be used")
