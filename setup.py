@@ -33,14 +33,12 @@ setup(
     python_requires=">=3.6, <3.9",
     install_requires=[
         "matplotlib",
-        "numpy>=1.16.0,<1.19.0",
+        "numpy",
         "pandas",
-        "pillow",
-        "plotly",
         "pyyaml",
         "scikit-image",
-        "scipy==1.4.1",
-        "tensorflow>=2.0",
+        "scipy",
+        "tensorflow>=2.0.0",
     ],
     entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
     # Metadata
