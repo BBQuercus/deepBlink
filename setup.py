@@ -36,6 +36,7 @@ setup(
         "numpy",
         "pandas",
         "pyyaml",
+        "requests",
         "scikit-image",
         "scipy",
         "tensorflow>=2.0.0",
