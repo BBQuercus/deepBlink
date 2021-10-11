@@ -172,6 +172,7 @@ class HandleCreate:
             df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
         # TrackMate export format
         elif all(c in df.columns for c in ("POSITION_X", "POSITION_Y")):
+            df = df[~df.index.isna()]  # Remove unused headers for TrackMate v7.0.0+
             df = df.rename(columns={"POSITION_X": "c", "POSITION_Y": "r"})[["r", "c"]]
             df = df.reset_index(drop=True)
         else:
@@ -182,6 +183,7 @@ class HandleCreate:
             )
 
         # Clip upper and lower bounds of coordinates
+        df = df.astype({"r": np.float64, "c": np.float64})
         for name, var in zip(["r", "c"], image.shape):
             df[name] = df[name].where(df[name] < var, var)
             df[name] = df[name].where(df[name] > 0, 0)

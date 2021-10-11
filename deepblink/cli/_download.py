@@ -42,7 +42,7 @@ class HandleDownload:
         if self.list:
             print(f"Found the following {len(self.models)} models:")
             for name in self.models.keys():
-                print(f"  - {name.capitalize()}")
+                print(f"  - {name}")
             print(
                 (
                     'Download all models using "deepblink download --all" or '
