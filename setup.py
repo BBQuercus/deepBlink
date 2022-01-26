@@ -66,7 +66,7 @@ setup(
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Artificial Life",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "Topic :: Scientific/Engineering :: Medical Science Apps",
+        "Topic :: Scientific/Engineering :: Medical Science Apps.",
         "Topic :: Utilities",
     ],
 )
