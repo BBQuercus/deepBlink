@@ -11,7 +11,7 @@ from setuptools import setup
 setup(
     # Description
     name="deepblink",
-    version="0.1.1",
+    version="0.1.2",
     license="MIT",
     description="Threshold independent detection and localization of diffraction-limited spots.",
     long_description_content_type="text/plain",
@@ -30,7 +30,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.6, <3.9",
     install_requires=[
         "matplotlib",
         "numpy",
@@ -64,13 +63,10 @@ setup(
         "Operating System :: POSIX",
         "Operating System :: Unix",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Artificial Life",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "Topic :: Scientific/Engineering :: Medical Science Apps.",
+        "Topic :: Scientific/Engineering :: Medical Science Apps",
         "Topic :: Utilities",
     ],
 )
