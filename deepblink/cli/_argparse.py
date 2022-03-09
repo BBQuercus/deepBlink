@@ -16,7 +16,7 @@ EXTENSIONS = ("tif", "jpeg", "jpg", "png")
 
 
 def _parse_args_check(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
 ):
     """Subparser for checking."""
     parser = subparsers.add_parser(
@@ -86,7 +86,7 @@ def _parse_args_config(
 
 
 def _parse_args_create(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
 ):
     """Subparser for creation."""
     parser = subparsers.add_parser(
@@ -188,7 +188,7 @@ def _parse_args_create(
 
 
 def _parse_args_download(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
 ):
     """Subparser for downloading."""
     parser = subparsers.add_parser(
@@ -234,7 +234,7 @@ def _parse_args_download(
 
 
 def _parse_args_predict(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
 ):
     """Subparser for prediction."""
     parser = subparsers.add_parser(
@@ -338,7 +338,7 @@ def _parse_args_predict(
 
 
 def _parse_args_train(
-    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser,
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
 ):
     """Subparser for training."""
     parser = subparsers.add_parser(
@@ -376,6 +376,73 @@ def _parse_args_train(
         help=(
             "GPU index. "
             "Value passed CUDA_VISIBLE_DEVICES if a GPU is used for training. "
+            "[default: None]"
+        ),
+    )
+    _add_utils(parser)
+
+
+def _parse_args_visualize(
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
+):
+    """Subparser for visualization."""
+    parser = subparsers.add_parser(
+        "visualize",
+        parents=[parent_parser],
+        formatter_class=CustomFormatter,
+        add_help=False,
+        description=(
+            f"\U0001F4F8 {Color.title}Visualization submodule{Color.end} \U0001F4F8\n\n"
+            "Visualize the output of a trained model or the labels of a dataset. "
+        ),
+        help="\U0001F4F8 Visualize the output of a trained model on a dataset.",
+    )
+    group2 = parser.add_argument_group(f"{Color.optional}Optional{Color.end}")
+    group2.add_argument(
+        "--dataset",
+        type=FileType(["npz"]),
+        default=None,
+        help=(
+            "Npz dataset to visualize a random image if `dataset_index` is not given. "
+            "Selects the train subset if `dataset_subset` is not given. "
+            "[default: None]"
+        ),
+    )
+    group2.add_argument(
+        "--subset",
+        type=str,
+        default="train",
+        help=(
+            "Subset of the dataset to visualize. "
+            "Must be one of `train`, `valid`, `test`. "
+            "[default: train]"
+        ),
+    )
+    group2.add_argument(
+        "--index",
+        type=int,
+        default=None,
+        help=(
+            "Index of the image to visualize from the dataset and subset. "
+            "[default: random]"
+        ),
+    )
+    group2.add_argument(
+        "--image",
+        type=FileType(EXTENSIONS),
+        default=None,
+        help=(
+            "Raw image to visualize. "
+            "Passing the `dataset` argument will override `image`. "
+            "[default: None]"
+        ),
+    )
+    group2.add_argument(
+        "--prediction",
+        type=FileType(["csv"]),
+        default=None,
+        help=(
+            "Prediction csv file (output from deepBlink predict) to visualize. "
             "[default: None]"
         ),
     )
