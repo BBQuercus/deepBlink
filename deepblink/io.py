@@ -6,6 +6,7 @@ import os
 import re
 
 import numpy as np
+import pandas as pd
 import skimage.color
 import skimage.io
 import tensorflow as tf
@@ -101,6 +102,14 @@ def load_model(fname: str) -> tf.keras.models.Model:
         return model
     except ValueError as error:
         raise ImportError(f"Model '{fname}' could not be imported.") from error
+
+
+def load_prediction(fname: str) -> pd.DataFrame:
+    """Import a prediction file (output from deepBlink predict) as pandas dataframe."""
+    df = pd.read_csv(fname)
+    if not all([c in df.columns for c in ["x", "y"]]):
+        raise ValueError("Prediction file must contain columns 'x' and 'y'.")
+    return df
 
 
 def grab_files(path: str, extensions: Tuple[str, ...]) -> List[str]:
