@@ -31,7 +31,7 @@ def securename(fname: str) -> str:
     return re.sub(r"[^\w\d-]", "_", fname)
 
 
-def load_npz(fname: str, test_only: bool = False) -> List[Any]:
+def load_npz(fname: str, test_only: bool = False) -> List[np.ndarray]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".

@@ -69,12 +69,14 @@ class HandleVisualize:
             )
 
         # Load image and prediction
-        if self.dataset_index is not None and self.dataset_index >= len(x):
+        dataset_length = len(x) - 1
+        if self.dataset_index is not None and self.dataset_index > dataset_length:
             self.logger.error(
-                f"Invalid dataset index. Please select from 0 to {len(x) - 1}."
+                "Invalid dataset index. "  # nosec: B608
+                f"Please select from 0 to {dataset_length =}."
             )
         else:
-            self.dataset_index = random.randint(0, len(x) - 1)
+            self.dataset_index = random.randint(0, dataset_length)  # nosec: B311
         image = x[self.dataset_index]
         coords = y[self.dataset_index]
 
