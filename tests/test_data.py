@@ -32,7 +32,7 @@ def test_next_multiple(value, dividend, expected):
     assert next_multiple(value, dividend) == expected
 
 
-@given(arrays(np.float, (5, 5), elements=floats(0, 100)))
+@given(arrays(float, (5, 5), elements=floats(0, 100)))
 def test_normalize_image(matrix):
     matrix = matrix + np.random.rand(5, 5)
     normalized_image = normalize_image(matrix)

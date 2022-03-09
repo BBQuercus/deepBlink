@@ -1,11 +1,12 @@
 """Dataset preparation functions."""
 
-from typing import Any, List, Tuple
+from typing import List, Tuple
 import glob
 import os
 import re
 
 import numpy as np
+import pandas as pd
 import skimage.color
 import skimage.io
 import tensorflow as tf
@@ -30,7 +31,7 @@ def securename(fname: str) -> str:
     return re.sub(r"[^\w\d-]", "_", fname)
 
 
-def load_npz(fname: str, test_only: bool = False) -> List[Any]:
+def load_npz(fname: str, test_only: bool = False) -> List[np.ndarray]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".
@@ -101,6 +102,14 @@ def load_model(fname: str) -> tf.keras.models.Model:
         return model
     except ValueError as error:
         raise ImportError(f"Model '{fname}' could not be imported.") from error
+
+
+def load_prediction(fname: str) -> pd.DataFrame:
+    """Import a prediction file (output from deepBlink predict) as pandas dataframe."""
+    df = pd.read_csv(fname)
+    if not all([c in df.columns for c in ["x", "y"]]):
+        raise ValueError("Prediction file must contain columns 'x' and 'y'.")
+    return df
 
 
 def grab_files(path: str, extensions: Tuple[str, ...]) -> List[str]:

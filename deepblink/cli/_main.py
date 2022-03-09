@@ -9,6 +9,7 @@ from ._argparse import _parse_args_create
 from ._argparse import _parse_args_download
 from ._argparse import _parse_args_predict
 from ._argparse import _parse_args_train
+from ._argparse import _parse_args_visualize
 from ._check import HandleCheck
 from ._config import HandleConfig
 from ._create import HandleCreate
@@ -19,6 +20,7 @@ from ._parseutil import CustomFormatter
 from ._parseutil import _add_utils
 from ._predict import HandlePredict
 from ._train import HandleTrain
+from ._visualize import HandleVisualize
 
 # Removes tensorflow's information on CPU / GPU availablity.
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -49,6 +51,7 @@ def arg_parser() -> argparse.ArgumentParser:
     _parse_args_download(subparsers, parent_parser)
     _parse_args_predict(subparsers, parent_parser)
     _parse_args_train(subparsers, parent_parser)
+    _parse_args_visualize(subparsers, parent_parser)
     _add_utils(parser)
 
     return parser
@@ -95,6 +98,16 @@ def main():
 
     if args.command == "train":
         handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
+
+    if args.command == "visualize":
+        handler = HandleVisualize(
+            arg_dataset=args.dataset,
+            arg_subset=args.subset,
+            arg_index=args.index,
+            arg_image=args.image,
+            arg_prediction=args.prediction,
+            logger=logger,
+        )
 
     try:
         handler()

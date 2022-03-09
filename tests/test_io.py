@@ -6,6 +6,7 @@ import os
 import tempfile
 
 import numpy as np
+import pandas as pd
 import pytest
 import skimage.io
 
@@ -13,6 +14,7 @@ from deepblink.io import basename
 from deepblink.io import grab_files
 from deepblink.io import load_image
 from deepblink.io import load_npz
+from deepblink.io import load_prediction
 from deepblink.io import securename
 
 
@@ -80,6 +82,17 @@ def test_load_npz():
         # Load only test dataset
         data = load_npz(fname, test_only=True)
         assert len(data) == 2
+
+
+def test_load_prediction():
+    path_invalid = os.path.join(os.path.dirname(__file__), "./data/output_invalid.csv")
+    path_valid = os.path.join(os.path.dirname(__file__), "./data/output_valid.csv")
+
+    data = load_prediction(path_valid)
+    assert isinstance(data, pd.DataFrame)
+
+    with pytest.raises(ValueError):
+        data = load_prediction(path_invalid)
 
 
 def test_grab_files():
