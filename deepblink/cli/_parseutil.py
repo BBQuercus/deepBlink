@@ -56,6 +56,26 @@ class FolderType:
         return value
 
 
+class PixelSizeType:
+    """Custom type for pixel size."""
+
+    def __init__(self):
+        pass
+
+    def __call__(self, value):  # noqa: D102
+        if isinstance(value, float):
+            return value
+        if (
+            isinstance(value, tuple)
+            and len(value) == 2
+            and all([isinstance(e, float) for e in value])
+        ):
+            return value
+        raise argparse.ArgumentTypeError(
+            f"Pixel size must be a float or a tuple of two floats. '{value}' is not."
+        )
+
+
 class ShapeType:
     """Custom type for image shapes."""
 
