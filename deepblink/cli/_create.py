@@ -135,7 +135,7 @@ class HandleCreate:
             return size
         except (ValueError, KeyError, IndexError) as e:
             self.logger.warning(
-                f"\U000026A0 pixel size for image {image} could not be predicted."
+                f"\U000026A0 {e} encountered. Pixel size for image {image} could not be predicted."
             )
 
         self.logger.debug(f"defaulting pixel size to {size}")
