@@ -43,6 +43,7 @@ def test_create():
         arg_labels="None",
         arg_name="None",
         arg_size=0,
+        arg_pixel_size=1.0,
         arg_testsplit=0,
         arg_validsplit=0,
         arg_minspots=0,
@@ -59,7 +60,7 @@ def test_create():
 
     for label in labels:
         df = pd.read_csv(label, index_col=0)
-        df = handler.convert_labels(image, df)
+        df = handler.convert_labels(image, df, (1.0, 1.0))
         assert df.columns.to_list() == ["r", "c"]
         assert df.dtypes.to_list() == [np.float64, np.float64]
         assert df["r"].min() >= 0
