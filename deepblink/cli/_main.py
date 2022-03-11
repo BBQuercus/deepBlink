@@ -74,6 +74,7 @@ def main():
             arg_labels=args.labels,
             arg_name=args.name,
             arg_size=args.size,
+            arg_pixel_size=args.pixel_size,
             arg_testsplit=args.testsplit,
             arg_validsplit=args.validsplit,
             arg_minspots=args.minspots,

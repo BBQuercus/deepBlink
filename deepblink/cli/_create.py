@@ -1,6 +1,6 @@
 """CLI submodule for creating a new dataset."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import logging
 import os
 
@@ -12,6 +12,7 @@ from ..io import EXTENSIONS
 from ..io import basename
 from ..io import grab_files
 from ..io import load_image
+from ..util import predict_pixel_size
 from ..util import train_valid_split
 
 
@@ -23,6 +24,7 @@ class HandleCreate:
         arg_labels: Path to folder with labels.
         arg_name: Name of dataset file to be saved.
         arg_size: Size of image to be cropped.
+        arg_pixel_size: Pixel size of images.
         arg_testsplit: Test vs. Trainval split percentage.
         arg_testsplit: Valid vs. Train split percentage.
         logger: Logger to log verbose output.
@@ -37,6 +39,7 @@ class HandleCreate:
         arg_labels: str,
         arg_name: str,
         arg_size: int,
+        arg_pixel_size: Union[float, Tuple[float, float]],
         arg_testsplit: int,
         arg_validsplit: int,
         arg_minspots: int,
@@ -51,6 +54,14 @@ class HandleCreate:
         self.minspots = max(1, arg_minspots)
         self.logger = logger
         self.logger.info("\U0001F5BC starting creation submodule")
+
+        # Allow xy pixel size or single value
+        self.pixel_size = (1.0, 1.0)
+        if arg_pixel_size is not None:
+            if isinstance(arg_pixel_size, tuple):
+                self.pixel_size = arg_pixel_size
+            else:
+                self.pixel_size = (arg_pixel_size, arg_pixel_size)
 
         self.abs_input = os.path.abspath(self.raw_input)
         self.extensions = EXTENSIONS
@@ -116,8 +127,10 @@ class HandleCreate:
         return path
 
     @property
-    def image_label_lists(self):
-        """Return lists with all images and labels."""
+    def image_label_size_lists(
+        self,
+    ) -> Tuple[List[np.ndarray], List[pd.DataFrame], List[Tuple[float, float]]]:
+        """Return lists with all images, labels, and sizes."""
         fname_images = grab_files(self.abs_input, self.extensions)
         fname_labels = grab_files(self.abs_labels, extensions=("csv",))
         self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}")
@@ -125,6 +138,7 @@ class HandleCreate:
 
         images = []
         labels = []
+        sizes = []
         for image, label in zip(fname_images, fname_labels):
             if basename(image) != basename(label):
                 self.logger.warning(
@@ -145,23 +159,37 @@ class HandleCreate:
 
             # Read image
             img = load_image(image, is_rgb=False)
-            if all(shape >= self.img_size for shape in img.shape):
-                images.append(img)
-                labels.append(df)
-            else:
+            if not all(shape >= self.img_size for shape in img.shape):
                 self.logger.warning(
                     f"\U000026A0 image {image} was too small! {img.shape} < {self.img_size}"
                 )
+                continue
+
+            # Predict pixel size
+            size = self.pixel_size
+            try:
+                size = predict_pixel_size(image)
+            except ValueError:
+                self.logger.warning(
+                    f"\U000026A0 pixel size for image {image} could not be predicted. "
+                    f"Defaulting pixel size to {size}."
+                )
+
+            images.append(img)
+            labels.append(df)
+            sizes.append(size)
 
         if not images:
             raise ValueError(
                 "No images matched the format criteria. Please check image size and labelling."
             )
         self.logger.debug(f"using {len(images)} non-empty files")
-        return images, labels
+        return images, labels, sizes
 
     @staticmethod
-    def convert_labels(image: np.ndarray, df: pd.DataFrame) -> pd.DataFrame:
+    def convert_labels(
+        image: np.ndarray, df: pd.DataFrame, pixel_size: Tuple[float, float]
+    ) -> pd.DataFrame:
         """Pre-processes labels to be used in deepBlink.
 
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
@@ -188,6 +216,10 @@ class HandleCreate:
             df[name] = df[name].where(df[name] < var, var)
             df[name] = df[name].where(df[name] > 0, 0)
 
+        # Scale coordinates to pixel size
+        size_x, size_y = pixel_size
+        df["r"] = df["r"] / size_y
+        df["c"] = df["c"] / size_x
         return df
 
     def crop_image(
@@ -239,8 +271,10 @@ class HandleCreate:
         self.image_list = []
         self.label_list = []
 
-        for image, label in zip(*self.image_label_lists):
-            label_normalized = self.convert_labels(image=image, df=label)
+        for image, label, size in zip(*self.image_label_size_lists):
+            label_normalized = self.convert_labels(
+                image=image, df=label, pixel_size=size
+            )
             image_crops, label_crops = self.crop_image(image=image, df=label_normalized)
             self.image_list.extend(image_crops)
             self.label_list.extend(label_crops)

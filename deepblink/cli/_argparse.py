@@ -8,6 +8,7 @@ from ._parseutil import CustomFormatter
 from ._parseutil import FileFolderType
 from ._parseutil import FileType
 from ._parseutil import FolderType
+from ._parseutil import PixelSizeType
 from ._parseutil import ProbabilityType
 from ._parseutil import ShapeType
 from ._parseutil import _add_utils
@@ -148,6 +149,19 @@ def _parse_args_create(
             "Will crop non-overlapping and ignore areas that did not get covered."
             "deepBlink requires square images powers of 2, such as 256, 512... "
             "[default: 512]"
+        ),
+    )
+    group2.add_argument(
+        "-ps",
+        "--pixel-size",
+        default=None,
+        type=PixelSizeType(),
+        help=(
+            "Pixel size in micrometer. "
+            "If given, will convert all labels to pixel coordinates. "
+            "Can be a single value or a tuple of two values for x and y, respectively. "
+            "If only one value is given, it will be used for both x and y. "
+            "[default: 1]"
         ),
     )
     group2.add_argument(
