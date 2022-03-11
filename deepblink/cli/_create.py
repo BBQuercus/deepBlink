@@ -296,9 +296,9 @@ class HandleCreate:
         )
 
         # Convert DataFrame to Numpy array
-        self.y_train = [y.values for y in y_train]
-        self.y_valid = [y.values for y in y_valid]
-        self.y_test = [y.values for y in y_test]
+        self.y_train = np.array([y.values for y in y_train], dtype=object)
+        self.y_valid = np.array([y.values for y in y_valid], dtype=object)
+        self.y_test = np.array([y.values for y in y_test], dtype=object)
 
     def save_npz(self):
         """Save dataset splits as single npz file."""
