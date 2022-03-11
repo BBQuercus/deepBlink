@@ -2,8 +2,11 @@
 
 from typing import Callable, Iterable, Tuple, Union
 import importlib
+import os
 import random
 
+from PIL import Image
+from PIL.TiffTags import TAGS
 import numpy as np
 import pandas as pd
 
@@ -127,3 +130,25 @@ def predict_shape(shape: tuple) -> str:
     sorted_dims = [k for k, v in sorted(dims.items(), key=lambda item: item[1])]
     order = ",".join(sorted_dims)
     return order
+
+
+def predict_pixel_size(fname: str) -> Tuple[float, float]:
+    """Predict the pixel size based on tifffile metadata."""
+    if not fname.endswith(".tif"):
+        raise ValueError(f"{fname} is not a tif file.")
+    if not os.path.isfile(fname):
+        raise ValueError(f"{fname} does not exist.")
+
+    image = Image.open(fname)
+    if len(image.size) != 2:
+        raise ValueError(f"Image {fname} has more than 2 dimensions.")
+
+    # Get resolutions from tiff metadata
+    meta_dict = {TAGS[key]: image.tag[key] for key in image.tag_v2}
+    x_res = meta_dict.get("XResolution", ((1, 1),))
+    y_res = meta_dict.get("YResolution", ((1, 1),))
+    unit = meta_dict.get("ResolutionUnit", (1,))
+    x_size = x_res[0][1] / x_res[0][0] * unit[0]
+    y_size = y_res[0][1] / y_res[0][0] * unit[0]
+
+    return x_size, y_size

@@ -1,6 +1,8 @@
 """Unittests for the deepblink.util module."""
 # pylint: disable=missing-function-docstring
 
+import os
+
 from hypothesis import given
 from hypothesis.strategies import floats
 from hypothesis.strategies import lists
@@ -11,6 +13,7 @@ import pytest
 
 from deepblink.util import delete_non_unique_columns
 from deepblink.util import get_from_module
+from deepblink.util import predict_pixel_size
 from deepblink.util import predict_shape
 from deepblink.util import relative_shuffle
 from deepblink.util import remove_falses
@@ -95,3 +98,12 @@ def test_predict_shape_1(shape, expected):
 def test_predict_shape_2(shape):
     with pytest.raises(ValueError):
         predict_shape(shape)
+
+
+def test_predict_pixel_size():
+    images = [
+        os.path.join(os.path.dirname(__file__), "./data/image_pixel.tif"),
+        os.path.join(os.path.dirname(__file__), "./data/image_micron.tif"),
+    ]
+    assert predict_pixel_size(images[0]) == (1.0, 1.0)
+    assert predict_pixel_size(images[1]) == pytest.approx((0.3878, 0.4824))

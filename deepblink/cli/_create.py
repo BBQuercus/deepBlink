@@ -1,6 +1,6 @@
 """CLI submodule for creating a new dataset."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import logging
 import os
 
@@ -12,6 +12,7 @@ from ..io import EXTENSIONS
 from ..io import basename
 from ..io import grab_files
 from ..io import load_image
+from ..util import predict_pixel_size
 from ..util import train_valid_split
 
 
@@ -23,6 +24,7 @@ class HandleCreate:
         arg_labels: Path to folder with labels.
         arg_name: Name of dataset file to be saved.
         arg_size: Size of image to be cropped.
+        arg_pixel_size: Pixel size of images.
         arg_testsplit: Test vs. Trainval split percentage.
         arg_testsplit: Valid vs. Train split percentage.
         logger: Logger to log verbose output.
@@ -37,6 +39,7 @@ class HandleCreate:
         arg_labels: str,
         arg_name: str,
         arg_size: int,
+        arg_pixel_size: Union[float, Tuple[float, float]],
         arg_testsplit: int,
         arg_validsplit: int,
         arg_minspots: int,
@@ -46,6 +49,7 @@ class HandleCreate:
         self.raw_labels = arg_labels
         self.raw_name = arg_name
         self.img_size = arg_size
+        self.pixel_size = arg_pixel_size
         self.test_split = arg_testsplit
         self.valid_split = arg_validsplit
         self.minspots = max(1, arg_minspots)
@@ -63,15 +67,15 @@ class HandleCreate:
         self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}")
 
     @property
-    def abs_labels(self):
+    def abs_labels(self) -> str:
         """Return absolute path to directory with labels."""
         # Full path name
         if self.raw_labels is not None:
             path = os.path.abspath(self.raw_labels)
             self.logger.debug(f"using provided label path at {path}")
-        # Default path with labels/ subdirectory
-        elif os.path.isdir(os.path.join(self.abs_input, "labels")):
-            path = os.path.join(self.abs_input, "labels")
+        # Default path in input directory
+        elif os.path.isdir(self.abs_input):
+            path = self.abs_input
             self.logger.debug(f"using default label path at {path}")
         else:
             self.logger.debug(
@@ -80,13 +84,13 @@ class HandleCreate:
             raise ValueError(
                 (
                     "\U0000274C No label path found.\t"
-                    "Please use a directory called 'labels' in input or use the '--labels' flag."
+                    "Please provide labels in the input directory or use the '--labels' flag."
                 )
             )
         return path
 
     @property
-    def fname_out(self):
+    def fname_out(self) -> str:
         """Return the absolute path to the dataset."""
         if self.raw_name is not None:
             # Full path and file given
@@ -115,9 +119,33 @@ class HandleCreate:
             self.logger.debug(f"using default output at {path}")
         return path
 
+    def get_pixel_size(self, image: str) -> Tuple[float, float]:
+        """Return the pixel size of an image."""
+        # Use user-provided pixel size
+        if self.pixel_size is not None:
+            self.logger.debug(f"using provided pixel size {self.pixel_size}")
+            if isinstance(self.pixel_size, tuple):
+                return self.pixel_size
+            return (self.pixel_size, self.pixel_size)
+
+        # Try to predict pixel size
+        try:
+            size = predict_pixel_size(image)
+            self.logger.debug(f"using predicted pixel size {size}")
+            return size
+        except (ValueError, KeyError, IndexError) as e:
+            self.logger.warning(
+                f"\U000026A0 {e} encountered. Pixel size for image {image} could not be predicted."
+            )
+
+        self.logger.debug(f"defaulting pixel size to {size}")
+        return (1.0, 1.0)
+
     @property
-    def image_label_lists(self):
-        """Return lists with all images and labels."""
+    def image_label_size_lists(
+        self,
+    ) -> Tuple[List[np.ndarray], List[pd.DataFrame], List[Tuple[float, float]]]:
+        """Return lists with all images, labels, and sizes."""
         fname_images = grab_files(self.abs_input, self.extensions)
         fname_labels = grab_files(self.abs_labels, extensions=("csv",))
         self.logger.debug(f"images - found {len(fname_images)} files: {fname_images}")
@@ -125,6 +153,7 @@ class HandleCreate:
 
         images = []
         labels = []
+        sizes = []
         for image, label in zip(fname_images, fname_labels):
             if basename(image) != basename(label):
                 self.logger.warning(
@@ -145,23 +174,28 @@ class HandleCreate:
 
             # Read image
             img = load_image(image, is_rgb=False)
-            if all(shape >= self.img_size for shape in img.shape):
-                images.append(img)
-                labels.append(df)
-            else:
+            if not all(shape >= self.img_size for shape in img.shape):
                 self.logger.warning(
                     f"\U000026A0 image {image} was too small! {img.shape} < {self.img_size}"
                 )
+                continue
+
+            size = self.get_pixel_size(image)
+            images.append(img)
+            labels.append(df)
+            sizes.append(size)
 
         if not images:
             raise ValueError(
                 "No images matched the format criteria. Please check image size and labelling."
             )
         self.logger.debug(f"using {len(images)} non-empty files")
-        return images, labels
+        return images, labels, sizes
 
     @staticmethod
-    def convert_labels(image: np.ndarray, df: pd.DataFrame) -> pd.DataFrame:
+    def convert_labels(
+        image: np.ndarray, df: pd.DataFrame, pixel_size: Tuple[float, float]
+    ) -> pd.DataFrame:
         """Pre-processes labels to be used in deepBlink.
 
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
@@ -188,6 +222,10 @@ class HandleCreate:
             df[name] = df[name].where(df[name] < var, var)
             df[name] = df[name].where(df[name] > 0, 0)
 
+        # Scale coordinates to pixel size
+        size_x, size_y = pixel_size
+        df["r"] = df["r"] / size_y
+        df["c"] = df["c"] / size_x
         return df
 
     def crop_image(
@@ -239,8 +277,10 @@ class HandleCreate:
         self.image_list = []
         self.label_list = []
 
-        for image, label in zip(*self.image_label_lists):
-            label_normalized = self.convert_labels(image=image, df=label)
+        for image, label, size in zip(*self.image_label_size_lists):
+            label_normalized = self.convert_labels(
+                image=image, df=label, pixel_size=size
+            )
             image_crops, label_crops = self.crop_image(image=image, df=label_normalized)
             self.image_list.extend(image_crops)
             self.label_list.extend(label_crops)
@@ -262,9 +302,9 @@ class HandleCreate:
         )
 
         # Convert DataFrame to Numpy array
-        self.y_train = [y.values for y in y_train]
-        self.y_valid = [y.values for y in y_valid]
-        self.y_test = [y.values for y in y_test]
+        self.y_train = np.array([y.values for y in y_train], dtype=object)
+        self.y_valid = np.array([y.values for y in y_valid], dtype=object)
+        self.y_test = np.array([y.values for y in y_test], dtype=object)
 
     def save_npz(self):
         """Save dataset splits as single npz file."""
