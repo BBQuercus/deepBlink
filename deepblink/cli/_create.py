@@ -133,7 +133,7 @@ class HandleCreate:
             size = predict_pixel_size(image)
             self.logger.debug(f"using predicted pixel size {size}")
             return size
-        except ValueError:
+        except (ValueError, KeyError, IndexError) as e:
             self.logger.warning(
                 f"\U000026A0 pixel size for image {image} could not be predicted."
             )
