@@ -124,7 +124,7 @@ def _parse_args_create(
         help=(
             "Path to the directory containing labels in csv format. "
             "The default path accounts for using the FIJI macro described on the wiki. "
-            "[default: --INPUT/labels/]"
+            "[default: --INPUT/]"
         ),
     )
     group2.add_argument(

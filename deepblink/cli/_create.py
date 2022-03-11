@@ -74,15 +74,15 @@ class HandleCreate:
         self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}")
 
     @property
-    def abs_labels(self):
+    def abs_labels(self) -> str:
         """Return absolute path to directory with labels."""
         # Full path name
         if self.raw_labels is not None:
             path = os.path.abspath(self.raw_labels)
             self.logger.debug(f"using provided label path at {path}")
-        # Default path with labels/ subdirectory
-        elif os.path.isdir(os.path.join(self.abs_input, "labels")):
-            path = os.path.join(self.abs_input, "labels")
+        # Default path in input directory
+        elif os.path.isdir(self.abs_input):
+            path = self.abs_input
             self.logger.debug(f"using default label path at {path}")
         else:
             self.logger.debug(
@@ -91,13 +91,13 @@ class HandleCreate:
             raise ValueError(
                 (
                     "\U0000274C No label path found.\t"
-                    "Please use a directory called 'labels' in input or use the '--labels' flag."
+                    "Please provide labels in the input directory or use the '--labels' flag."
                 )
             )
         return path
 
     @property
-    def fname_out(self):
+    def fname_out(self) -> str:
         """Return the absolute path to the dataset."""
         if self.raw_name is not None:
             # Full path and file given
