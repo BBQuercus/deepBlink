@@ -49,19 +49,12 @@ class HandleCreate:
         self.raw_labels = arg_labels
         self.raw_name = arg_name
         self.img_size = arg_size
+        self.pixel_size = arg_pixel_size
         self.test_split = arg_testsplit
         self.valid_split = arg_validsplit
         self.minspots = max(1, arg_minspots)
         self.logger = logger
         self.logger.info("\U0001F5BC starting creation submodule")
-
-        # Allow xy pixel size or single value
-        self.pixel_size = (1.0, 1.0)
-        if arg_pixel_size is not None:
-            if isinstance(arg_pixel_size, tuple):
-                self.pixel_size = arg_pixel_size
-            else:
-                self.pixel_size = (arg_pixel_size, arg_pixel_size)
 
         self.abs_input = os.path.abspath(self.raw_input)
         self.extensions = EXTENSIONS
@@ -126,6 +119,28 @@ class HandleCreate:
             self.logger.debug(f"using default output at {path}")
         return path
 
+    def get_pixel_size(self, image: str) -> Tuple[float, float]:
+        """Return the pixel size of an image."""
+        # Use user-provided pixel size
+        if self.pixel_size is not None:
+            self.logger.debug(f"using provided pixel size {self.pixel_size}")
+            if isinstance(self.pixel_size, tuple):
+                return self.pixel_size
+            return (self.pixel_size, self.pixel_size)
+
+        # Try to predict pixel size
+        try:
+            size = predict_pixel_size(image)
+            self.logger.debug(f"using predicted pixel size {size}")
+            return size
+        except ValueError:
+            self.logger.warning(
+                f"\U000026A0 pixel size for image {image} could not be predicted."
+            )
+
+        self.logger.debug(f"defaulting pixel size to {size}")
+        return (1.0, 1.0)
+
     @property
     def image_label_size_lists(
         self,
@@ -165,16 +180,7 @@ class HandleCreate:
                 )
                 continue
 
-            # Predict pixel size
-            size = self.pixel_size
-            try:
-                size = predict_pixel_size(image)
-            except ValueError:
-                self.logger.warning(
-                    f"\U000026A0 pixel size for image {image} could not be predicted. "
-                    f"Defaulting pixel size to {size}."
-                )
-
+            size = self.get_pixel_size(image)
             images.append(img)
             labels.append(df)
             sizes.append(size)
