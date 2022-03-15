@@ -1,6 +1,6 @@
 """CLI submodule for predicting on images."""
 
-from typing import List
+from typing import List, Tuple, Union
 import logging
 import os
 
@@ -16,6 +16,7 @@ from ..io import load_image
 from ..io import load_model
 from ..util import delete_non_unique_columns
 from ..util import predict_shape
+from ._util import get_pixel_size
 
 
 class HandlePredict:
@@ -27,6 +28,8 @@ class HandlePredict:
         arg_output: Path to output directory.
         arg_radius: Size of integrated image intensity calculation.
         arg_shape: Custom shape format to label axes.
+        arg_probability: Probability threshold for prediction.
+        arg_pixel_size: Pixel size of image.
         logger: Logger to log verbose output.
     """
 
@@ -38,6 +41,7 @@ class HandlePredict:
         arg_radius: int,
         arg_shape: str,
         arg_probability: float,
+        arg_pixel_size: Union[float, Tuple[float, float]],
         logger: logging.Logger,
     ):
         self.fname_model = arg_model
@@ -46,6 +50,7 @@ class HandlePredict:
         self.radius = arg_radius
         self.raw_shape = arg_shape
         self.probability = arg_probability
+        self.pixel_size = arg_pixel_size
         self.logger = logger
         self.logger.info("\U0001F914 starting prediction submodule")
 
@@ -144,17 +149,20 @@ class HandlePredict:
         )
 
     def predict_single(
-        self, image: np.ndarray, c_idx: int, t_idx: int, z_idx: int
+        self, image: np.ndarray, pixel_size: Tuple[float, float]
     ) -> pd.DataFrame:
-        """Predict a single (x,y) image at given c, t, z positions."""
-        columns = (
-            ["y", "x"] if self.probability is None else ["y", "x", "p"]
-        )  # originally r, c
+        """Predict a single (x,y) image accounting for pixel size."""
+        column_x = "x [px]" if pixel_size[0] == 1 else "x [µm]"
+        column_y = "y [px]" if pixel_size[1] == 1 else "y [µm]"
+        columns = [column_y, column_x]  # originally r, c
+        if self.probability is not None:
+            columns.append("p")
+
         coords = predict(image, self.model, self.probability)
         df = pd.DataFrame(coords, columns=columns)
-        df["c"] = c_idx
-        df["t"] = t_idx
-        df["z"] = z_idx
+        df[column_x] *= pixel_size[0]
+        df[column_y] *= pixel_size[1]
+
         if self.radius is not None:
             df["i"] = get_intensities(image, coords, self.radius)
         return df
@@ -163,6 +171,7 @@ class HandlePredict:
         """Predict and save a single image."""
         order = ["c", "t", "z", "y", "x"]
         shape = self.shape
+        pixel_size = get_pixel_size(self.pixel_size, fname_in, self.logger)
 
         # Create an image and shape with all possible dimensions
         for i in order:
@@ -183,8 +192,11 @@ class HandlePredict:
         for c_idx, t_ser in enumerate(image):
             for t_idx, z_ser in enumerate(t_ser):
                 for z_idx, single_image in enumerate(z_ser):
-                    curr_df = self.predict_single(single_image, c_idx, t_idx, z_idx)
-                    df = df.append(curr_df)
+                    curr_df = self.predict_single(single_image, pixel_size)
+                    curr_df["c"] = c_idx
+                    curr_df["t"] = t_idx
+                    curr_df["z"] = z_idx
+                    df = pd.concat([df, curr_df])
 
         self.logger.debug(f"completed prediction loop with\n{df.head()}")
         self.save_output(fname_in, df)

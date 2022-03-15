@@ -94,6 +94,7 @@ def main():
             arg_radius=args.radius,
             arg_shape=args.shape,
             arg_probability=args.probability,
+            arg_pixel_size=args.pixel_size,
             logger=logger,
         )
 
