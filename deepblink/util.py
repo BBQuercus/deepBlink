@@ -132,9 +132,9 @@ def predict_shape(shape: tuple) -> str:
     return order
 
 
-def predict_pixel_size(fname: str) -> Tuple[float, float]:
+def predict_pixel_size(fname: Union[str, "os.PathLike[str]"]) -> Tuple[float, float]:
     """Predict the pixel size based on tifffile metadata."""
-    if not fname.endswith(".tif"):
+    if not os.path.splitext(fname)[1] == ".tif":
         raise ValueError(f"{fname} is not a tif file.")
     if not os.path.isfile(fname):
         raise ValueError(f"{fname} does not exist.")
