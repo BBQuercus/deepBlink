@@ -107,8 +107,13 @@ def load_model(fname: str) -> tf.keras.models.Model:
 def load_prediction(fname: str) -> pd.DataFrame:
     """Import a prediction file (output from deepBlink predict) as pandas dataframe."""
     df = pd.read_csv(fname)
-    if not all([c in df.columns for c in ["x", "y"]]):
-        raise ValueError("Prediction file must contain columns 'x' and 'y'.")
+    if any([c in df.columns for c in ["x [µm]", "y [µm]"]]):
+        raise ValueError(
+            "Predictions must be in pixels, not microns. "
+            "Please use 'pixel-size' 1 in predict."
+        )
+    if not all([c in df.columns for c in ["x [px]", "y [px]"]]):
+        raise ValueError("Prediction file must contain columns 'x [px]' and 'y [px]'.")
     return df
 
 

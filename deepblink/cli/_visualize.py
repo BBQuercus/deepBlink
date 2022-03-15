@@ -92,7 +92,7 @@ class HandleVisualize:
         if image.ndim != 2:
             self.logger.error("invalid image dimension")
         df = load_prediction(self.prediction)
-        coords = df[["x", "y"]].values
+        coords = df[["x [px]", "y [px]"]].values
 
         self.plot_data(image, coords, "Prediction")
 
