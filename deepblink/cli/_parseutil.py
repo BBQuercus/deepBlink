@@ -63,14 +63,19 @@ class PixelSizeType:
         pass
 
     def __call__(self, value):  # noqa: D102
-        if isinstance(value, float):
-            return value
-        if (
-            isinstance(value, tuple)
-            and len(value) == 2
-            and all([isinstance(e, float) for e in value])
-        ):
-            return value
+        # Attempt to parse as float
+        try:
+            return float(value)
+        except ValueError:
+            pass
+
+        # Attempt to parse as tuple
+        try:
+            value = tuple(map(float, value.split(",")))
+            if len(value) == 2:
+                return value
+        except ValueError:
+            pass
         raise argparse.ArgumentTypeError(
             f"Pixel size must be a float or a tuple of two floats. '{value}' is not."
         )
