@@ -1,6 +1,7 @@
 """CLI submodule for visualization."""
 
 import logging
+import os
 import random
 
 import matplotlib.pyplot as plt
@@ -42,7 +43,7 @@ class HandleVisualize:
         if self.dataset is not None:
             self.logger.info("\U0001F5BC Visualizing dataset provided.")
             self.visualize_dataset()
-        elif self.image is not None and self.prediction is not None:
+        elif self.image is not None:
             self.logger.info("\U0001F5BC visualizing image provided.")
             self.visualize_image()
         else:
@@ -91,6 +92,10 @@ class HandleVisualize:
         image = load_image(self.image)
         if image.ndim != 2:
             self.logger.error("invalid image dimension")
+
+        if self.prediction is None:
+            self.prediction = f"{os.path.splitext(self.image)[0]}.csv"
+            self.logger.debug("using same name prediction file")
         df = load_prediction(self.prediction)
         coords = df[["x [px]", "y [px]"]].values
 
