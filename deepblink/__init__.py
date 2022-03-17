@@ -16,7 +16,7 @@ Modules are arranged as follows:
 - util: Basic utility functions not fitting into a category.
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from . import augment
 from . import cli
