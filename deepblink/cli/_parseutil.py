@@ -158,7 +158,6 @@ class Color:
     end = "\033[0m" if ispos else ""
 
 
-# TODO find a simpler and safer solution
 def _add_utils(parser: argparse.ArgumentParser):
     """A very hacky way of trying to move this group to the bottom of help text."""
     group = parser.add_argument_group(f"{Color.general}General utilities{Color.end}")

@@ -113,8 +113,6 @@ class HandlePredict:
             outpath = self.path_input
         return outpath
 
-    # TODO solve double definition of replace_chars here and in ShapeType
-    # TODO solve mypy return type bug
     @property
     def shape(self) -> List[str]:
         """Resolve input shape."""

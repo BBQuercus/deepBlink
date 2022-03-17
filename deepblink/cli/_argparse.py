@@ -426,6 +426,7 @@ def _parse_args_visualize(
     )
     group2 = parser.add_argument_group(f"{Color.optional}Optional{Color.end}")
     group2.add_argument(
+        "-ds",
         "--dataset",
         type=FileType(["npz"]),
         default=None,
@@ -436,6 +437,7 @@ def _parse_args_visualize(
         ),
     )
     group2.add_argument(
+        "-s",
         "--subset",
         type=str,
         default="train",
@@ -446,6 +448,7 @@ def _parse_args_visualize(
         ),
     )
     group2.add_argument(
+        "-idx",
         "--index",
         type=int,
         default=None,
@@ -455,6 +458,7 @@ def _parse_args_visualize(
         ),
     )
     group2.add_argument(
+        "-i",
         "--image",
         type=FileType(EXTENSIONS),
         default=None,
@@ -465,12 +469,14 @@ def _parse_args_visualize(
         ),
     )
     group2.add_argument(
+        "-p",
         "--prediction",
         type=FileType(["csv"]),
         default=None,
         help=(
             "Prediction csv file (output from deepBlink predict) to visualize. "
-            "[default: None]"
+            "Will try to find the image's corresponding csv file if not given. "
+            "[default: image.csv]"
         ),
     )
     _add_utils(parser)
