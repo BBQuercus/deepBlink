@@ -110,6 +110,8 @@ def load_model(fname: Union[str, "os.PathLike[str]"]) -> tf.keras.models.Model:
 
 def load_prediction(fname: Union[str, "os.PathLike[str]"]) -> pd.DataFrame:
     """Import a prediction file (output from deepBlink predict) as pandas dataframe."""
+    if not os.path.isfile(fname):
+        raise ValueError(f"File must exist - '{fname}' does not.")
     df = pd.read_csv(fname)
     if any([c in df.columns for c in ["x [µm]", "y [µm]"]]):
         raise ValueError(

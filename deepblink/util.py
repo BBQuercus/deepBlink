@@ -132,6 +132,7 @@ def predict_shape(shape: tuple) -> str:
     return order
 
 
+# TODO account for resolution unit (µm / cm)
 def predict_pixel_size(fname: Union[str, "os.PathLike[str]"]) -> Tuple[float, float]:
     """Predict the pixel size based on tifffile metadata."""
     if not os.path.splitext(fname)[1] == ".tif":
