@@ -348,6 +348,19 @@ def _parse_args_predict(
             "[default: None]"
         ),
     )
+    group2.add_argument(
+        "-ps",
+        "--pixel-size",
+        default=None,
+        type=PixelSizeType(),
+        help=(
+            "Pixel size in micrometer. "
+            "If given, will convert all predictions to micrometers. "
+            "Can be a single value or a tuple of two values for x and y, respectively. "
+            "If only one value is given, it will be used for both x and y. "
+            "[default: 1]"
+        ),
+    )
     _add_utils(parser)
 
 

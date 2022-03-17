@@ -1,6 +1,6 @@
 """Dataset preparation functions."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import glob
 import os
 import re
@@ -21,7 +21,7 @@ from .losses import rmse
 EXTENSIONS = ("tif", "tiff", "jpeg", "jpg", "png")
 
 
-def basename(path: str) -> str:
+def basename(path: Union[str, "os.PathLike[str]"]) -> str:
     """Returns the basename removing path and extension."""
     return os.path.splitext(os.path.basename(path))[0]
 
@@ -31,7 +31,9 @@ def securename(fname: str) -> str:
     return re.sub(r"[^\w\d-]", "_", fname)
 
 
-def load_npz(fname: str, test_only: bool = False) -> List[np.ndarray]:
+def load_npz(
+    fname: Union[str, "os.PathLike[str]"], test_only: bool = False
+) -> List[np.ndarray]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".
@@ -58,7 +60,9 @@ def load_npz(fname: str, test_only: bool = False) -> List[np.ndarray]:
 
 
 def load_image(
-    fname: str, extensions: Tuple[str, ...] = EXTENSIONS, is_rgb: bool = False
+    fname: Union[str, "os.PathLike[str]"],
+    extensions: Tuple[str, ...] = EXTENSIONS,
+    is_rgb: bool = False,
 ) -> np.ndarray:
     """Import a single image as numpy array checking format requirements.
 
@@ -69,7 +73,7 @@ def load_image(
     """
     if not os.path.isfile(fname):
         raise ImportError("Input file does not exist. Please provide a valid path.")
-    if not fname.lower().endswith(extensions):
+    if not str(fname).lower().endswith(extensions):
         raise ImportError(f"Input file extension invalid. Please use {extensions}.")
     try:
         image = skimage.io.imread(fname).squeeze().astype(np.float32)
@@ -80,7 +84,7 @@ def load_image(
     return image
 
 
-def load_model(fname: str) -> tf.keras.models.Model:
+def load_model(fname: Union[str, "os.PathLike[str]"]) -> tf.keras.models.Model:
     """Import a deepBlink model from file."""
     if not os.path.isfile(fname):
         raise ValueError(f"File must exist - '{fname}' does not.")
@@ -104,15 +108,22 @@ def load_model(fname: str) -> tf.keras.models.Model:
         raise ImportError(f"Model '{fname}' could not be imported.") from error
 
 
-def load_prediction(fname: str) -> pd.DataFrame:
+def load_prediction(fname: Union[str, "os.PathLike[str]"]) -> pd.DataFrame:
     """Import a prediction file (output from deepBlink predict) as pandas dataframe."""
     df = pd.read_csv(fname)
-    if not all([c in df.columns for c in ["x", "y"]]):
-        raise ValueError("Prediction file must contain columns 'x' and 'y'.")
+    if any([c in df.columns for c in ["x [µm]", "y [µm]"]]):
+        raise ValueError(
+            "Predictions must be in pixels, not microns. "
+            "Please use 'pixel-size' 1 in predict."
+        )
+    if not all([c in df.columns for c in ["x [px]", "y [px]"]]):
+        raise ValueError("Prediction file must contain columns 'x [px]' and 'y [px]'.")
     return df
 
 
-def grab_files(path: str, extensions: Tuple[str, ...]) -> List[str]:
+def grab_files(
+    path: Union[str, "os.PathLike[str]"], extensions: Tuple[str, ...]
+) -> List[str]:
     """Grab all files in directory with listed extensions.
 
     Args:

@@ -12,8 +12,8 @@ from ..io import EXTENSIONS
 from ..io import basename
 from ..io import grab_files
 from ..io import load_image
-from ..util import predict_pixel_size
 from ..util import train_valid_split
+from ._util import get_pixel_size
 
 
 class HandleCreate:
@@ -119,28 +119,6 @@ class HandleCreate:
             self.logger.debug(f"using default output at {path}")
         return path
 
-    def get_pixel_size(self, image: str) -> Tuple[float, float]:
-        """Return the pixel size of an image."""
-        # Use user-provided pixel size
-        if self.pixel_size is not None:
-            self.logger.debug(f"using provided pixel size {self.pixel_size}")
-            if isinstance(self.pixel_size, tuple):
-                return self.pixel_size
-            return (self.pixel_size, self.pixel_size)
-
-        # Try to predict pixel size
-        try:
-            size = predict_pixel_size(image)
-            self.logger.debug(f"using predicted pixel size {size}")
-            return size
-        except (ValueError, KeyError, IndexError) as e:
-            self.logger.warning(
-                f"\U000026A0 {e} encountered. Pixel size for image {image} could not be predicted."
-            )
-
-        self.logger.debug(f"defaulting pixel size to {size}")
-        return (1.0, 1.0)
-
     @property
     def image_label_size_lists(
         self,
@@ -180,7 +158,7 @@ class HandleCreate:
                 )
                 continue
 
-            size = self.get_pixel_size(image)
+            size = get_pixel_size(self.pixel_size, image, self.logger)
             images.append(img)
             labels.append(df)
             sizes.append(size)
