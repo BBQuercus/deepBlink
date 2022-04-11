@@ -118,7 +118,7 @@ def test_predict_probability_and_pixel_size(predict_handler, filename_predict_ou
     predict_handler.probability = 0.9
     predict_handler()
     with open(filename_predict_output, "r") as f:
-        assert f.readline().strip() == "y [µm],x [µm],p"
+        assert f.readline().strip() == "y [\u00B5m],x [\u00B5m],p"
     os.remove(filename_predict_output)
     predict_handler.pixel_size = None
     predict_handler.probability = None
@@ -131,7 +131,7 @@ def test_predict_all_options(predict_handler, filename_predict_output):
     predict_handler.raw_shape = "(x,y)"
     predict_handler()
     with open(filename_predict_output, "r") as f:
-        assert f.readline().strip() == "y [µm],x [µm],p,i"
+        assert f.readline().strip() == "y [\u00B5m],x [\u00B5m],p,i"
     os.remove(filename_predict_output)
     predict_handler.pixel_size = None
     predict_handler.probability = None
