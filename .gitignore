@@ -76,7 +76,7 @@ docs/_build
 # Training
 *.npz
 *.h5
-!model512x512.h5
+!model.h5
 wandb/
 Fiji.app/
 
