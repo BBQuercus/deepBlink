@@ -158,11 +158,11 @@ class HandlePredict:
 
         coords = predict(image, self.model, self.probability)
         df = pd.DataFrame(coords, columns=columns)
+        if self.radius is not None:
+            df["i"] = get_intensities(image, coords[..., :2], self.radius)
+
         df[column_x] *= pixel_size[0]
         df[column_y] *= pixel_size[1]
-
-        if self.radius is not None:
-            df["i"] = get_intensities(image, coords, self.radius)
         return df
 
     def predict_adaptive(self, fname_in: str, image: np.ndarray) -> None:
