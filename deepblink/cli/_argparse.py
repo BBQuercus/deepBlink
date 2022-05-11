@@ -13,7 +13,7 @@ from ._parseutil import ProbabilityType
 from ._parseutil import ShapeType
 from ._parseutil import _add_utils
 
-EXTENSIONS = ("tif", "jpeg", "jpg", "png")
+EXTENSIONS = ("tiff", "tif", "jpeg", "jpg", "png")
 
 
 def _parse_args_check(
