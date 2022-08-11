@@ -184,7 +184,9 @@ class HandleCreate:
             df = df.rename(columns={"X": "c", "Y": "r"})[["r", "c"]]
         # TrackMate export format
         elif all(c in df.columns for c in ("POSITION_X", "POSITION_Y")):
-            df = df[~df.index.isna()]  # Remove unused headers for TrackMate v7.0.0+
+            df = df[
+                (~df.index.isna()) & (df.index.str.lower() != "label")
+            ]  # Remove unused headers for TrackMate v7.0.0+
             df = df.rename(columns={"POSITION_X": "c", "POSITION_Y": "r"})[["r", "c"]]
             df = df.reset_index(drop=True)
         else:

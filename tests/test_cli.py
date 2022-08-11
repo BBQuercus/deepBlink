@@ -56,8 +56,9 @@ def test_create():
 
     labels = [
         os.path.join(os.path.dirname(__file__), "./data/input_manual.csv"),
-        os.path.join(os.path.dirname(__file__), "./data/input_trackmate_post7.csv"),
-        os.path.join(os.path.dirname(__file__), "./data/input_trackmate_pre7.csv"),
+        os.path.join(os.path.dirname(__file__), "./data/input_trackmate_7.7+.csv"),
+        os.path.join(os.path.dirname(__file__), "./data/input_trackmate_7.0+.csv"),
+        os.path.join(os.path.dirname(__file__), "./data/input_trackmate_7.0-.csv"),
     ]
     max_size = 100
     image = np.zeros((max_size, max_size))
