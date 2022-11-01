@@ -6,6 +6,7 @@ import os
 import random
 
 from PIL import Image
+from PIL import UnidentifiedImageError
 from PIL.TiffTags import TAGS
 import numpy as np
 import pandas as pd
@@ -139,8 +140,16 @@ def predict_pixel_size(fname: Union[str, "os.PathLike[str]"]) -> Tuple[float, fl
         raise ValueError(f"{fname} is not a tif file.")
     if not os.path.isfile(fname):
         raise ValueError(f"{fname} does not exist.")
+    if not os.path.getsize(fname):
+        raise ValueError(f"{fname} does not contain any data.")
 
-    image = Image.open(fname)
+    try:
+        image = Image.open(fname)
+    except UnidentifiedImageError as err:
+        raise ValueError(
+            f"{fname} could not be read by PIL. "
+            f"Check the format or pass a pixel-size directly."
+        ) from err
     if len(image.size) != 2:
         raise ValueError(f"Image {fname} has more than 2 dimensions.")
 

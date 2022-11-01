@@ -161,7 +161,7 @@ def _parse_args_create(
             "If given, will convert all labels to pixel coordinates. "
             "Can be a single value or a tuple of two values for x and y, respectively. "
             "If only one value is given, it will be used for both x and y. "
-            "[default: 1]"
+            "[default: None]"
         ),
     )
     group2.add_argument(
