@@ -37,7 +37,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "napari and qtpy are required for the labeling plugin. "
-        "Install with: pip install napari[all]"
+        'Install with: pip install "deepblink[napari]"'
     ) from e
 
 from ..io import EXTENSIONS, load_image

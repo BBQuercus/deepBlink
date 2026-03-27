@@ -23,7 +23,7 @@ class HandleLabel:
         except ImportError as exc:
             self.logger.error(
                 "napari is required for the labeling plugin. "
-                "Install with: pip install napari[all]"
+                'Install with: pip install "deepblink[napari]"'
             )
             raise SystemExit(1) from exc
 

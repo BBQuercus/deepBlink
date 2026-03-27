@@ -18,6 +18,7 @@ Threshold independent detection and localization of diffraction-limited spots.
 - [Documentation](#documentation)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Labeling Plugin](#labeling-plugin)
 - [Citation](#citation)
 
 ## Overview
@@ -63,6 +64,11 @@ conda install -c bbquercus deepblink
 Additionally for GPU support, install `tensorflow-gpu` through pip and with the
 appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html). Lastly, you can also use our [KNIME node](https://kni.me/c/phip4SLhBhzPtMwI) for inference. Please follow the installation instructions on KNIME hub.
 
+To use the interactive napari labeling plugin, install with the optional napari dependency:
+```bash
+pip install "deepblink[napari]"
+```
+
 ## Usage
 A video overview can be found [here](https://www.youtube.com/watch?v=vlXMg4k79LQ). Inferencing on deepBlink is performed at the command line as follows:
 
@@ -71,6 +77,23 @@ deepblink predict -m MODEL -i INPUT [-o OUTPUT] [-r RADIUS] [-s SHAPE]
 ```
 
 With `MODEL` being a pre-trained or custom model and `INPUT` being the path to a input image or folder containing images.
+
+
+## Labeling Plugin
+deepBlink includes an interactive napari-based labeling tool that replaces external tools like TrackMate for creating training data. Install the optional dependency and launch with:
+
+```bash
+pip install "deepblink[napari]"
+deepblink label -i /path/to/images
+```
+
+The plugin lets you:
+- Browse through a folder of images one by one
+- Run preliminary spot detection using Laplacian of Gaussian or a pre-trained deepBlink model
+- Edit spots interactively (add, move, delete) using napari's built-in Points layer tools
+- Save labeled coordinates as CSV files directly compatible with `deepblink create`
+
+Keyboard shortcuts for fast labeling: `A`/`D` to navigate images, `R` to run detection, `Ctrl+S` to save.
 
 
 ## Citation
