@@ -513,3 +513,48 @@ def _parse_args_visualize(
         ),
     )
     _add_utils(parser)
+
+
+def _parse_args_view(
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
+):
+    """Subparser for interactive prediction viewing."""
+    parser = subparsers.add_parser(
+        "view",
+        parents=[parent_parser],
+        formatter_class=CustomFormatter,
+        add_help=False,
+        description=(
+            f"\U0001F50D {Color.title}Viewer submodule{Color.end} \U0001F50D\n\n"
+            "Launch an interactive napari-based prediction viewer. "
+            "Load images of any size and dimensionality, select channels / z-slices / "
+            "timepoints, run predictions, and inspect results with adjustable thresholds."
+        ),
+        help="\U0001F50D Interactive prediction viewer with napari.",
+    )
+    group2 = parser.add_argument_group(f"{Color.optional}Optional{Color.end}")
+    group2.add_argument(
+        "-i",
+        "--input",
+        type=FileFolderType(EXTENSIONS),
+        default=None,
+        help=(
+            "Input image or folder. "
+            "Path to a single image or a directory of images to inspect. "
+            "Can also be selected interactively in the napari widget. "
+            "[default: None]"
+        ),
+    )
+    group2.add_argument(
+        "-m",
+        "--model",
+        type=FileType(["h5"]),
+        default=None,
+        help=(
+            "DeepBlink model. "
+            'Model has to be of file type ".h5". '
+            "Can also be loaded interactively in the napari widget. "
+            "[default: None]"
+        ),
+    )
+    _add_utils(parser)

@@ -19,6 +19,7 @@ Threshold independent detection and localization of diffraction-limited spots.
 - [Installation](#installation)
 - [Usage](#usage)
 - [Labeling Plugin](#labeling-plugin)
+- [Prediction Viewer](#prediction-viewer)
 - [Citation](#citation)
 
 ## Overview
@@ -94,6 +95,22 @@ The plugin lets you:
 - Save labeled coordinates as CSV files directly compatible with `deepblink create`
 
 Keyboard shortcuts for fast labeling: `A`/`D` to navigate images, `R` to run detection, `Ctrl+S` to save.
+
+
+## Prediction Viewer
+After training a model, use the interactive prediction viewer to check performance on new images of any size and format:
+
+```bash
+deepblink view -m model.h5 -i /path/to/images
+```
+
+Features:
+- Load images of any dimensionality (multi-channel, z-stacks, time series)
+- Auto-detects or manually specify axis arrangement (c, t, z, y, x)
+- Navigate channels, z-slices, and timepoints with sliders
+- Run prediction on individual slices or all at once
+- Adjust probability threshold interactively with a slider to tune sensitivity
+- Spots colored by prediction confidence (blue=low, red=high)
 
 
 ## Citation

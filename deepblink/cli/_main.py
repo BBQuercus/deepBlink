@@ -10,6 +10,7 @@ from ._argparse import _parse_args_download
 from ._argparse import _parse_args_label
 from ._argparse import _parse_args_predict
 from ._argparse import _parse_args_train
+from ._argparse import _parse_args_view
 from ._argparse import _parse_args_visualize
 from ._check import HandleCheck
 from ._config import HandleConfig
@@ -22,6 +23,7 @@ from ._parseutil import CustomFormatter
 from ._parseutil import _add_utils
 from ._predict import HandlePredict
 from ._train import HandleTrain
+from ._view import HandleView
 from ._visualize import HandleVisualize
 
 # Removes tensorflow's information on CPU / GPU availablity.
@@ -54,6 +56,7 @@ def arg_parser() -> argparse.ArgumentParser:
     _parse_args_label(subparsers, parent_parser)
     _parse_args_predict(subparsers, parent_parser)
     _parse_args_train(subparsers, parent_parser)
+    _parse_args_view(subparsers, parent_parser)
     _parse_args_visualize(subparsers, parent_parser)
     _add_utils(parser)
 
@@ -106,6 +109,13 @@ def main():
 
     if args.command == "train":
         handler = HandleTrain(arg_config=args.config, arg_gpu=args.gpu, logger=logger)
+
+    if args.command == "view":
+        handler = HandleView(
+            arg_input=getattr(args, "input", None),
+            arg_model=getattr(args, "model", None),
+            logger=logger,
+        )
 
     if args.command == "visualize":
         handler = HandleVisualize(

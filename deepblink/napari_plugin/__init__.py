@@ -11,7 +11,11 @@ def __getattr__(name):
         from .widget import SpotLabeler
 
         return SpotLabeler
+    if name == "PredictionViewer":
+        from .viewer import PredictionViewer
+
+        return PredictionViewer
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["SpotLabeler"]
+__all__ = ["SpotLabeler", "PredictionViewer"]

@@ -1,10 +1,15 @@
 name: deepblink
-display_name: deepBlink Spot Labeler
+display_name: deepBlink
 contributions:
   commands:
     - id: deepblink.spot_labeler
       title: deepBlink Spot Labeler
       python_name: deepblink.napari_plugin.widget:SpotLabeler
+    - id: deepblink.prediction_viewer
+      title: deepBlink Prediction Viewer
+      python_name: deepblink.napari_plugin.viewer:PredictionViewer
   widgets:
     - command: deepblink.spot_labeler
       display_name: deepBlink Spot Labeler
+    - command: deepblink.prediction_viewer
+      display_name: deepBlink Prediction Viewer
