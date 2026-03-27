@@ -364,6 +364,39 @@ def _parse_args_predict(
     _add_utils(parser)
 
 
+def _parse_args_label(
+    subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
+):
+    """Subparser for labeling."""
+    parser = subparsers.add_parser(
+        "label",
+        parents=[parent_parser],
+        formatter_class=CustomFormatter,
+        add_help=False,
+        description=(
+            f"\U0001F3F7 {Color.title}Labeling submodule{Color.end} \U0001F3F7\n\n"
+            "Launch an interactive napari-based labeling tool. "
+            "Open a folder of images, run preliminary spot detection, "
+            "edit spots interactively, and save labels for training."
+        ),
+        help="\U0001F3F7 Interactive spot labeling with napari.",
+    )
+    group2 = parser.add_argument_group(f"{Color.optional}Optional{Color.end}")
+    group2.add_argument(
+        "-i",
+        "--input",
+        type=FolderType(),
+        default=None,
+        help=(
+            "Input folder. "
+            "Path to the directory containing images to label. "
+            "Can also be selected interactively in the napari widget. "
+            "[default: None]"
+        ),
+    )
+    _add_utils(parser)
+
+
 def _parse_args_train(
     subparsers: argparse._SubParsersAction, parent_parser: argparse.ArgumentParser
 ):

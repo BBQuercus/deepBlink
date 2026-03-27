@@ -7,6 +7,7 @@ from ._argparse import _parse_args_check
 from ._argparse import _parse_args_config
 from ._argparse import _parse_args_create
 from ._argparse import _parse_args_download
+from ._argparse import _parse_args_label
 from ._argparse import _parse_args_predict
 from ._argparse import _parse_args_train
 from ._argparse import _parse_args_visualize
@@ -14,6 +15,7 @@ from ._check import HandleCheck
 from ._config import HandleConfig
 from ._create import HandleCreate
 from ._download import HandleDownload
+from ._label import HandleLabel
 from ._logger import _configure_logger
 from ._parseutil import Color
 from ._parseutil import CustomFormatter
@@ -49,6 +51,7 @@ def arg_parser() -> argparse.ArgumentParser:
     _parse_args_config(subparsers, parent_parser)
     _parse_args_create(subparsers, parent_parser)
     _parse_args_download(subparsers, parent_parser)
+    _parse_args_label(subparsers, parent_parser)
     _parse_args_predict(subparsers, parent_parser)
     _parse_args_train(subparsers, parent_parser)
     _parse_args_visualize(subparsers, parent_parser)
@@ -80,6 +83,9 @@ def main():
             arg_minspots=args.minspots,
             logger=logger,
         )
+
+    if args.command == "label":
+        handler = HandleLabel(arg_input=getattr(args, "input", None), logger=logger)
 
     if args.command == "download":
         handler = HandleDownload(

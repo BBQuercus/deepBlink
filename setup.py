@@ -40,7 +40,13 @@ setup(
         "scipy",
         "tensorflow>=2.0.0",
     ],
-    entry_points={"console_scripts": ["deepblink = deepblink.cli:main"]},
+    extras_require={
+        "napari": ["napari[all]>=0.4.0"],
+    },
+    entry_points={
+        "console_scripts": ["deepblink = deepblink.cli:main"],
+        "napari.manifest": ["deepblink = deepblink:napari.yaml"],
+    },
     # Metadata
     author="Bastian Eichenberger, YinXiu Zhan",
     author_email="bastian@eichenbergers.ch, yinxiuzhan89@gmail.com",

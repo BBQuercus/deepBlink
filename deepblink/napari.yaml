@@ -1,0 +1,10 @@
+name: deepblink
+display_name: deepBlink Spot Labeler
+contributions:
+  commands:
+    - id: deepblink.spot_labeler
+      title: deepBlink Spot Labeler
+      python_name: deepblink.napari_plugin.widget:SpotLabeler
+  widgets:
+    - command: deepblink.spot_labeler
+      display_name: deepBlink Spot Labeler
