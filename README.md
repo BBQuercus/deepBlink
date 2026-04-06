@@ -69,13 +69,34 @@ You can also use our [KNIME node](https://kni.me/c/phip4SLhBhzPtMwI) for inferen
 ## Usage
 
 ### Python API
+
+**Detect spots in an image:**
 ```python
 import deepblink
 
-model = deepblink.load_model("model.h5")
-image = deepblink.load_image("image.tif")
+model  = deepblink.load_model("model.h5")
+image  = deepblink.load_image("image.tif")
 coords = deepblink.predict(image, model, probability=0.5)
+# coords is an (N, 2) array of [row, col] coordinates
 ```
+
+**Measure intensities around detected spots:**
+```python
+intensities = deepblink.get_intensities(image, coords, radius=3)
+```
+
+**Evaluate predictions against ground truth:**
+```python
+df = deepblink.compute_metrics(pred=coords, true=ground_truth, mdist=3)
+```
+
+**Load a deepBlink dataset:**
+```python
+x_train, y_train, x_valid, y_valid, x_test, y_test = deepblink.load_npz("dataset.npz")
+```
+
+All submodules (`deepblink.losses`, `deepblink.networks`, `deepblink.augment`, etc.)
+are still accessible for advanced use cases like custom training loops.
 
 ### Command Line
 A video overview can be found [here](https://www.youtube.com/watch?v=vlXMg4k79LQ). Inferencing on deepBlink is performed at the command line as follows:
