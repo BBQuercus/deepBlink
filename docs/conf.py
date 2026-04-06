@@ -34,10 +34,10 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 project = "deepblink"
-year = "2020"
+year = "2026"
 author = "Bastian Eichenberger"
 copyright = f"{year}, {author}"
-version = release = "0.1.4"
+version = release = "0.2.0"
 
 pygments_style = "trac"
 templates_path = ["."]

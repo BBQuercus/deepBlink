@@ -1,11 +1,10 @@
 """Model class, to be extended by specific types of models."""
-# pylint: disable=R0913
 
-from typing import Callable, Dict, List
+from collections.abc import Callable
 import datetime
 
 import numpy as np
-import tensorflow as tf
+import keras
 
 from ..datasets import Dataset
 from ..datasets import SequenceDataset
@@ -36,15 +35,15 @@ class Model:
 
     def __init__(
         self,
-        augmentation_args: Dict,
-        dataset_args: Dict,
+        augmentation_args: dict,
+        dataset_args: dict,
         dataset_cls: Dataset,
-        network_args: Dict,
+        network_args: dict,
         network_fn: Callable,
         loss_fn: Callable,
         optimizer_fn: Callable,
-        train_args: Dict,
-        pre_model: tf.keras.models.Model = None,
+        train_args: dict,
+        pre_model: keras.Model = None,
         **kwargs,
     ):
         self.name = f"{DATESTRING}_{self.__class__.__name__}_{dataset_cls.name}_{network_fn.__name__}"
@@ -59,7 +58,7 @@ class Model:
         self.has_pre_model = pre_model is not None
 
         if self.has_pre_model:
-            self.network: tf.keras.models.Model = pre_model
+            self.network: keras.Model = pre_model
         else:
             try:
                 self.network = network_fn(**network_args)
@@ -110,7 +109,7 @@ class Model:
             shuffle=True,
         )
 
-    def evaluate(self, x: np.ndarray, y: np.ndarray) -> List[float]:
+    def evaluate(self, x: np.ndarray, y: np.ndarray) -> list[float]:
         """Evaluate on images / masks and return l2 norm and f1 score."""
         if x.ndim < 4:
             x = np.expand_dims(x, -1)

@@ -1,5 +1,4 @@
 """Unittests for the deepblink.losses module."""
-# pylint: disable=missing-function-docstring,redefined-outer-name
 
 import pytest
 import tensorflow as tf

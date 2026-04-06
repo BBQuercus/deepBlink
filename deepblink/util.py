@@ -1,6 +1,6 @@
 """Utility helper functions."""
 
-from typing import Callable, Iterable, Tuple, Union
+from collections.abc import Callable, Iterable
 import importlib
 import os
 import random
@@ -20,8 +20,8 @@ def get_from_module(path: str, attribute: str) -> Callable:
 
 
 def relative_shuffle(
-    x: Union[list, np.ndarray], y: Union[list, np.ndarray]
-) -> Tuple[Union[list, np.ndarray], Union[list, np.ndarray]]:
+    x: list | np.ndarray, y: list | np.ndarray
+) -> tuple[list | np.ndarray, list | np.ndarray]:
     """Shuffles x and y keeping their relative order."""
     if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
         shuffled_indices = np.random.permutation(x.shape[0])
@@ -36,7 +36,7 @@ def relative_shuffle(
 
 def train_valid_split(
     x_list: list, y_list: list, valid_split: float = 0.2, shuffle: bool = True
-) -> Iterable[list]:
+) -> tuple[list, list, list, list]:
     """Split two lists (usually input and ground truth).
 
     Splitting into random training and validation sets with an optional shuffling.
@@ -76,9 +76,8 @@ def train_valid_split(
 
 def delete_non_unique_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Deletes DataFrame columns that only contain one (non-unique) value."""
-    for col in df.columns:
-        if len(df[col].unique()) == 1:
-            df.drop(col, inplace=True, axis=1)
+    cols_to_drop = [col for col in df.columns if len(df[col].unique()) == 1]
+    df = df.drop(columns=cols_to_drop)
     return df
 
 
@@ -134,7 +133,7 @@ def predict_shape(shape: tuple) -> str:
 
 
 # TODO account for resolution unit (µm / cm)
-def predict_pixel_size(fname: Union[str, "os.PathLike[str]"]) -> Tuple[float, float]:
+def predict_pixel_size(fname: str | os.PathLike[str]) -> tuple[float, float]:
     """Predict the pixel size based on tifffile metadata."""
     if not os.path.splitext(fname)[1] == ".tif":
         raise ValueError(f"{fname} is not a tif file.")

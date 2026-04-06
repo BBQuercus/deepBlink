@@ -1,5 +1,4 @@
 """Unittests for the deepblink.cli module."""
-# pylint: disable=missing-function-docstring
 from unittest import mock
 import argparse
 import logging

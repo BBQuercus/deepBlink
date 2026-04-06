@@ -4,21 +4,22 @@ While functions are comparable to the ones found in the module metrics,
 these rely on keras' backend and do not take raw numpy as input.
 """
 
+import keras
+import keras.ops as ops
 import tensorflow as tf
-import tensorflow.keras.backend as K
 
 
 def binary_crossentropy(y_true, y_pred):
     """Keras' binary crossentropy loss."""
-    return tf.keras.losses.binary_crossentropy(
-        y_true=K.flatten(y_true), y_pred=K.flatten(y_pred)
+    return keras.losses.binary_crossentropy(
+        y_true=ops.flatten(y_true), y_pred=ops.flatten(y_pred)
     )
 
 
 def categorical_crossentropy(y_true, y_pred):
     """Keras' categorical crossentropy loss."""
-    return tf.keras.losses.categorical_crossentropy(
-        y_true=K.flatten(y_true), y_pred=K.flatten(y_pred)
+    return keras.losses.categorical_crossentropy(
+        y_true=ops.flatten(y_true), y_pred=ops.flatten(y_pred)
     )
 
 
@@ -36,10 +37,10 @@ def dice_score(y_true, y_pred, smooth: int = 1):
         y_pred: Predicted masks.
         smooth: Epslion value to avoid division by zero.
     """
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    dice = (2.0 * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    y_true_f = ops.flatten(y_true)
+    y_pred_f = ops.flatten(y_pred)
+    intersection = ops.sum(y_true_f * y_pred_f)
+    dice = (2.0 * intersection + smooth) / (ops.sum(y_true_f) + ops.sum(y_pred_f) + smooth)
     return dice
 
 
@@ -55,9 +56,9 @@ def recall_score(y_true, y_pred):
     Can be interpreted as the accuracy of finding positive samples or how many relevant samples were selected.
     The best value is 1 and the worst value is 0.
     """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
+    true_positives = ops.sum(ops.round(ops.clip(y_true * y_pred, 0, 1)))
+    possible_positives = ops.sum(ops.round(ops.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + keras.backend.epsilon())
     return recall
 
 
@@ -68,9 +69,9 @@ def precision_score(y_true, y_pred):
     Can be interpreted as the accuracy to not mislabel samples or how many selected items are relevant.
     The best value is 1 and the worst value is 0.
     """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
+    true_positives = ops.sum(ops.round(ops.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = ops.sum(ops.round(ops.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + keras.backend.epsilon())
     return precision
 
 
@@ -86,7 +87,7 @@ def f1_score(y_true, y_pred):
     # Do not move outside of function. See RMSE.
     precision = precision_score(y_true[..., 0], y_pred[..., 0])
     recall = recall_score(y_true[..., 0], y_pred[..., 0])
-    f1_value = 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+    f1_value = 2 * ((precision * recall) / (precision + recall + keras.backend.epsilon()))
     return f1_value
 
 
@@ -113,12 +114,12 @@ def rmse(y_true, y_pred):
     y_true_new = tf.where(comparison, tf.zeros_like(y_true), y_true)
     y_pred_new = tf.where(comparison, tf.zeros_like(y_pred), y_pred)
 
-    sum_rc_coords = K.sum(y_true, axis=-1)
+    sum_rc_coords = ops.sum(y_true, axis=-1)
     n_true_spots = tf.math.count_nonzero(sum_rc_coords, dtype=tf.float32)
 
-    squared_displacement_xy_summed = K.sum(K.square(y_true_new - y_pred_new), axis=-1)
-    rmse_value = K.sqrt(
-        K.sum(squared_displacement_xy_summed) / (n_true_spots + K.epsilon())
+    squared_displacement_xy_summed = ops.sum(ops.square(y_true_new - y_pred_new), axis=-1)
+    rmse_value = ops.sqrt(
+        ops.sum(squared_displacement_xy_summed) / (n_true_spots + keras.backend.epsilon())
     )
 
     return rmse_value

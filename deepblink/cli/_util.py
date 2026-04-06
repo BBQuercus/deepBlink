@@ -1,13 +1,12 @@
 """Utilities shared by multiple CLI modules."""
-from typing import Tuple, Union
 import logging
 
 from ..util import predict_pixel_size
 
 
 def get_pixel_size(
-    pixel_size: Union[float, Tuple[float, float]], image: str, logger: logging.Logger
-) -> Tuple[float, float]:
+    pixel_size: float | tuple[float, float], image: str, logger: logging.Logger
+) -> tuple[float, float]:
     """Return the pixel size of an image."""
     # Use user-provided pixel size
     if pixel_size is not None:

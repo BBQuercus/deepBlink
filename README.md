@@ -3,12 +3,12 @@
 [![Pypi package version number](https://badge.fury.io/py/deepblink.svg)](https://badge.fury.io/py/deepblink)
 [![Pypi download statistics](https://img.shields.io/pypi/dm/deepblink.svg)](https://badge.fury.io/py/deepblink)
 [![DOI for deepBlink](https://zenodo.org/badge/DOI/10.5281/zenodo.3992543.svg)](https://doi.org/10.5281/zenodo.3992543)
-<!-- [![Codecov test coverage](https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg)](https://codecov.io/gh/BBQuercus/deepBlink) -->
+[![Codecov test coverage](https://codecov.io/gh/BBQuercus/deepBlink/branch/master/graph/badge.svg)](https://codecov.io/gh/BBQuercus/deepBlink)
 
 <img src="https://github.com/bbquercus/deepblink/raw/master/images/logo.jpg" width="200px" align="right" alt="Logo of deepBlink.">
 
 
-# deepBlink [![Tweet](https://img.shields.io/twitter/url/https/github.com/bbquercus/deepblink.svg?style=social)](https://twitter.com/intent/tweet?text=%23deepBlink%20automatically%20finds%20spots%20in%20smFISH%20and%20live%20cell%20imaging%20data!%20Check%20it%20out%20on%20@NAR_Open%20https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab546/6312733)
+# deepBlink
 
 Threshold independent detection and localization of diffraction-limited spots.
 
@@ -49,7 +49,7 @@ More documentation about deepBlink including how to train, create a dataset, con
 
 
 ## Installation
-This package is built for [Python](https://www.python.org/downloads/) versions newer than 3.6 and can easily be installed with pip:
+This package is built for [Python](https://www.python.org/downloads/) versions 3.11+ and can easily be installed with pip:
 ```bash
 pip install deepblink
 ```
@@ -59,11 +59,25 @@ Or using conda:
 conda install -c bbquercus deepblink
 ```
 
+For GPU support, TensorFlow 2.16+ ships CUDA via pip — no manual CUDA/cuDNN setup needed:
+```bash
+pip install 'tensorflow[and-cuda]'
+```
 
-Additionally for GPU support, install `tensorflow-gpu` through pip and with the
-appropriate `CUDA` and `cuDNN` verions matching your [GPU setup](https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html). Lastly, you can also use our [KNIME node](https://kni.me/c/phip4SLhBhzPtMwI) for inference. Please follow the installation instructions on KNIME hub.
+You can also use our [KNIME node](https://kni.me/c/phip4SLhBhzPtMwI) for inference. Please follow the installation instructions on KNIME hub.
 
 ## Usage
+
+### Python API
+```python
+import deepblink
+
+model = deepblink.load_model("model.h5")
+image = deepblink.load_image("image.tif")
+coords = deepblink.predict(image, model, probability=0.5)
+```
+
+### Command Line
 A video overview can be found [here](https://www.youtube.com/watch?v=vlXMg4k79LQ). Inferencing on deepBlink is performed at the command line as follows:
 
 ```bash

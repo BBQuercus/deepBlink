@@ -1,6 +1,5 @@
 """CLI submodule for predicting on images."""
 
-from typing import List, Tuple, Union
 import logging
 import os
 
@@ -41,7 +40,7 @@ class HandlePredict:
         arg_radius: int,
         arg_shape: str,
         arg_probability: float,
-        arg_pixel_size: Union[float, Tuple[float, float]],
+        arg_pixel_size: float | tuple[float, float],
         logger: logging.Logger,
     ):
         self.fname_model = arg_model
@@ -82,7 +81,7 @@ class HandlePredict:
         return path_input
 
     @property
-    def file_list(self) -> List[str]:
+    def file_list(self) -> list[str]:
         """Return a list with all files to be processed."""
         if os.path.isdir(self.abs_input):
             file_list = grab_files(self.abs_input, self.extensions)
@@ -95,7 +94,7 @@ class HandlePredict:
         return file_list
 
     @property
-    def image_list(self) -> List[np.ndarray]:
+    def image_list(self) -> list[np.ndarray]:
         """Return a list with all images."""
         try:
             is_rgb = "3" in self.raw_shape
@@ -114,7 +113,7 @@ class HandlePredict:
         return outpath
 
     @property
-    def shape(self) -> List[str]:
+    def shape(self) -> list[str]:
         """Resolve input shape."""
         first_image = self.image_list[0]
         if not all([i.ndim == first_image.ndim for i in self.image_list]):
@@ -147,7 +146,7 @@ class HandlePredict:
         )
 
     def predict_single(
-        self, image: np.ndarray, pixel_size: Tuple[float, float]
+        self, image: np.ndarray, pixel_size: tuple[float, float]
     ) -> pd.DataFrame:
         """Predict a single (x,y) image accounting for pixel size."""
         column_x = "x [px]" if pixel_size[0] == 1 else "x [µm]"

@@ -1,5 +1,4 @@
 """Unittests for the deepblink.io module."""
-# pylint: disable=missing-function-docstring
 
 from pathlib import Path
 import os

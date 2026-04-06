@@ -1,6 +1,5 @@
 """Functions to calculate training loss on single image."""
 
-from typing import List, Optional, Tuple, Union
 import warnings
 
 import numpy as np
@@ -15,7 +14,7 @@ def euclidean_dist(x1: float, y1: float, x2: float, y2: float) -> float:
     return np.sqrt(np.square(x1 - x2) + np.square(y1 - y2))
 
 
-def offset_euclidean(offset: List[tuple]) -> np.ndarray:
+def offset_euclidean(offset: list[tuple]) -> np.ndarray:
     """Calculates the euclidean distance based on row_column_offsets per coordinate."""
     return np.sqrt(np.sum(np.square(np.array(offset)), axis=-1))
 
@@ -56,7 +55,7 @@ def recall_score(pred: np.ndarray, true: np.ndarray) -> float:
     return recall
 
 
-def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
+def f1_score(pred: np.ndarray, true: np.ndarray) -> float | None:
     r"""F1 score metric.
 
     .. math::
@@ -82,8 +81,8 @@ def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
 
 
 def linear_sum_assignment(
-    matrix: np.ndarray, cutoff: float = None
-) -> Tuple[list, list]:
+    matrix: np.ndarray, cutoff: float | None = None
+) -> tuple[list, list]:
     """Solve the linear sum assignment problem with a cutoff.
 
     A problem instance is described by matrix matrix where each matrix[i, j]
@@ -127,7 +126,7 @@ def f1_integral(
     mdist: float = 3.0,
     n_cutoffs: int = 50,
     return_raw: bool = False,
-) -> Union[float, tuple]:
+) -> float | tuple:
     """F1 integral calculation / area under F1 vs. cutoff.
 
     Compute the area under the curve when plotting F1 score vs cutoff values.
@@ -197,7 +196,7 @@ def f1_integral(
 
 def _get_offsets(
     pred: np.ndarray, true: np.ndarray, rows: np.ndarray, cols: np.ndarray
-) -> List[tuple]:
+) -> list[tuple]:
     """Return a list of (r, c) offsets for all assigned coordinates.
 
     Args:
@@ -211,7 +210,6 @@ def _get_offsets(
     ]
 
 
-# TODO - find suitable return type Union[float, tuple] does not work
 def _f1_at_cutoff(
     matrix: np.ndarray,
     pred: np.ndarray,

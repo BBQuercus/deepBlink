@@ -1,11 +1,10 @@
 """Training functions."""
-# pylint: disable=C0415
 
-from typing import Dict
 import datetime
 import os
 import platform
 
+import keras
 import tensorflow as tf
 
 from .datasets import Dataset
@@ -16,7 +15,7 @@ from .util import get_from_module
 def train_model(
     model: Model,
     dataset: Dataset,
-    cfg: Dict,
+    cfg: dict,
     run_name: str = "model",
     use_wandb: bool = True,
 ) -> Model:
@@ -31,7 +30,7 @@ def train_model(
     """
     callbacks = []
 
-    cb_saver = tf.keras.callbacks.ModelCheckpoint(
+    cb_saver = keras.callbacks.ModelCheckpoint(
         os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
     )
     callbacks.append(cb_saver)
@@ -51,7 +50,7 @@ def train_model(
     return model
 
 
-def run_experiment(cfg: Dict, pre_model: tf.keras.models.Model = None):
+def run_experiment(cfg: dict, pre_model: keras.Model = None):
     """Run a training experiment.
 
     Configuration file can be generated using deepblink config.
@@ -113,10 +112,9 @@ def run_experiment(cfg: Dict, pre_model: tf.keras.models.Model = None):
                 )
             )
 
-        # pylint:disable=E1101
         wandb.init(name=run_name, project=cfg["name"], config=cfg)
 
     model = train_model(model, dataset, cfg, run_name, use_wandb)
 
     if use_wandb:
-        wandb.join()  # pylint:disable=E1101
+        wandb.join()

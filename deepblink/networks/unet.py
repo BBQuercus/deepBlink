@@ -2,7 +2,7 @@
 
 import math
 
-import tensorflow as tf
+import keras
 
 from ._networks import OPTIONS_CONV
 from ._networks import conv_block
@@ -14,8 +14,8 @@ from ._networks import upconv_block
 
 def __block(inputs, filters, block, l2):
     opts_conv = OPTIONS_CONV
-    opts_conv["kernel_regularizer"] = tf.keras.regularizers.l2(l2) if l2 else None
-    opts_conv["bias_regularizer"] = tf.keras.regularizers.l2(l2) if l2 else None
+    opts_conv["kernel_regularizer"] = keras.regularizers.l2(l2) if l2 else None
+    opts_conv["bias_regularizer"] = keras.regularizers.l2(l2) if l2 else None
     if block == "convolutional":
         x = conv_block(inputs=inputs, filters=filters, n_convs=3, opts_conv=opts_conv)
     if block == "inception":
@@ -28,8 +28,8 @@ def __block(inputs, filters, block, l2):
 
 def __encoder(inputs, filters, block, l2, dropout):
     x = __block(inputs, filters, block, l2)
-    skip = tf.keras.layers.SpatialDropout2D(dropout)(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2, 2))(skip)
+    skip = keras.layers.SpatialDropout2D(dropout)(x)
+    x = keras.layers.MaxPool2D(pool_size=(2, 2))(skip)
     return x, skip
 
 
@@ -46,7 +46,7 @@ def unet(
     ndown: int = 2,
     l2: float = 1e-6,
     block: str = "convolutional",
-) -> tf.keras.models.Model:
+) -> keras.Model:
     """Unet model with second, cell size dependent encoder.
 
     Note that "convolution" is the currently best block.
@@ -63,7 +63,7 @@ def unet(
         raise ValueError(f"cell_size must be a power of 2, but is {cell_size}.")
 
     # Input
-    inputs = tf.keras.layers.Input(shape=(None, None, 1))
+    inputs = keras.layers.Input(shape=(None, None, 1))
     x = inputs
     skip_layers = []
 
@@ -84,10 +84,10 @@ def unet(
 
     # Logit
     if ndown == 2 and cell_size == 4:
-        x = tf.keras.layers.Concatenate()([skip_bottom, x])
+        x = keras.layers.Concatenate()([skip_bottom, x])
     x = __block(x, 2 ** (filters + ndown_cell), block, l2)
-    x = tf.keras.layers.Conv2D(filters=3, kernel_size=1, strides=1)(x)
-    x = tf.keras.layers.Activation("sigmoid")(x)
-    model = tf.keras.Model(inputs=inputs, outputs=x)
+    x = keras.layers.Conv2D(filters=3, kernel_size=1, strides=1)(x)
+    x = keras.layers.Activation("sigmoid")(x)
+    model = keras.Model(inputs=inputs, outputs=x)
 
     return model

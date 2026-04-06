@@ -1,6 +1,5 @@
 """Dataset preparation functions."""
 
-from typing import List, Tuple, Union
 import glob
 import os
 import re
@@ -9,6 +8,7 @@ import numpy as np
 import pandas as pd
 import skimage.color
 import skimage.io
+import keras
 import tensorflow as tf
 
 from .losses import combined_bce_rmse
@@ -21,7 +21,7 @@ from .losses import rmse
 EXTENSIONS = ("tif", "tiff", "jpeg", "jpg", "png")
 
 
-def basename(path: Union[str, "os.PathLike[str]"]) -> str:
+def basename(path: str | os.PathLike[str]) -> str:
     """Returns the basename removing path and extension."""
     return os.path.splitext(os.path.basename(path))[0]
 
@@ -32,8 +32,8 @@ def securename(fname: str) -> str:
 
 
 def load_npz(
-    fname: Union[str, "os.PathLike[str]"], test_only: bool = False
-) -> List[np.ndarray]:
+    fname: str | os.PathLike[str], test_only: bool = False
+) -> list[np.ndarray]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".
@@ -60,8 +60,8 @@ def load_npz(
 
 
 def load_image(
-    fname: Union[str, "os.PathLike[str]"],
-    extensions: Tuple[str, ...] = EXTENSIONS,
+    fname: str | os.PathLike[str],
+    extensions: tuple[str, ...] = EXTENSIONS,
     is_rgb: bool = False,
 ) -> np.ndarray:
     """Import a single image as numpy array checking format requirements.
@@ -84,7 +84,7 @@ def load_image(
     return image
 
 
-def load_model(fname: Union[str, "os.PathLike[str]"]) -> tf.keras.models.Model:
+def load_model(fname: str | os.PathLike[str]) -> keras.Model:
     """Import a deepBlink model from file."""
     if not os.path.isfile(fname):
         raise ValueError(f"File must exist - '{fname}' does not.")
@@ -92,7 +92,7 @@ def load_model(fname: Union[str, "os.PathLike[str]"]) -> tf.keras.models.Model:
         raise ValueError(f"File must be of type h5 - '{fname}' does not.")
 
     try:
-        model = tf.keras.models.load_model(
+        model = keras.models.load_model(
             fname,
             custom_objects={
                 "combined_bce_rmse": combined_bce_rmse,
@@ -108,7 +108,7 @@ def load_model(fname: Union[str, "os.PathLike[str]"]) -> tf.keras.models.Model:
         raise ImportError(f"Model '{fname}' could not be imported.") from error
 
 
-def load_prediction(fname: Union[str, "os.PathLike[str]"]) -> pd.DataFrame:
+def load_prediction(fname: str | os.PathLike[str]) -> pd.DataFrame:
     """Import a prediction file (output from deepBlink predict) as pandas dataframe."""
     if not os.path.isfile(fname):
         raise ValueError(f"File must exist - '{fname}' does not.")
@@ -124,8 +124,8 @@ def load_prediction(fname: Union[str, "os.PathLike[str]"]) -> pd.DataFrame:
 
 
 def grab_files(
-    path: Union[str, "os.PathLike[str]"], extensions: Tuple[str, ...]
-) -> List[str]:
+    path: str | os.PathLike[str], extensions: tuple[str, ...]
+) -> list[str]:
     """Grab all files in directory with listed extensions.
 
     Args:

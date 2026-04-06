@@ -1,5 +1,4 @@
 """Unittests for the deepblink.metrics module."""
-# pylint: disable=missing-function-docstring
 
 from hypothesis import given
 from hypothesis import strategies as st

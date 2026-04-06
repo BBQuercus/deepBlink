@@ -4,7 +4,6 @@ This utility file is used separate to avoid circular dependencies between
 _parser.py and the individual _commands.py.
 """
 
-from typing import Union
 import argparse
 import os
 import re
@@ -13,7 +12,7 @@ import re
 class FileType:
     """Custom type for files with given extensions."""
 
-    def __init__(self, extensions: Union[tuple, list]):
+    def __init__(self, extensions: tuple | list):
         self.extensions = extensions
 
     def __call__(self, value):  # noqa: D102
@@ -30,7 +29,7 @@ class FileType:
 class FileFolderType:
     """Custom type supporting folders or files with given extensions."""
 
-    def __init__(self, extensions: Union[tuple, list]):
+    def __init__(self, extensions: tuple | list):
         self.extensions = extensions
 
     def __call__(self, value):  # noqa: D102
@@ -172,7 +171,7 @@ def _add_utils(parser: argparse.ArgumentParser):
         "-V",
         "--version",
         action="version",
-        version="%(prog)s 0.1.4",
+        version="%(prog)s 0.2.0",
         help="Show %(prog)s's version number.",
     )
     group.add_argument(

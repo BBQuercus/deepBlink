@@ -1,16 +1,16 @@
 """SequenceDataset class."""
 
-from typing import Callable, Tuple
+from collections.abc import Callable
 import warnings
 
 import numpy as np
-import tensorflow as tf
+import keras
 
 from ..util import relative_shuffle
 
 
-class SequenceDataset(tf.keras.utils.Sequence):
-    """Custom Sequence class used to feed data into model.fit.
+class SequenceDataset(keras.utils.PyDataset):
+    """Custom PyDataset class used to feed data into model.fit.
 
     Args:
         x_list: List of inputs.
@@ -26,10 +26,11 @@ class SequenceDataset(tf.keras.utils.Sequence):
         x: np.ndarray,
         y: np.ndarray,
         batch_size: int = 16,
-        augment_fn: Callable = None,
-        format_fn: Callable = None,
+        augment_fn: Callable | None = None,
+        format_fn: Callable | None = None,
         overfit: bool = False,
     ):
+        super().__init__()
         self.x = x
         self.y = y
         self.batch_size = batch_size
@@ -48,7 +49,7 @@ class SequenceDataset(tf.keras.utils.Sequence):
 
         return int(np.floor(len(self.x) / self.batch_size))
 
-    def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
+    def __getitem__(self, idx) -> tuple[np.ndarray, np.ndarray]:
         """Return a single batch."""
         if self.overfit:
             idx = 0

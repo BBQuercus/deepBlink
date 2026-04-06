@@ -1,5 +1,4 @@
 """Unittests for the deepblink.util module."""
-# pylint: disable=missing-function-docstring
 
 import os
 

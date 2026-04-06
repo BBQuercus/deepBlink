@@ -1,10 +1,9 @@
 """Logging callbacks for wandb."""
-# pylint: disable=no-member,missing-function-docstring
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import keras
 
 try:
     import wandb
@@ -31,7 +30,7 @@ def wandb_callback():
     return wandb.keras.WandbCallback()
 
 
-class WandbImageLogger(tf.keras.callbacks.Callback):
+class WandbImageLogger(keras.callbacks.Callback):
     """Custom image prediction logger callback in wandb.
 
     Expects segmentation images and the model class to have a predict_on_image method.
@@ -72,22 +71,19 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         wandb.log({title: plots}, commit=False)
         plt.close(fig="all")
 
-    # pylint: disable=W0613,W0221
-    def on_train_begin(self, epochs, logs=None):  # noqa: D102
+    def on_train_begin(self, epochs, logs=None):
         self.plot_scatter("Train ground truth", self.train_images, self.train_masks)
         self.plot_scatter("Valid ground truth", self.valid_images, self.valid_masks)
 
-    def on_epoch_end(self, epoch, logs=None):  # noqa: ignore=D102
+    def on_epoch_end(self, epoch, logs=None):
         self.plot_scatter("Train data predictions", self.train_images)
         self.plot_scatter("Valid data predictions", self.valid_images)
 
-    # pylint: enable=W0613,W0221
 
-
-class WandbComputeMetrics(tf.keras.callbacks.Callback):
+class WandbComputeMetrics(keras.callbacks.Callback):
     """Compute the final metrics once training is complete."""
 
-    def __init__(self, model: tf.keras.models.Model, dataset: Dataset, mdist: int):
+    def __init__(self, model: keras.Model, dataset: Dataset, mdist: int):
         super().__init__()
         self.model = model
         self.train_images = dataset.x_train
@@ -111,7 +107,7 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
                 mdist=mdist,
             )
             curr_df["image"] = idx  # for downstream groupby's
-            df = df.append(curr_df)
+            df = pd.concat([df, curr_df], ignore_index=True)
 
         # Log single summary values to wandb
         values = {
@@ -170,10 +166,7 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
         plt.legend(loc="upper left")
         wandb.log({"F1 integral histogram": plt})
 
-    # pylint: disable=W0613
-    def on_train_end(self, logs=None):  # noqa: D102
+    def on_train_end(self, logs=None):
         self.df_train = self.log_scores("Train", self.train_images, self.train_labels)
         self.df_valid = self.log_scores("Valid", self.valid_images, self.valid_labels)
         self.log_plots()
-
-    # pylint: enable=W0613

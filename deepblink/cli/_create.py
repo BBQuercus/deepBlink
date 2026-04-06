@@ -1,6 +1,5 @@
 """CLI submodule for creating a new dataset."""
 
-from typing import List, Tuple, Union
 import logging
 import os
 
@@ -30,7 +29,6 @@ class HandleCreate:
         logger: Logger to log verbose output.
     """
 
-    # pylint: disable=too-many-instance-attributes
     # We require many attributes for the splits
 
     def __init__(
@@ -39,7 +37,7 @@ class HandleCreate:
         arg_labels: str,
         arg_name: str,
         arg_size: int,
-        arg_pixel_size: Union[float, Tuple[float, float]],
+        arg_pixel_size: float | tuple[float, float],
         arg_testsplit: int,
         arg_validsplit: int,
         arg_minspots: int,
@@ -122,7 +120,7 @@ class HandleCreate:
     @property
     def image_label_size_lists(
         self,
-    ) -> Tuple[List[np.ndarray], List[pd.DataFrame], List[Tuple[float, float]]]:
+    ) -> tuple[list[np.ndarray], list[pd.DataFrame], list[tuple[float, float]]]:
         """Return lists with all images, labels, and sizes."""
         fname_images = grab_files(self.abs_input, self.extensions)
         fname_labels = grab_files(self.abs_labels, extensions=("csv",))
@@ -172,7 +170,7 @@ class HandleCreate:
 
     @staticmethod
     def convert_labels(
-        image: np.ndarray, df: pd.DataFrame, pixel_size: Tuple[float, float]
+        image: np.ndarray, df: pd.DataFrame, pixel_size: tuple[float, float]
     ) -> pd.DataFrame:
         """Pre-processes labels to be used in deepBlink.
 
@@ -210,7 +208,7 @@ class HandleCreate:
 
     def crop_image(
         self, image: np.ndarray, df: pd.DataFrame
-    ) -> Tuple[List[np.ndarray], List[pd.DataFrame]]:
+    ) -> tuple[list[np.ndarray], list[pd.DataFrame]]:
         """Crop a image / label pair to a uniform size and scale labels accordingly."""
         if self.img_size is None:
             self.logger.debug(f"using unchanged size in {image.shape}")

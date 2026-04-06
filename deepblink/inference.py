@@ -1,11 +1,10 @@
 """Model prediction / inference functions."""
 
-from typing import Union
 import math
 
 import numpy as np
 import skimage.morphology
-import tensorflow as tf
+import keras
 
 from .data import get_coordinate_list
 from .data import next_power
@@ -14,8 +13,8 @@ from .data import normalize_image
 
 def predict(
     image: np.ndarray,
-    model: tf.keras.models.Model,
-    probability: Union[None, float] = None,
+    model: keras.Model,
+    probability: float | None = None,
 ) -> np.ndarray:
     """Returns a binary or categorical model based prediction of an image.
 
