@@ -9,7 +9,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --output=./experiments/logs/%x-%j.log
-#SBATCH --partition=gpu_short
+#SBATCH --partition=main
 #SBATCH --time=12:00:00
 
 # ==============================================================================
@@ -30,7 +30,7 @@ DATASET_NAME=${1:-particle}
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
-CACHE_DIR="${REPO_DIR}/experiments/datasets"
+CACHE_DIR="/tachyon/scratch/gchao/douyuhu/deepblink_datasets"
 
 cd "$REPO_DIR"
 
