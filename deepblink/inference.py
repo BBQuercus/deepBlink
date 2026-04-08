@@ -84,6 +84,103 @@ def get_probabilities(
     return np.array(probabilities)
 
 
+def _undo_rotation(coords: np.ndarray, k: int, shape: tuple[int, int]) -> np.ndarray:
+    """Reverse a np.rot90(image, k) on coordinates (r, c)."""
+    h, w = shape
+    r, c = coords[:, 0], coords[:, 1]
+    if k == 0:
+        return coords
+    elif k == 1:  # 90° CCW: (r,c) -> (c, h-1-r)
+        return np.column_stack([c, h - 1 - r])
+    elif k == 2:  # 180°: (r,c) -> (h-1-r, w-1-c)
+        return np.column_stack([h - 1 - r, w - 1 - c])
+    elif k == 3:  # 270° CCW: (r,c) -> (w-1-c, r)
+        return np.column_stack([w - 1 - c, r])
+    return coords
+
+
+def _undo_flip(coords: np.ndarray, axis: int, shape: tuple[int, int]) -> np.ndarray:
+    """Reverse a np.flip(image, axis) on coordinates (r, c)."""
+    out = coords.copy()
+    if axis == 0:
+        out[:, 0] = shape[0] - 1 - out[:, 0]
+    else:
+        out[:, 1] = shape[1] - 1 - out[:, 1]
+    return out
+
+
+def _merge_predictions(
+    all_coords: list[np.ndarray], merge_radius: float = 2.0
+) -> np.ndarray:
+    """Merge multiple coordinate predictions by averaging nearby detections."""
+    if not all_coords or all(len(c) == 0 for c in all_coords):
+        return np.empty((0, 2))
+
+    from scipy.spatial import cKDTree
+
+    stacked = np.vstack([c for c in all_coords if len(c) > 0])
+    if len(stacked) == 0:
+        return np.empty((0, 2))
+
+    tree = cKDTree(stacked)
+    used = np.zeros(len(stacked), dtype=bool)
+    merged = []
+
+    for i in range(len(stacked)):
+        if used[i]:
+            continue
+        neighbors = tree.query_ball_point(stacked[i], merge_radius)
+        cluster = [j for j in neighbors if not used[j]]
+        if not cluster:
+            continue
+        merged.append(stacked[cluster].mean(axis=0))
+        used[cluster] = True
+
+    return np.array(merged) if merged else np.empty((0, 2))
+
+
+def predict_tta(
+    image: np.ndarray,
+    model: keras.Model,
+    probability: float = 0.5,
+    merge_radius: float = 2.0,
+) -> np.ndarray:
+    """Predict with test-time augmentation (4x rotation + 2x flip, averaged).
+
+    Args:
+        image: Image to be predicted.
+        model: Model used to predict the image.
+        probability: Cutoff value for detection probability.
+        merge_radius: Radius in pixels for merging nearby detections.
+
+    Returns:
+        Merged list of coordinates [r, c].
+    """
+    shape = image.shape[:2]
+    all_preds = []
+
+    # 4 rotations
+    for k in range(4):
+        img_rot = np.rot90(image, k)
+        coords = predict(img_rot, model, probability=None)
+        if len(coords) > 0:
+            coords = coords[:, :2]  # drop probability column if present
+            rot_shape = img_rot.shape[:2]
+            coords = _undo_rotation(coords, k, rot_shape)
+            all_preds.append(coords)
+
+    # 2 flips
+    for axis in [0, 1]:
+        img_flip = np.flip(image, axis)
+        coords = predict(img_flip, model, probability=None)
+        if len(coords) > 0:
+            coords = coords[:, :2]
+            coords = _undo_flip(coords, axis, shape)
+            all_preds.append(coords)
+
+    return _merge_predictions(all_preds, merge_radius)
+
+
 def get_intensities(
     image: np.ndarray, coordinate_list: np.ndarray, radius: int, method: str = "sum",
 ) -> np.ndarray:

@@ -150,3 +150,30 @@ def combined_dice_rmse(y_true, y_pred):
     The optimal values for dice and rmse are both 0.
     """
     return dice_loss(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) * 2
+
+
+def focal_loss(gamma=2.0):
+    """Focal loss factory for the probability channel.
+
+    Down-weights easy examples so the model focuses on hard-to-classify pixels.
+
+    Args:
+        gamma: Focusing parameter. Higher values increase focus on hard examples.
+    """
+    def _focal(y_true, y_pred):
+        bce = keras.losses.binary_crossentropy(
+            ops.flatten(y_true), ops.flatten(y_pred)
+        )
+        p_t = ops.exp(-bce)
+        return ops.mean((1 - p_t) ** gamma * bce)
+
+    _focal.__name__ = "focal_loss"
+    return _focal
+
+
+def combined_focal_rmse(y_true, y_pred):
+    """Loss that combines focal loss for probability and rmse for coordinates.
+
+    The optimal values for focal loss and rmse are both 0.
+    """
+    return focal_loss()(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) * 2

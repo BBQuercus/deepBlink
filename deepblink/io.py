@@ -14,7 +14,9 @@ import tensorflow as tf
 from .losses import combined_bce_rmse
 from .losses import combined_dice_rmse
 from .losses import combined_f1_rmse
+from .losses import combined_focal_rmse
 from .losses import f1_score
+from .losses import focal_loss
 from .losses import rmse
 
 # List of currently supported image file extensions.
@@ -98,7 +100,9 @@ def load_model(fname: str | os.PathLike[str]) -> keras.Model:
                 "combined_bce_rmse": combined_bce_rmse,
                 "combined_dice_rmse": combined_dice_rmse,
                 "combined_f1_rmse": combined_f1_rmse,
+                "combined_focal_rmse": combined_focal_rmse,
                 "f1_score": f1_score,
+                "focal_loss": focal_loss(),
                 "leaky_relu": tf.nn.leaky_relu,
                 "rmse": rmse,
             },

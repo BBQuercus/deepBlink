@@ -43,7 +43,7 @@ from . import util
 from .io import load_model, load_image, load_npz
 
 # Inference
-from .inference import predict, get_intensities
+from .inference import predict, predict_tta, get_intensities
 
 # Evaluation
 from .metrics import compute_metrics

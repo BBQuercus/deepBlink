@@ -1,15 +1,69 @@
 """Training functions."""
 
 import datetime
+import math
 import os
 import platform
 
 import keras
+import numpy as np
 import tensorflow as tf
 
 from .datasets import Dataset
 from .models import Model
 from .util import get_from_module
+
+
+def _build_experiment_callbacks(cfg: dict) -> list[keras.callbacks.Callback]:
+    """Build additional callbacks from experiment config keys in train_args.
+
+    Reads optional keys: ``early_stopping``, ``lr_schedule``, ``mixed_precision``.
+    """
+    ta = cfg.get("train_args", {})
+    callbacks: list[keras.callbacks.Callback] = []
+
+    # Early stopping
+    if ta.get("early_stopping", False):
+        callbacks.append(
+            keras.callbacks.EarlyStopping(
+                patience=ta.get("early_stopping_patience", 20),
+                restore_best_weights=True,
+            )
+        )
+
+    # LR schedules
+    schedule = ta.get("lr_schedule", None)
+    epochs = ta.get("epochs", 200)
+    lr = float(ta.get("learning_rate", 1e-4))
+
+    if schedule == "cosine":
+        lr_min = float(ta.get("lr_min", 1e-6))
+        callbacks.append(
+            keras.callbacks.LearningRateScheduler(
+                lambda epoch: lr_min + 0.5 * (lr - lr_min) * (1 + math.cos(math.pi * epoch / epochs))
+            )
+        )
+    elif schedule == "plateau":
+        callbacks.append(
+            keras.callbacks.ReduceLROnPlateau(patience=10, factor=0.5)
+        )
+    elif schedule == "warmup_cosine":
+        warmup_epochs = ta.get("warmup_epochs", 10)
+        lr_min = float(ta.get("lr_min", 1e-6))
+
+        def _warmup_cosine(epoch):
+            if epoch < warmup_epochs:
+                return lr * (epoch + 1) / warmup_epochs
+            progress = (epoch - warmup_epochs) / max(1, epochs - warmup_epochs)
+            return lr_min + 0.5 * (lr - lr_min) * (1 + math.cos(math.pi * progress))
+
+        callbacks.append(keras.callbacks.LearningRateScheduler(_warmup_cosine))
+
+    # Mixed precision
+    if ta.get("mixed_precision", False):
+        keras.mixed_precision.set_global_policy("mixed_float16")
+
+    return callbacks
 
 
 def train_model(
@@ -34,6 +88,9 @@ def train_model(
         os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
     )
     callbacks.append(cb_saver)
+
+    # Experiment callbacks (LR schedules, early stopping, etc.)
+    callbacks.extend(_build_experiment_callbacks(cfg))
 
     if use_wandb:
         from ._wandb import WandbComputeMetrics

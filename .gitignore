@@ -80,5 +80,12 @@ docs/_build
 wandb/
 Fiji.app/
 
+# Experiments
+experiments/datasets/
+experiments/models/
+experiments/retrained_models/
+experiments/results/
+experiments/logs/
+
 # Tests
 .hypothesis/
