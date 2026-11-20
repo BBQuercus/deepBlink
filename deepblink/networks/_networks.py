@@ -83,9 +83,7 @@ def conv_block(
     return x
 
 
-def upconv_block(
-    inputs: keras.layers.Layer, skip: keras.layers.Layer
-) -> keras.layers.Layer:
+def upconv_block(inputs: keras.layers.Layer, skip: keras.layers.Layer) -> keras.layers.Layer:
     """Upconvolutional block with skip connection concatenation.
 
     Args:
@@ -99,9 +97,7 @@ def upconv_block(
     return x
 
 
-def residual_block(
-    inputs: keras.layers.Layer, filters: int, opts_conv: dict = OPTIONS_CONV
-) -> keras.layers.Layer:
+def residual_block(inputs: keras.layers.Layer, filters: int, opts_conv: dict = OPTIONS_CONV) -> keras.layers.Layer:
     """Simple residual block."""
     x = keras.layers.Conv2D(filters=filters, **opts_conv)(inputs)
     x = keras.layers.Activation(keras.activations.leaky_relu)(x)
@@ -118,7 +114,7 @@ def residual_block(
 
 
 # TODO: add input and type checks
-def squeeze_block(x: keras.layers.Layer, ratio: int = 8):
+def squeeze_block(x: keras.layers.Layer, ratio: int = 8) -> keras.layers.Layer:
     """Squeeze and excitation block.
 
     ref: https://arxiv.org/pdf/1709.01507.pdf.

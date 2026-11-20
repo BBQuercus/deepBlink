@@ -1,0 +1,31 @@
+augmentation_args:
+  flip: true
+  gaussian_noise: true
+  illuminate: false
+  rotate: true
+  translate: false
+dataset: SpotsDataset
+dataset_args:
+  cell_size: 4
+  name: ./synthetic_dataset.npz
+  smooth_factor: 1
+loss: combined_dice_rmse
+model: SpotsModel
+name: deepBlink
+network: unet
+network_args:
+  block: convolutional
+  dropout: 0.3
+  filters: 4
+  l2: 1.0e-06
+  ndown: 2
+optimizer: amsgrad
+run_name: synthetic_test
+savedir: ./retrained_models
+train_args:
+  batch_size: 4
+  epochs: 10
+  learning_rate: 0.0001
+  overfit: false
+  pre_train: null
+use_wandb: false

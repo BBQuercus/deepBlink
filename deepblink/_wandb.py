@@ -1,9 +1,9 @@
 """Logging callbacks for wandb."""
 
+import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import keras
 
 try:
     import wandb
@@ -12,10 +12,8 @@ try:
         raise AssertionError
 except (ModuleNotFoundError, AttributeError, AssertionError):
     raise ImportError(
-        (
-            "To support conda packages we don't ship deepBlink with wandb. "
-            "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
-        )
+        "To support conda packages we don't ship deepBlink with wandb. "
+        "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
     )
 
 
@@ -42,7 +40,10 @@ class WandbImageLogger(keras.callbacks.Callback):
     """
 
     def __init__(
-        self, model_wrapper: Model, dataset: Dataset, n_examples: int = 4,
+        self,
+        model_wrapper: Model,
+        dataset: Dataset,
+        n_examples: int = 4,
     ):
         super().__init__()
         self.model_wrapper = model_wrapper
@@ -52,9 +53,7 @@ class WandbImageLogger(keras.callbacks.Callback):
         self.valid_masks = dataset.y_valid[:n_examples]  # type: ignore[index]
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
 
-    def plot_scatter(
-        self, title: str, images: np.ndarray, masks: np.ndarray = None
-    ) -> None:
+    def plot_scatter(self, title: str, images: np.ndarray, masks: np.ndarray = None) -> None:
         """Plot one set of images to wandb."""
         plots = []
         for i, image in enumerate(images):
@@ -92,9 +91,7 @@ class WandbComputeMetrics(keras.callbacks.Callback):
         self.valid_labels = dataset.y_valid
         self.mdist = mdist
 
-    def log_scores(
-        self, name: str, images: np.ndarray, labels: np.ndarray
-    ) -> pd.DataFrame:
+    def log_scores(self, name: str, images: np.ndarray, labels: np.ndarray) -> pd.DataFrame:
         """Prediction and logging function for one set of images and labels."""
         df = pd.DataFrame()
         mdist = self.mdist
@@ -127,9 +124,7 @@ class WandbComputeMetrics(keras.callbacks.Callback):
             wandb.log(
                 {
                     f"{name} metrics": wandb.plot.bar(
-                        wandb.Table(
-                            data=list(values.items()), columns=["label", "value"]
-                        ),
+                        wandb.Table(data=list(values.items()), columns=["label", "value"]),
                         "label",
                         "value",
                         title=f"{name} metrics",

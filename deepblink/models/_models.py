@@ -1,15 +1,13 @@
 """Model class, to be extended by specific types of models."""
 
-from collections.abc import Callable
 import datetime
+from collections.abc import Callable
 
-import numpy as np
 import keras
+import numpy as np
 
-from ..datasets import Dataset
-from ..datasets import SequenceDataset
-from ..losses import f1_score
-from ..losses import rmse
+from ..datasets import Dataset, SequenceDataset
+from ..losses import f1_score, rmse
 
 DATESTRING = datetime.datetime.now().strftime("%Y%d%m_%H%M")
 
@@ -72,7 +70,10 @@ class Model:
         return ["accuracy"]
 
     def fit(
-        self, dataset: Dataset, augment_val: bool = True, callbacks: list = None,
+        self,
+        dataset: Dataset,
+        augment_val: bool = True,
+        callbacks: list = None,
     ) -> None:
         """Training loop."""
         if callbacks is None:

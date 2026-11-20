@@ -4,12 +4,7 @@ import math
 
 import keras
 
-from ._networks import OPTIONS_CONV
-from ._networks import conv_block
-from ._networks import inception_block
-from ._networks import residual_block
-from ._networks import squeeze_block
-from ._networks import upconv_block
+from ._networks import OPTIONS_CONV, conv_block, inception_block, residual_block, squeeze_block, upconv_block
 
 
 def __block(inputs, filters, block, l2):

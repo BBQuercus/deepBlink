@@ -1,10 +1,10 @@
 """CLI submodule for downloading pre-trained models."""
 
-from urllib import request
-from urllib.error import URLError
 import ast
 import logging
-import socket
+from urllib import request
+from urllib.error import URLError
+
 import requests
 
 
@@ -18,14 +18,12 @@ class HandleDownload:
         logger: Verbose logger.
     """
 
-    def __init__(
-        self, arg_input: str, arg_list: bool, arg_all: bool, logger: logging.Logger
-    ):
+    def __init__(self, arg_input: str, arg_list: bool, arg_all: bool, logger: logging.Logger):
         self.input = arg_input
         self.list = arg_list
         self.all = arg_all
         self.logger = logger
-        self.logger.info("\U0001F4E5 starting download submodule")
+        self.logger.info("\U0001f4e5 starting download submodule")
 
         self.timeout_list = 10
         self.timeout_download = 30
@@ -44,10 +42,8 @@ class HandleDownload:
             for name in self.models.keys():
                 print(f"  - {name}")
             print(
-                (
-                    'Download all models using "deepblink download --all" or '
-                    'download specific models using "deepblink download --input NAME".'
-                )
+                'Download all models using "deepblink download --all" or '
+                'download specific models using "deepblink download --input NAME".'
             )
 
         if not self.all and self.input is not None:
@@ -57,10 +53,7 @@ class HandleDownload:
                 self.download_model(inp, self.models[inp], self.timeout_download)
             else:
                 raise ValueError(
-                    (
-                        f"Model {self.input} does not exist. "
-                        'List all available models using "deepblink download --list"'
-                    )
+                    f'Model {self.input} does not exist. List all available models using "deepblink download --list"'
                 )
 
     @property
@@ -68,12 +61,9 @@ class HandleDownload:
         """Dictionary with all models listed."""
         try:
             req = request.urlopen(self.model_url, timeout=self.timeout_list)  # nosec
-        except (URLError, socket.timeout) as e:
+        except (TimeoutError, URLError) as e:
             self.logger.debug(f"url timeout occurred: {e}")
-            print(
-                "Response time was exceeded. "
-                "Please wait and try again with a better connection."
-            )
+            print("Response time was exceeded. Please wait and try again with a better connection.")
         raw_models = req.read().decode("utf-8")
         models = ast.literal_eval(raw_models)
         self.logger.debug(f"found models {models}")
@@ -85,8 +75,5 @@ class HandleDownload:
         try:
             req = requests.get(url, allow_redirects=True, timeout=timeout)
         except requests.exceptions.Timeout:
-            print(
-                "Response time was exceeded. "
-                "Please wait and try again with a better connection."
-            )
+            print("Response time was exceeded. Please wait and try again with a better connection.")
         open(f"{name}.h5", "wb").write(req.content)

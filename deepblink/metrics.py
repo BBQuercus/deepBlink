@@ -80,9 +80,7 @@ def f1_score(pred: np.ndarray, true: np.ndarray) -> float | None:
     return f1_value
 
 
-def linear_sum_assignment(
-    matrix: np.ndarray, cutoff: float | None = None
-) -> tuple[list, list]:
+def linear_sum_assignment(matrix: np.ndarray, cutoff: float | None = None) -> tuple[list, list]:
     """Solve the linear sum assignment problem with a cutoff.
 
     A problem instance is described by matrix matrix where each matrix[i, j]
@@ -180,23 +178,19 @@ def f1_integral(
 
     if not return_raw:
         f1_scores = [_f1_at_cutoff(matrix, pred, true, cutoff) for cutoff in cutoffs]
-        return np.trapz(f1_scores, cutoffs) / mdist  # Norm. to 0-1
+        return np.trapezoid(f1_scores, cutoffs) / mdist  # Norm. to 0-1
 
     f1_scores = []
     offsets = []
     for cutoff in cutoffs:
-        f1_value, rows, cols = _f1_at_cutoff(
-            matrix, pred, true, cutoff, return_raw=True
-        )
+        f1_value, rows, cols = _f1_at_cutoff(matrix, pred, true, cutoff, return_raw=True)
         f1_scores.append(f1_value)
         offsets.append(_get_offsets(pred, true, rows, cols))
 
     return (f1_scores, offsets, list(cutoffs))
 
 
-def _get_offsets(
-    pred: np.ndarray, true: np.ndarray, rows: np.ndarray, cols: np.ndarray
-) -> list[tuple]:
+def _get_offsets(pred: np.ndarray, true: np.ndarray, rows: np.ndarray, cols: np.ndarray) -> list[tuple]:
     """Return a list of (r, c) offsets for all assigned coordinates.
 
     Args:
@@ -205,9 +199,7 @@ def _get_offsets(
         rows: Rows of the assigned coordinates (along "true"-axis).
         cols: Columns of the assigned coordinates (along "pred"-axis).
     """
-    return [
-        (true[r][0] - pred[c][0], true[r][1] - pred[c][1]) for r, c in zip(rows, cols)
-    ]
+    return [(true[r][0] - pred[c][0], true[r][1] - pred[c][1]) for r, c in zip(rows, cols)]
 
 
 def _f1_at_cutoff(
@@ -260,9 +252,7 @@ def _f1_at_cutoff(
     return f1_value
 
 
-def compute_metrics(
-    pred: np.ndarray, true: np.ndarray, mdist: float = 3.0
-) -> pd.DataFrame:
+def compute_metrics(pred: np.ndarray, true: np.ndarray, mdist: float = 3.0) -> pd.DataFrame:
     """Calculate metric scores across cutoffs.
 
     Args:

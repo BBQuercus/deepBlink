@@ -7,9 +7,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..io import load_image
-from ..io import load_npz
-from ..io import load_prediction
+from ..io import load_image, load_npz, load_prediction
 
 
 class HandleVisualize:
@@ -36,20 +34,18 @@ class HandleVisualize:
         self.image = arg_image
         self.prediction = arg_prediction
         self.logger = logger
-        self.logger.info("\U0001F4F8 starting visualization submodule")
+        self.logger.info("\U0001f4f8 starting visualization submodule")
 
     def __call__(self):
         """Select dataset / image and run visualization."""
         if self.dataset is not None:
-            self.logger.info("\U0001F5BC Visualizing dataset provided.")
+            self.logger.info("\U0001f5bc Visualizing dataset provided.")
             self.visualize_dataset()
         elif self.image is not None:
-            self.logger.info("\U0001F5BC visualizing image provided.")
+            self.logger.info("\U0001f5bc visualizing image provided.")
             self.visualize_image()
         else:
-            self.logger.error(
-                "\U0000274C No input given. Please provide a dataset or image/prediction."
-            )
+            self.logger.error("\U0000274c No input given. Please provide a dataset or image/prediction.")
 
     def visualize_dataset(self):
         """Visualize a random image and label from a npz file dataset."""
@@ -65,9 +61,7 @@ class HandleVisualize:
             x = x_test
             y = y_test
         else:
-            self.logger.error(
-                "Invalid dataset subset. Please select from train, valid, or test."
-            )
+            self.logger.error("Invalid dataset subset. Please select from train, valid, or test.")
 
         # Load image and prediction
         if self.dataset_index is not None and self.dataset_index >= len(x):

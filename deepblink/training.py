@@ -31,14 +31,13 @@ def train_model(
     callbacks = []
 
     cb_saver = keras.callbacks.ModelCheckpoint(
-        os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
+        os.path.join(cfg["savedir"], f"{run_name}.h5"),
+        save_best_only=True,
     )
     callbacks.append(cb_saver)
 
     if use_wandb:
-        from ._wandb import WandbComputeMetrics
-        from ._wandb import WandbImageLogger
-        from ._wandb import wandb_callback
+        from ._wandb import WandbComputeMetrics, WandbImageLogger, wandb_callback
 
         cb_image = WandbImageLogger(model, dataset)
         cb_wandb = wandb_callback()
@@ -50,7 +49,7 @@ def train_model(
     return model
 
 
-def run_experiment(cfg: dict, pre_model: keras.Model = None):
+def run_experiment(cfg: dict, pre_model: keras.Model = None) -> None:
     """Run a training experiment.
 
     Configuration file can be generated using deepblink config.
@@ -70,9 +69,7 @@ def run_experiment(cfg: dict, pre_model: keras.Model = None):
     augmentation_args = cfg.get("augmentation_args", {})
     dataset_args = cfg.get("dataset_args", {})
     dataset = dataset_class(**dataset_args)
-    network_args = (
-        cfg.get("network_args", {}) if cfg.get("network_args", {}) is not None else {}
-    )
+    network_args = cfg.get("network_args", {}) if cfg.get("network_args", {}) is not None else {}
     network_args["cell_size"] = dataset_args["cell_size"]
     train_args = cfg.get("train_args", {})
 
@@ -106,10 +103,8 @@ def run_experiment(cfg: dict, pre_model: keras.Model = None):
                 raise AssertionError
         except (ModuleNotFoundError, AttributeError, AssertionError):
             raise ImportError(
-                (
-                    "To support conda packages we don't ship deepBlink with wandb. "
-                    "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
-                )
+                "To support conda packages we don't ship deepBlink with wandb. "
+                "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
             )
 
         wandb.init(name=run_name, project=cfg["name"], config=cfg)
