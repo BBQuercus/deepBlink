@@ -1,16 +1,13 @@
 """Model class, to be extended by specific types of models."""
-# pylint: disable=R0913
 
-from typing import Callable, Dict, List
 import datetime
+from collections.abc import Callable
 
+import keras
 import numpy as np
-import tensorflow as tf
 
-from ..datasets import Dataset
-from ..datasets import SequenceDataset
-from ..losses import f1_score
-from ..losses import rmse
+from ..datasets import Dataset, SequenceDataset
+from ..losses import f1_score, rmse
 
 DATESTRING = datetime.datetime.now().strftime("%Y%d%m_%H%M")
 
@@ -28,6 +25,7 @@ class Model:
         optimizer_fn: Optimizer function.
         train_args: Training arguments containing - batch_size, epochs, learning_rate.
         pre_model: Loaded, pre-trained model to bypass a new network creation.
+            It is compiled again with the given loss, optimizer and learning rate.
 
     Kwargs:
         batch_format_fn: Formatting function added in the specific model, e.g. spots.
@@ -36,15 +34,15 @@ class Model:
 
     def __init__(
         self,
-        augmentation_args: Dict,
-        dataset_args: Dict,
+        augmentation_args: dict,
+        dataset_args: dict,
         dataset_cls: Dataset,
-        network_args: Dict,
+        network_args: dict,
         network_fn: Callable,
         loss_fn: Callable,
         optimizer_fn: Callable,
-        train_args: Dict,
-        pre_model: tf.keras.models.Model = None,
+        train_args: dict,
+        pre_model: keras.Model = None,
         **kwargs,
     ):
         self.name = f"{DATESTRING}_{self.__class__.__name__}_{dataset_cls.name}_{network_fn.__name__}"
@@ -56,10 +54,9 @@ class Model:
         self.loss_fn = loss_fn
         self.optimizer_fn = optimizer_fn
         self.train_args = train_args
-        self.has_pre_model = pre_model is not None
 
-        if self.has_pre_model:
-            self.network: tf.keras.models.Model = pre_model
+        if pre_model is not None:
+            self.network: keras.Model = pre_model
         else:
             try:
                 self.network = network_fn(**network_args)
@@ -73,18 +70,22 @@ class Model:
         return ["accuracy"]
 
     def fit(
-        self, dataset: Dataset, augment_val: bool = True, callbacks: list = None,
+        self,
+        dataset: Dataset,
+        augment_val: bool = True,
+        callbacks: list = None,
     ) -> None:
         """Training loop."""
         if callbacks is None:
             callbacks = []
 
-        if not self.has_pre_model:
-            self.network.compile(
-                loss=self.loss_fn,
-                optimizer=self.optimizer_fn(float(self.train_args["learning_rate"])),
-                metrics=self.metrics,
-            )
+        # Also for a pre-trained network: the optimizer Keras 3 restores from an
+        # .h5 file is not bound to the network's variables and fails on the first step.
+        self.network.compile(
+            loss=self.loss_fn,
+            optimizer=self.optimizer_fn(float(self.train_args["learning_rate"])),
+            metrics=self.metrics,
+        )
 
         train_sequence = SequenceDataset(
             dataset.x_train,
@@ -110,7 +111,7 @@ class Model:
             shuffle=True,
         )
 
-    def evaluate(self, x: np.ndarray, y: np.ndarray) -> List[float]:
+    def evaluate(self, x: np.ndarray, y: np.ndarray) -> list[float]:
         """Evaluate on images / masks and return l2 norm and f1 score."""
         if x.ndim < 4:
             x = np.expand_dims(x, -1)

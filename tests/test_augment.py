@@ -1,5 +1,4 @@
 """Unittests for the deepblink.augment module."""
-# pylint: disable=missing-function-docstring
 
 from hypothesis import given
 from hypothesis.extra.numpy import arrays

@@ -4,7 +4,6 @@ This utility file is used separate to avoid circular dependencies between
 _parser.py and the individual _commands.py.
 """
 
-from typing import Union
 import argparse
 import os
 import re
@@ -13,7 +12,7 @@ import re
 class FileType:
     """Custom type for files with given extensions."""
 
-    def __init__(self, extensions: Union[tuple, list]):
+    def __init__(self, extensions: tuple | list):
         self.extensions = extensions
 
     def __call__(self, value):  # noqa: D102
@@ -21,24 +20,20 @@ class FileType:
             raise argparse.ArgumentTypeError(f"Input must be a file. '{value}' is not.")
 
         if not any([value.endswith(e) for e in self.extensions]):
-            raise argparse.ArgumentTypeError(
-                f"Input file must have extension {self.extensions}. '{value}' does not."
-            )
+            raise argparse.ArgumentTypeError(f"Input file must have extension {self.extensions}. '{value}' does not.")
         return value
 
 
 class FileFolderType:
     """Custom type supporting folders or files with given extensions."""
 
-    def __init__(self, extensions: Union[tuple, list]):
+    def __init__(self, extensions: tuple | list):
         self.extensions = extensions
 
     def __call__(self, value):  # noqa: D102
         if not os.path.isdir(value):
             if not FileType(self.extensions)(value):
-                raise argparse.ArgumentTypeError(
-                    f"Input value must be file or folder. '{value}' is not."
-                )
+                raise argparse.ArgumentTypeError(f"Input value must be file or folder. '{value}' is not.")
         return value
 
 
@@ -50,9 +45,7 @@ class FolderType:
 
     def __call__(self, value):  # noqa: D102
         if not os.path.isdir(value):
-            raise argparse.ArgumentTypeError(
-                f"Input value must be folder and must exist. '{value}' is not."
-            )
+            raise argparse.ArgumentTypeError(f"Input value must be folder and must exist. '{value}' is not.")
         return value
 
 
@@ -76,9 +69,7 @@ class PixelSizeType:
                 return value
         except ValueError:
             pass
-        raise argparse.ArgumentTypeError(
-            f"Pixel size must be a float or a tuple of two floats. '{value}' is not."
-        )
+        raise argparse.ArgumentTypeError(f"Pixel size must be a float or a tuple of two floats. '{value}' is not.")
 
 
 class ShapeType:
@@ -97,21 +88,11 @@ class ShapeType:
         for c in self.remove_characters:
             value = value.replace(c, "")
         if not bool(re.match(f"^[{self.allowed_characters},]+$", value)):
-            raise ValueError(
-                f"Input must only contain values '{self.allowed_characters},'. '{raw_value}' does not."
-            )
-        if not bool(
-            re.match(
-                f"^([{self.allowed_characters}],)+[{self.allowed_characters}]$", value
-            )
-        ):
-            raise ValueError(
-                f"Input must have format '(?,?,?,?)'. '{raw_value}' does not."
-            )
+            raise ValueError(f"Input must only contain values '{self.allowed_characters},'. '{raw_value}' does not.")
+        if not bool(re.match(f"^([{self.allowed_characters}],)+[{self.allowed_characters}]$", value)):
+            raise ValueError(f"Input must have format '(?,?,?,?)'. '{raw_value}' does not.")
         if not all([c in value for c in self.required_characters]):
-            raise ValueError(
-                f"Input must contain {self.required_characters}. '{raw_value}' does not."
-            )
+            raise ValueError(f"Input must contain {self.required_characters}. '{raw_value}' does not.")
         return raw_value
 
 
@@ -125,14 +106,10 @@ class ProbabilityType:
         try:
             value = float(value)
         except ValueError:
-            raise argparse.ArgumentTypeError(
-                f"Input value must be a float. '{value}' is not."
-            )
+            raise argparse.ArgumentTypeError(f"Input value must be a float. '{value}' is not.")
 
         if value < 0.0 or value > 1.0:
-            raise argparse.ArgumentTypeError(
-                f"Input '{value}' not in range [0.0, 1.0]."
-            )
+            raise argparse.ArgumentTypeError(f"Input '{value}' not in range [0.0, 1.0].")
 
         return value
 
@@ -144,7 +121,7 @@ class CustomFormatter(argparse.RawDescriptionHelpFormatter):
         """Helpformatter internal usage description function overwrite."""
         if prefix is None:
             prefix = "Usage: "
-        return super(CustomFormatter, self).add_usage(usage, actions, groups, prefix)
+        return super().add_usage(usage, actions, groups, prefix)
 
 
 class Color:
@@ -172,7 +149,7 @@ def _add_utils(parser: argparse.ArgumentParser):
         "-V",
         "--version",
         action="version",
-        version="%(prog)s 0.1.4",
+        version="%(prog)s 0.2.0",
         help="Show %(prog)s's version number.",
     )
     group.add_argument(

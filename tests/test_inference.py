@@ -1,9 +1,8 @@
 """Unittests for the deepblink.inference module."""
-# pylint: disable=missing-function-docstring,redefined-outer-name
 
 import numpy as np
 import pytest
-import tensorflow as tf
+import keras
 
 from deepblink.inference import get_intensities
 from deepblink.inference import predict
@@ -15,11 +14,11 @@ from deepblink.losses import rmse
 
 def test_predict():
     """Test the function that given model and image, returns the prediction on image."""
-    model = tf.keras.models.Sequential(
+    model = keras.models.Sequential(
         [
-            tf.keras.layers.Input((None, None, 1)),
-            tf.keras.layers.Conv2D(3, 3, strides=2),
-            tf.keras.layers.Activation("sigmoid"),
+            keras.layers.Input((None, None, 1)),
+            keras.layers.Conv2D(3, 3, strides=2),
+            keras.layers.Activation("sigmoid"),
         ]
     )
     model.compile(

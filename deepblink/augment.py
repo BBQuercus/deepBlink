@@ -1,6 +1,5 @@
 """Model utility functions for augmentation."""
 
-from typing import Tuple
 import warnings
 
 import numpy as np
@@ -15,7 +14,7 @@ def augment_batch_baseline(
     rotate_: bool = False,
     translate_: bool = False,
     cell_size: int = 4,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Baseline augmentation function.
 
     Probability of augmentations is determined in the corresponding functions
@@ -69,7 +68,7 @@ def augment_batch_baseline(
     return aug_images, aug_masks
 
 
-def flip(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def flip(image: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Augment through horizontal/vertical flipping."""
     rand_flip = np.random.randint(low=0, high=2)
 
@@ -87,7 +86,7 @@ def flip(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     return image, mask
 
 
-def illuminate(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def illuminate(image: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Augment through changing illumination."""
     rand_illumination = 1 + np.random.uniform(-0.75, 0.75)
     image = image.copy()
@@ -95,9 +94,7 @@ def illuminate(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndar
     return image, mask
 
 
-def gaussian_noise(
-    image: np.ndarray, mask: np.ndarray, mean: int = 0
-) -> Tuple[np.ndarray, np.ndarray]:
+def gaussian_noise(image: np.ndarray, mask: np.ndarray, mean: int = 0) -> tuple[np.ndarray, np.ndarray]:
     """Augment through the addition of gaussian noise.
 
     Args:
@@ -123,13 +120,12 @@ def gaussian_noise(
     return image, mask
 
 
-def rotate(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def rotate(image: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Augment through rotation."""
     rand_rotate = np.random.randint(low=0, high=4)
     image = image.copy()
     mask = mask.copy()
     for _ in range(rand_rotate):
-
         image = np.rot90(image)  # rotate image -90 degrees
         mask = np.rot90(mask)  # rotate mask -90 degrees
         r_coord = mask[..., 1].copy()
@@ -142,9 +138,7 @@ def rotate(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]
     return image, mask
 
 
-def translate(
-    image: np.ndarray, mask: np.ndarray, cell_size: int = 4
-) -> Tuple[np.ndarray, np.ndarray]:
+def translate(image: np.ndarray, mask: np.ndarray, cell_size: int = 4) -> tuple[np.ndarray, np.ndarray]:
     """Augment through translation along all axes.
 
     Args:

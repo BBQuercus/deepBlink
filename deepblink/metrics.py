@@ -1,6 +1,5 @@
 """Functions to calculate training loss on single image."""
 
-from typing import List, Optional, Tuple, Union
 import warnings
 
 import numpy as np
@@ -15,7 +14,7 @@ def euclidean_dist(x1: float, y1: float, x2: float, y2: float) -> float:
     return np.sqrt(np.square(x1 - x2) + np.square(y1 - y2))
 
 
-def offset_euclidean(offset: List[tuple]) -> np.ndarray:
+def offset_euclidean(offset: list[tuple]) -> np.ndarray:
     """Calculates the euclidean distance based on row_column_offsets per coordinate."""
     return np.sqrt(np.sum(np.square(np.array(offset)), axis=-1))
 
@@ -56,7 +55,7 @@ def recall_score(pred: np.ndarray, true: np.ndarray) -> float:
     return recall
 
 
-def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
+def f1_score(pred: np.ndarray, true: np.ndarray) -> float | None:
     r"""F1 score metric.
 
     .. math::
@@ -81,9 +80,7 @@ def f1_score(pred: np.ndarray, true: np.ndarray) -> Optional[float]:
     return f1_value
 
 
-def linear_sum_assignment(
-    matrix: np.ndarray, cutoff: float = None
-) -> Tuple[list, list]:
+def linear_sum_assignment(matrix: np.ndarray, cutoff: float | None = None) -> tuple[list, list]:
     """Solve the linear sum assignment problem with a cutoff.
 
     A problem instance is described by matrix matrix where each matrix[i, j]
@@ -127,7 +124,7 @@ def f1_integral(
     mdist: float = 3.0,
     n_cutoffs: int = 50,
     return_raw: bool = False,
-) -> Union[float, tuple]:
+) -> float | tuple:
     """F1 integral calculation / area under F1 vs. cutoff.
 
     Compute the area under the curve when plotting F1 score vs cutoff values.
@@ -181,23 +178,19 @@ def f1_integral(
 
     if not return_raw:
         f1_scores = [_f1_at_cutoff(matrix, pred, true, cutoff) for cutoff in cutoffs]
-        return np.trapz(f1_scores, cutoffs) / mdist  # Norm. to 0-1
+        return np.trapezoid(f1_scores, cutoffs) / mdist  # Norm. to 0-1
 
     f1_scores = []
     offsets = []
     for cutoff in cutoffs:
-        f1_value, rows, cols = _f1_at_cutoff(
-            matrix, pred, true, cutoff, return_raw=True
-        )
+        f1_value, rows, cols = _f1_at_cutoff(matrix, pred, true, cutoff, return_raw=True)
         f1_scores.append(f1_value)
         offsets.append(_get_offsets(pred, true, rows, cols))
 
     return (f1_scores, offsets, list(cutoffs))
 
 
-def _get_offsets(
-    pred: np.ndarray, true: np.ndarray, rows: np.ndarray, cols: np.ndarray
-) -> List[tuple]:
+def _get_offsets(pred: np.ndarray, true: np.ndarray, rows: np.ndarray, cols: np.ndarray) -> list[tuple]:
     """Return a list of (r, c) offsets for all assigned coordinates.
 
     Args:
@@ -206,12 +199,9 @@ def _get_offsets(
         rows: Rows of the assigned coordinates (along "true"-axis).
         cols: Columns of the assigned coordinates (along "pred"-axis).
     """
-    return [
-        (true[r][0] - pred[c][0], true[r][1] - pred[c][1]) for r, c in zip(rows, cols)
-    ]
+    return [(true[r][0] - pred[c][0], true[r][1] - pred[c][1]) for r, c in zip(rows, cols)]
 
 
-# TODO - find suitable return type Union[float, tuple] does not work
 def _f1_at_cutoff(
     matrix: np.ndarray,
     pred: np.ndarray,
@@ -262,9 +252,7 @@ def _f1_at_cutoff(
     return f1_value
 
 
-def compute_metrics(
-    pred: np.ndarray, true: np.ndarray, mdist: float = 3.0
-) -> pd.DataFrame:
+def compute_metrics(pred: np.ndarray, true: np.ndarray, mdist: float = 3.0) -> pd.DataFrame:
     """Calculate metric scores across cutoffs.
 
     Args:
@@ -304,7 +292,7 @@ def compute_metrics(
             "offset": offsets,
         }
     )
-    df["f1_integral"] = np.trapz(df["f1_score"], cutoffs) / mdist  # Norm. to 0-1
+    df["f1_integral"] = np.trapezoid(df["f1_score"], cutoffs) / mdist  # Norm. to 0-1
     df["mean_euclidean"] = total_euclidean / (total_assignments + 1e-10)
 
     return df

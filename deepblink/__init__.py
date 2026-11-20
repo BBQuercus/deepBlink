@@ -16,18 +16,6 @@ Modules are arranged as follows:
 - util: Basic utility functions not fitting into a category.
 """
 
-__version__ = "0.1.4"
+__version__ = "0.2.0"
 
-from . import augment
-from . import cli
-from . import data
-from . import datasets
-from . import inference
-from . import io
-from . import losses
-from . import metrics
-from . import models
-from . import networks
-from . import optimizers
-from . import training
-from . import util
+from . import augment, cli, data, datasets, inference, io, losses, metrics, models, networks, optimizers, training, util

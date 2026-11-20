@@ -1,10 +1,9 @@
 """Logging callbacks for wandb."""
-# pylint: disable=no-member,missing-function-docstring
 
+import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 
 try:
     import wandb
@@ -13,10 +12,8 @@ try:
         raise AssertionError
 except (ModuleNotFoundError, AttributeError, AssertionError):
     raise ImportError(
-        (
-            "To support conda packages we don't ship deepBlink with wandb. "
-            "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
-        )
+        "To support conda packages we don't ship deepBlink with wandb. "
+        "Please install it using pip: 'pip install \"deepblink[wandb]\"'"
     )
 
 
@@ -28,10 +25,12 @@ from .models import Model
 
 def wandb_callback():
     """Callback function to avoid double imports."""
-    return wandb.keras.WandbCallback()
+    from wandb.integration.keras import WandbMetricsLogger
+
+    return WandbMetricsLogger()
 
 
-class WandbImageLogger(tf.keras.callbacks.Callback):
+class WandbImageLogger(keras.callbacks.Callback):
     """Custom image prediction logger callback in wandb.
 
     Expects segmentation images and the model class to have a predict_on_image method.
@@ -43,7 +42,10 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
     """
 
     def __init__(
-        self, model_wrapper: Model, dataset: Dataset, n_examples: int = 4,
+        self,
+        model_wrapper: Model,
+        dataset: Dataset,
+        n_examples: int = 4,
     ):
         super().__init__()
         self.model_wrapper = model_wrapper
@@ -53,9 +55,7 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         self.valid_masks = dataset.y_valid[:n_examples]  # type: ignore[index]
         self.image_size = dataset.x_train[0].shape[0]  # type: ignore[index]
 
-    def plot_scatter(
-        self, title: str, images: np.ndarray, masks: np.ndarray = None
-    ) -> None:
+    def plot_scatter(self, title: str, images: np.ndarray, masks: np.ndarray = None) -> None:
         """Plot one set of images to wandb."""
         plots = []
         for i, image in enumerate(images):
@@ -72,33 +72,30 @@ class WandbImageLogger(tf.keras.callbacks.Callback):
         wandb.log({title: plots}, commit=False)
         plt.close(fig="all")
 
-    # pylint: disable=W0613,W0221
-    def on_train_begin(self, epochs, logs=None):  # noqa: D102
+    def on_train_begin(self, epochs, logs=None):
         self.plot_scatter("Train ground truth", self.train_images, self.train_masks)
         self.plot_scatter("Valid ground truth", self.valid_images, self.valid_masks)
 
-    def on_epoch_end(self, epoch, logs=None):  # noqa: ignore=D102
+    def on_epoch_end(self, epoch, logs=None):
         self.plot_scatter("Train data predictions", self.train_images)
         self.plot_scatter("Valid data predictions", self.valid_images)
 
-    # pylint: enable=W0613,W0221
 
+class WandbComputeMetrics(keras.callbacks.Callback):
+    """Compute the final metrics once training is complete.
 
-class WandbComputeMetrics(tf.keras.callbacks.Callback):
-    """Compute the final metrics once training is complete."""
+    Predicts with ``self.model``, the network Keras attaches to every callback.
+    """
 
-    def __init__(self, model: tf.keras.models.Model, dataset: Dataset, mdist: int):
+    def __init__(self, dataset: Dataset, mdist: int):
         super().__init__()
-        self.model = model
         self.train_images = dataset.x_train
         self.train_labels = dataset.y_train
         self.valid_images = dataset.x_valid
         self.valid_labels = dataset.y_valid
         self.mdist = mdist
 
-    def log_scores(
-        self, name: str, images: np.ndarray, labels: np.ndarray
-    ) -> pd.DataFrame:
+    def log_scores(self, name: str, images: np.ndarray, labels: np.ndarray) -> pd.DataFrame:
         """Prediction and logging function for one set of images and labels."""
         df = pd.DataFrame()
         mdist = self.mdist
@@ -111,7 +108,7 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
                 mdist=mdist,
             )
             curr_df["image"] = idx  # for downstream groupby's
-            df = df.append(curr_df)
+            df = pd.concat([df, curr_df], ignore_index=True)
 
         # Log single summary values to wandb
         values = {
@@ -131,9 +128,7 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
             wandb.log(
                 {
                     f"{name} metrics": wandb.plot.bar(
-                        wandb.Table(
-                            data=list(values.items()), columns=["label", "value"]
-                        ),
+                        wandb.Table(data=list(values.items()), columns=["label", "value"]),
                         "label",
                         "value",
                         title=f"{name} metrics",
@@ -170,10 +165,7 @@ class WandbComputeMetrics(tf.keras.callbacks.Callback):
         plt.legend(loc="upper left")
         wandb.log({"F1 integral histogram": plt})
 
-    # pylint: disable=W0613
-    def on_train_end(self, logs=None):  # noqa: D102
+    def on_train_end(self, logs=None):
         self.df_train = self.log_scores("Train", self.train_images, self.train_labels)
         self.df_valid = self.log_scores("Valid", self.valid_images, self.valid_labels)
         self.log_plots()
-
-    # pylint: enable=W0613

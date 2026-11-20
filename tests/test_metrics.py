@@ -1,5 +1,4 @@
 """Unittests for the deepblink.metrics module."""
-# pylint: disable=missing-function-docstring
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -9,6 +8,7 @@ import pytest
 import scipy.spatial
 
 from deepblink.metrics import _f1_at_cutoff
+from deepblink.metrics import compute_metrics
 from deepblink.metrics import euclidean_dist
 from deepblink.metrics import f1_integral
 from deepblink.metrics import f1_score
@@ -136,3 +136,12 @@ def test_offset_euclidean():
     offset = [[0, 0], [1, 1], [-1, 1], [1, 0]]
     expected = [0, np.sqrt(2), np.sqrt(2), 1]
     assert offset_euclidean(offset) == pytest.approx(expected)
+
+
+def test_compute_metrics():
+    # Identical inputs: perfect score at every cutoff
+    coords = np.array([[2.0, 2.0], [10.0, 12.0], [20.0, 5.0]])
+    df = compute_metrics(pred=coords, true=coords, mdist=3)
+    assert df["f1_score"].to_numpy() == pytest.approx(1)
+    assert df["f1_integral"].iloc[0] == pytest.approx(1)
+    assert df["mean_euclidean"].iloc[0] == pytest.approx(0)

@@ -1,6 +1,4 @@
 """Unittests for the deepblink.data module."""
-# pylint: disable=missing-function-docstring
-# TODO random cropping
 
 from hypothesis import given
 from hypothesis.extra.numpy import arrays

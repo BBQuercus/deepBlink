@@ -1,15 +1,14 @@
 """Utility helper functions."""
 
-from typing import Callable, Iterable, Tuple, Union
 import importlib
 import os
 import random
+from collections.abc import Callable
 
-from PIL import Image
-from PIL import UnidentifiedImageError
-from PIL.TiffTags import TAGS
 import numpy as np
 import pandas as pd
+from PIL import Image, UnidentifiedImageError
+from PIL.TiffTags import TAGS
 
 
 def get_from_module(path: str, attribute: str) -> Callable:
@@ -19,9 +18,7 @@ def get_from_module(path: str, attribute: str) -> Callable:
     return attribute  # type: ignore[return-value]
 
 
-def relative_shuffle(
-    x: Union[list, np.ndarray], y: Union[list, np.ndarray]
-) -> Tuple[Union[list, np.ndarray], Union[list, np.ndarray]]:
+def relative_shuffle(x: list | np.ndarray, y: list | np.ndarray) -> tuple[list | np.ndarray, list | np.ndarray]:
     """Shuffles x and y keeping their relative order."""
     if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
         shuffled_indices = np.random.permutation(x.shape[0])
@@ -36,7 +33,7 @@ def relative_shuffle(
 
 def train_valid_split(
     x_list: list, y_list: list, valid_split: float = 0.2, shuffle: bool = True
-) -> Iterable[list]:
+) -> tuple[list, list, list, list]:
     """Split two lists (usually input and ground truth).
 
     Splitting into random training and validation sets with an optional shuffling.
@@ -45,6 +42,7 @@ def train_valid_split(
         x_list: First list of items. Typically input data.
         y_list: Second list of items. Typically labeled data.
         valid_split: Number between 0-1 to denote the percentage of examples used for validation.
+        shuffle: If True, shuffle the data before splitting.
 
     Returns:
         (x_train, x_valid, y_train, y_valid) splited lists containing training
@@ -53,13 +51,9 @@ def train_valid_split(
     if not 0 <= valid_split <= 1:
         raise ValueError(f"valid_split must be between 0-1 but is {valid_split}.")
     if len(x_list) != len(y_list):
-        raise ValueError(
-            f"Lists must be of equal length: {len(x_list)} != {len(y_list)}."
-        )
+        raise ValueError(f"Lists must be of equal length: {len(x_list)} != {len(y_list)}.")
     if len(x_list) <= 2:
-        raise ValueError(
-            f"At least 3 images/labels are required for a train/val split. Given: {len(x_list)}."
-        )
+        raise ValueError(f"At least 3 images/labels are required for a train/val split. Given: {len(x_list)}.")
 
     if shuffle:
         x_list, y_list = relative_shuffle(x_list, y_list)
@@ -76,9 +70,8 @@ def train_valid_split(
 
 def delete_non_unique_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Deletes DataFrame columns that only contain one (non-unique) value."""
-    for col in df.columns:
-        if len(df[col].unique()) == 1:
-            df.drop(col, inplace=True, axis=1)
+    cols_to_drop = [col for col in df.columns if len(df[col].unique()) == 1]
+    df = df.drop(columns=cols_to_drop)
     return df
 
 
@@ -108,14 +101,10 @@ def predict_shape(shape: tuple) -> str:
     max_len = 6 if is_rgb else 5
 
     if len(shape) > max_len:
-        raise ValueError(
-            f"Too many dimensions (max {max_len}). Shape {shape} can't be predicted."
-        )
+        raise ValueError(f"Too many dimensions (max {max_len}). Shape {shape} can't be predicted.")
 
     dims = {}
-    dims["x"], dims["y"] = [
-        idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]
-    ]
+    dims["x"], dims["y"] = [idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]]
     sorted_shape = sorted(shape)
 
     if is_rgb:
@@ -134,7 +123,7 @@ def predict_shape(shape: tuple) -> str:
 
 
 # TODO account for resolution unit (µm / cm)
-def predict_pixel_size(fname: Union[str, "os.PathLike[str]"]) -> Tuple[float, float]:
+def predict_pixel_size(fname: str | os.PathLike[str]) -> tuple[float, float]:
     """Predict the pixel size based on tifffile metadata."""
     if not os.path.splitext(fname)[1] == ".tif":
         raise ValueError(f"{fname} is not a tif file.")
@@ -146,10 +135,7 @@ def predict_pixel_size(fname: Union[str, "os.PathLike[str]"]) -> Tuple[float, fl
     try:
         image = Image.open(fname)
     except UnidentifiedImageError as err:
-        raise ValueError(
-            f"{fname} could not be read by PIL. "
-            f"Check the format or pass a pixel-size directly."
-        ) from err
+        raise ValueError(f"{fname} could not be read by PIL. Check the format or pass a pixel-size directly.") from err
     if len(image.size) != 2:
         raise ValueError(f"Image {fname} has more than 2 dimensions.")
 

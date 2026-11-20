@@ -1,13 +1,11 @@
 """Utilities shared by multiple CLI modules."""
-from typing import Tuple, Union
+
 import logging
 
 from ..util import predict_pixel_size
 
 
-def get_pixel_size(
-    pixel_size: Union[float, Tuple[float, float]], image: str, logger: logging.Logger
-) -> Tuple[float, float]:
+def get_pixel_size(pixel_size: float | tuple[float, float], image: str, logger: logging.Logger) -> tuple[float, float]:
     """Return the pixel size of an image."""
     # Use user-provided pixel size
     if pixel_size is not None:
@@ -22,8 +20,6 @@ def get_pixel_size(
         size = predict_pixel_size(image)
         logger.debug(f"using predicted pixel size {size}")
     except (ValueError, KeyError, IndexError) as e:
-        logger.warning(
-            f"\U000026A0 {e} encountered. Pixel size for image {image} could not be predicted."
-        )
+        logger.warning(f"\U000026a0 {e} encountered. Pixel size for image {image} could not be predicted.")
         logger.debug(f"defaulting pixel size to {size}")
     return size

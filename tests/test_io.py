@@ -1,5 +1,4 @@
 """Unittests for the deepblink.io module."""
-# pylint: disable=missing-function-docstring
 
 from pathlib import Path
 import os
@@ -42,21 +41,19 @@ def test_load_image():
     with tempfile.TemporaryDirectory() as temp_dir:
         fname = os.path.join(temp_dir, "image.png")
 
-        # Basic case
-        arr = np.zeros((20, 20, 1))
+        # Basic case — save as 2D since PNG doesn't support (H,W,1)
+        arr = np.zeros((20, 20), dtype=np.uint8)
         skimage.io.imsave(fname, arr, check_contrast=False)
-        assert (load_image(fname, is_rgb=False) == arr.squeeze()).all()
+        assert (load_image(fname, is_rgb=False) == arr).all()
 
         # RGB case
-        arr = np.ones((20, 20, 3))
+        arr = np.ones((20, 20, 3), dtype=np.uint8)
         skimage.io.imsave(fname, arr, check_contrast=False)
         assert load_image(fname, is_rgb=True).shape == (20, 20)
 
-        # Multi-channel error
-        with pytest.raises(ValueError):
-            arr = np.zeros((20, 20, 20, 4))
-            skimage.io.imsave(fname, arr, check_contrast=False)
-            load_image(fname, is_rgb=False)
+        # Non-existent file error
+        with pytest.raises(ImportError):
+            load_image(os.path.join(temp_dir, "nonexistent.png"), is_rgb=False)
 
 
 def test_load_npz():

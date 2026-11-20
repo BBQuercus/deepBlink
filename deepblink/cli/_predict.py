@@ -1,21 +1,14 @@
 """CLI submodule for predicting on images."""
 
-from typing import List, Tuple, Union
 import logging
 import os
 
 import numpy as np
 import pandas as pd
 
-from ..inference import get_intensities
-from ..inference import predict
-from ..io import EXTENSIONS
-from ..io import basename
-from ..io import grab_files
-from ..io import load_image
-from ..io import load_model
-from ..util import delete_non_unique_columns
-from ..util import predict_shape
+from ..inference import get_intensities, predict
+from ..io import EXTENSIONS, basename, grab_files, load_image, load_model
+from ..util import delete_non_unique_columns, predict_shape
 from ._util import get_pixel_size
 
 
@@ -41,7 +34,7 @@ class HandlePredict:
         arg_radius: int,
         arg_shape: str,
         arg_probability: float,
-        arg_pixel_size: Union[float, Tuple[float, float]],
+        arg_pixel_size: float | tuple[float, float],
         logger: logging.Logger,
     ):
         self.fname_model = arg_model
@@ -52,25 +45,23 @@ class HandlePredict:
         self.probability = arg_probability
         self.pixel_size = arg_pixel_size
         self.logger = logger
-        self.logger.info("\U0001F914 starting prediction submodule")
+        self.logger.info("\U0001f914 starting prediction submodule")
 
         self.type = "csv"
         self.extensions = EXTENSIONS
         self.abs_input = os.path.abspath(self.raw_input)
-        self.model = load_model(
-            os.path.abspath(self.fname_model)
-        )  # noqa: assignment-from-no-return
-        self.logger.info("\U0001F9E0 model imported")
+        self.model = load_model(os.path.abspath(self.fname_model))
+        self.logger.info("\U0001f9e0 model imported")
 
     def __call__(self):
         """Run prediction for all given images."""
-        self.logger.info(f"\U0001F4C2 {len(self.file_list)} file(s) found")
-        self.logger.info(f"\U0001F5C4 output will be saved to {self.path_output}")
+        self.logger.info(f"\U0001f4c2 {len(self.file_list)} file(s) found")
+        self.logger.info(f"\U0001f5c4 output will be saved to {self.path_output}")
 
         for fname_in, image in zip(self.file_list, self.image_list):
             self.predict_adaptive(fname_in, image)
 
-        self.logger.info("\U0001F3C1 all predictions are complete")
+        self.logger.info("\U0001f3c1 all predictions are complete")
 
     @property
     def path_input(self) -> str:
@@ -82,20 +73,18 @@ class HandlePredict:
         return path_input
 
     @property
-    def file_list(self) -> List[str]:
+    def file_list(self) -> list[str]:
         """Return a list with all files to be processed."""
         if os.path.isdir(self.abs_input):
             file_list = grab_files(self.abs_input, self.extensions)
         elif os.path.isfile(self.abs_input):
             file_list = [self.abs_input]
         else:
-            raise ImportError(
-                "\U0000274C Input file(s) could not be found. Please make sure all files exist."
-            )
+            raise ImportError("\U0000274c Input file(s) could not be found. Please make sure all files exist.")
         return file_list
 
     @property
-    def image_list(self) -> List[np.ndarray]:
+    def image_list(self) -> list[np.ndarray]:
         """Return a list with all images."""
         try:
             is_rgb = "3" in self.raw_shape
@@ -114,22 +103,20 @@ class HandlePredict:
         return outpath
 
     @property
-    def shape(self) -> List[str]:
+    def shape(self) -> list[str]:
         """Resolve input shape."""
         first_image = self.image_list[0]
         if not all([i.ndim == first_image.ndim for i in self.image_list]):
             raise ValueError("Images must all have the same number of dimensions.")
         if not all([i.shape == first_image.shape for i in self.image_list]):
-            self.logger.warning(
-                "\U000026A0 images do not have equal shapes (dimensions match)"
-            )
+            self.logger.warning("\U000026a0 images do not have equal shapes (dimensions match)")
 
         if self.raw_shape is None:
             shape = predict_shape(self.image_list[0].shape)
-            self.logger.info(f"\U0001F535 using predicted shape of {shape}")
+            self.logger.info(f"\U0001f535 using predicted shape of {shape}")
         else:
             shape = self.raw_shape
-            self.logger.info(f"\U0001F535 using provided input shape of {shape}")
+            self.logger.info(f"\U0001f535 using provided input shape of {shape}")
         for c in ["(", ")", " "]:
             shape = shape.replace(c, "")
         shape_list = shape.split(",")
@@ -142,13 +129,9 @@ class HandlePredict:
         self.logger.debug(f"non-unique columns to be saved are {df.columns}")
 
         df.to_csv(fname_out, index=False)
-        self.logger.info(
-            f"\U0001F3C3 prediction of file {fname_in} saved as {fname_out}"
-        )
+        self.logger.info(f"\U0001f3c3 prediction of file {fname_in} saved as {fname_out}")
 
-    def predict_single(
-        self, image: np.ndarray, pixel_size: Tuple[float, float]
-    ) -> pd.DataFrame:
+    def predict_single(self, image: np.ndarray, pixel_size: tuple[float, float]) -> pd.DataFrame:
         """Predict a single (x,y) image accounting for pixel size."""
         column_x = "x [px]" if pixel_size[0] == 1 else "x [µm]"
         column_y = "y [px]" if pixel_size[1] == 1 else "y [µm]"

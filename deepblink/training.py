@@ -1,11 +1,10 @@
 """Training functions."""
-# pylint: disable=C0415
 
-from typing import Dict
 import datetime
 import os
 import platform
 
+import keras
 import tensorflow as tf
 
 from .datasets import Dataset
@@ -16,7 +15,7 @@ from .util import get_from_module
 def train_model(
     model: Model,
     dataset: Dataset,
-    cfg: Dict,
+    cfg: dict,
     run_name: str = "model",
     use_wandb: bool = True,
 ) -> Model:
@@ -31,19 +30,18 @@ def train_model(
     """
     callbacks = []
 
-    cb_saver = tf.keras.callbacks.ModelCheckpoint(
-        os.path.join(cfg["savedir"], f"{run_name}.h5"), save_best_only=True,
+    cb_saver = keras.callbacks.ModelCheckpoint(
+        os.path.join(cfg["savedir"], f"{run_name}.h5"),
+        save_best_only=True,
     )
     callbacks.append(cb_saver)
 
     if use_wandb:
-        from ._wandb import WandbComputeMetrics
-        from ._wandb import WandbImageLogger
-        from ._wandb import wandb_callback
+        from ._wandb import WandbComputeMetrics, WandbImageLogger, wandb_callback
 
         cb_image = WandbImageLogger(model, dataset)
         cb_wandb = wandb_callback()
-        cb_metrics = WandbComputeMetrics(model, dataset, mdist=3)
+        cb_metrics = WandbComputeMetrics(dataset, mdist=3)
         callbacks.extend([cb_image, cb_wandb, cb_metrics])
 
     model.fit(dataset=dataset, callbacks=callbacks)
@@ -51,7 +49,7 @@ def train_model(
     return model
 
 
-def run_experiment(cfg: Dict, pre_model: tf.keras.models.Model = None):
+def run_experiment(cfg: dict, pre_model: keras.Model = None) -> None:
     """Run a training experiment.
 
     Configuration file can be generated using deepblink config.
@@ -71,9 +69,7 @@ def run_experiment(cfg: Dict, pre_model: tf.keras.models.Model = None):
     augmentation_args = cfg.get("augmentation_args", {})
     dataset_args = cfg.get("dataset_args", {})
     dataset = dataset_class(**dataset_args)
-    network_args = (
-        cfg.get("network_args", {}) if cfg.get("network_args", {}) is not None else {}
-    )
+    network_args = cfg.get("network_args", {}) if cfg.get("network_args", {}) is not None else {}
     network_args["cell_size"] = dataset_args["cell_size"]
     train_args = cfg.get("train_args", {})
 
@@ -107,16 +103,13 @@ def run_experiment(cfg: Dict, pre_model: tf.keras.models.Model = None):
                 raise AssertionError
         except (ModuleNotFoundError, AttributeError, AssertionError):
             raise ImportError(
-                (
-                    "To support conda packages we don't ship deepBlink with wandb. "
-                    "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
-                )
+                "To support conda packages we don't ship deepBlink with wandb. "
+                "Please install it using pip: 'pip install \"deepblink[wandb]\"'"
             )
 
-        # pylint:disable=E1101
         wandb.init(name=run_name, project=cfg["name"], config=cfg)
 
     model = train_model(model, dataset, cfg, run_name, use_wandb)
 
     if use_wandb:
-        wandb.join()  # pylint:disable=E1101
+        wandb.join()
