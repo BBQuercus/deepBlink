@@ -104,7 +104,7 @@ def run_experiment(cfg: dict, pre_model: keras.Model = None) -> None:
         except (ModuleNotFoundError, AttributeError, AssertionError):
             raise ImportError(
                 "To support conda packages we don't ship deepBlink with wandb. "
-                "Please install any using pip: 'pip install \"wandb>=0.10.3\"'"
+                "Please install it using pip: 'pip install \"deepblink[wandb]\"'"
             )
 
         wandb.init(name=run_name, project=cfg["name"], config=cfg)

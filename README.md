@@ -53,7 +53,7 @@ Or using conda:
 conda install -c bbquercus deepblink
 ```
 
-For GPU support, TensorFlow 2.16+ ships CUDA via pip — no manual CUDA/cuDNN setup needed:
+For GPU support on Linux or WSL2 with an NVIDIA GPU, TensorFlow ships CUDA via pip – no manual CUDA/cuDNN setup needed (see the [TensorFlow install guide](https://www.tensorflow.org/install/pip)):
 ```bash
 pip install 'tensorflow[and-cuda]'
 ```
