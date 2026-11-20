@@ -4,18 +4,14 @@ import glob
 import os
 import re
 
+import keras
 import numpy as np
 import pandas as pd
 import skimage.color
 import skimage.io
-import keras
 import tensorflow as tf
 
-from .losses import combined_bce_rmse
-from .losses import combined_dice_rmse
-from .losses import combined_f1_rmse
-from .losses import f1_score
-from .losses import rmse
+from .losses import combined_bce_rmse, combined_dice_rmse, combined_f1_rmse, f1_score, rmse
 
 # List of currently supported image file extensions.
 EXTENSIONS = ("tif", "tiff", "jpeg", "jpg", "png")
@@ -31,9 +27,7 @@ def securename(fname: str) -> str:
     return re.sub(r"[^\w\d-]", "_", fname)
 
 
-def load_npz(
-    fname: str | os.PathLike[str], test_only: bool = False
-) -> list[np.ndarray]:
+def load_npz(fname: str | os.PathLike[str], test_only: bool = False) -> list[np.ndarray]:
     """Imports the standard npz file format used for custom training and inference.
 
     Only for files saved using "np.savez_compressed(fname, x_train, y_train...)".
@@ -114,18 +108,13 @@ def load_prediction(fname: str | os.PathLike[str]) -> pd.DataFrame:
         raise ValueError(f"File must exist - '{fname}' does not.")
     df = pd.read_csv(fname)
     if any([c in df.columns for c in ["x [µm]", "y [µm]"]]):
-        raise ValueError(
-            "Predictions must be in pixels, not microns. "
-            "Please use 'pixel-size' 1 in predict."
-        )
+        raise ValueError("Predictions must be in pixels, not microns. Please use 'pixel-size' 1 in predict.")
     if not all([c in df.columns for c in ["x [px]", "y [px]"]]):
         raise ValueError("Prediction file must contain columns 'x [px]' and 'y [px]'.")
     return df
 
 
-def grab_files(
-    path: str | os.PathLike[str], extensions: tuple[str, ...]
-) -> list[str]:
+def grab_files(path: str | os.PathLike[str], extensions: tuple[str, ...]) -> list[str]:
     """Grab all files in directory with listed extensions.
 
     Args:

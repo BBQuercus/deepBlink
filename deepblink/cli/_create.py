@@ -7,10 +7,7 @@ import numpy as np
 import pandas as pd
 import skimage.util
 
-from ..io import EXTENSIONS
-from ..io import basename
-from ..io import grab_files
-from ..io import load_image
+from ..io import EXTENSIONS, basename, grab_files, load_image
 from ..util import train_valid_split
 from ._util import get_pixel_size
 
@@ -52,7 +49,7 @@ class HandleCreate:
         self.valid_split = arg_validsplit
         self.minspots = max(1, arg_minspots)
         self.logger = logger
-        self.logger.info("\U0001F5BC starting creation submodule")
+        self.logger.info("\U0001f5bc starting creation submodule")
 
         self.abs_input = os.path.abspath(self.raw_input)
         self.extensions = EXTENSIONS
@@ -62,7 +59,7 @@ class HandleCreate:
         self.get_file_lists()
         self.train_val_test_split()
         self.save_npz()
-        self.logger.info(f"\U0001F3C1 dataset created at {self.fname_out}")
+        self.logger.info(f"\U0001f3c1 dataset created at {self.fname_out}")
 
     @property
     def abs_labels(self) -> str:
@@ -76,14 +73,10 @@ class HandleCreate:
             path = self.abs_input
             self.logger.debug(f"using default label path at {path}")
         else:
-            self.logger.debug(
-                f"no labels found in default {self.abs_input} or input {self.raw_labels}"
-            )
+            self.logger.debug(f"no labels found in default {self.abs_input} or input {self.raw_labels}")
             raise ValueError(
-                (
-                    "\U0000274C No label path found.\t"
-                    "Please provide labels in the input directory or use the '--labels' flag."
-                )
+                "\U0000274c No label path found.\t"
+                "Please provide labels in the input directory or use the '--labels' flag."
             )
         return path
 
@@ -94,22 +87,14 @@ class HandleCreate:
             # Full path and file given
             if os.path.isfile(self.raw_name):
                 path = self.raw_name
-                self.logger.warning(
-                    f"\U000026A0 input name {self.raw_name} is already a file"
-                )
+                self.logger.warning(f"\U000026a0 input name {self.raw_name} is already a file")
             # Full path only
             elif os.path.isdir(self.raw_name):
                 path = os.path.join(self.raw_name, "dataset.npz")
-                self.logger.warning(
-                    f"\U000026A0 input name {self.raw_name} is already a file"
-                )
+                self.logger.warning(f"\U000026a0 input name {self.raw_name} is already a file")
             # Name only
             else:
-                fname = (
-                    self.raw_name[:-4]
-                    if self.raw_name.endswith(".npz")
-                    else self.raw_name
-                )
+                fname = self.raw_name[:-4] if self.raw_name.endswith(".npz") else self.raw_name
                 path = os.path.join(os.getcwd(), f"{fname}.npz")
                 self.logger.debug(f"using given name {self.raw_name}")
         else:
@@ -132,28 +117,22 @@ class HandleCreate:
         sizes = []
         for image, label in zip(fname_images, fname_labels):
             if basename(image) != basename(label):
-                self.logger.warning(
-                    f"\U0000274C file basenames do not match! {image} != {label}"
-                )
+                self.logger.warning(f"\U0000274c file basenames do not match! {image} != {label}")
 
             # Read label
             try:
                 df = pd.read_csv(label, index_col=0)
             except pd.errors.EmptyDataError:
-                self.logger.warning(f"\U0000274C label empty! {label} won't be used")
+                self.logger.warning(f"\U0000274c label empty! {label} won't be used")
                 continue
             if len(df) <= 1:
-                self.logger.warning(
-                    f"\U000026A0 labels for {label} empty. will not be used"
-                )
+                self.logger.warning(f"\U000026a0 labels for {label} empty. will not be used")
                 continue
 
             # Read image
             img = load_image(image, is_rgb=False)
             if not all(shape >= self.img_size for shape in img.shape):
-                self.logger.warning(
-                    f"\U000026A0 image {image} was too small! {img.shape} < {self.img_size}"
-                )
+                self.logger.warning(f"\U000026a0 image {image} was too small! {img.shape} < {self.img_size}")
                 continue
 
             size = get_pixel_size(self.pixel_size, image, self.logger)
@@ -162,16 +141,12 @@ class HandleCreate:
             sizes.append(size)
 
         if not images:
-            raise ValueError(
-                "No images matched the format criteria. Please check image size and labelling."
-            )
+            raise ValueError("No images matched the format criteria. Please check image size and labelling.")
         self.logger.debug(f"using {len(images)} non-empty files")
         return images, labels, sizes
 
     @staticmethod
-    def convert_labels(
-        image: np.ndarray, df: pd.DataFrame, pixel_size: tuple[float, float]
-    ) -> pd.DataFrame:
+    def convert_labels(image: np.ndarray, df: pd.DataFrame, pixel_size: tuple[float, float]) -> pd.DataFrame:
         """Pre-processes labels to be used in deepBlink.
 
         Renames X/Y to c/r respectively for easier handling with rearrangement to r/c.
@@ -206,9 +181,7 @@ class HandleCreate:
         df["c"] = df["c"] / size_x
         return df
 
-    def crop_image(
-        self, image: np.ndarray, df: pd.DataFrame
-    ) -> tuple[list[np.ndarray], list[pd.DataFrame]]:
+    def crop_image(self, image: np.ndarray, df: pd.DataFrame) -> tuple[list[np.ndarray], list[pd.DataFrame]]:
         """Crop a image / label pair to a uniform size and scale labels accordingly."""
         if self.img_size is None:
             self.logger.debug(f"using unchanged size in {image.shape}")
@@ -218,9 +191,7 @@ class HandleCreate:
             self.logger.debug(f"skipping image due to small size {image.shape}")
             return [], []
 
-        windows = skimage.util.view_as_windows(
-            image, window_shape=(self.img_size, self.img_size), step=self.img_size
-        )
+        windows = skimage.util.view_as_windows(image, window_shape=(self.img_size, self.img_size), step=self.img_size)
 
         img_list = []
         df_list = []
@@ -245,9 +216,7 @@ class HandleCreate:
                     img_list.append(img)
                     df_list.append(df_norm)
 
-        self.logger.debug(
-            f"converted original size of {image.shape} into {len(df_list)} crops"
-        )
+        self.logger.debug(f"converted original size of {image.shape} into {len(df_list)} crops")
         return img_list, df_list
 
     def get_file_lists(self):
@@ -256,16 +225,12 @@ class HandleCreate:
         self.label_list = []
 
         for image, label, size in zip(*self.image_label_size_lists):
-            label_normalized = self.convert_labels(
-                image=image, df=label, pixel_size=size
-            )
+            label_normalized = self.convert_labels(image=image, df=label, pixel_size=size)
             image_crops, label_crops = self.crop_image(image=image, df=label_normalized)
             self.image_list.extend(image_crops)
             self.label_list.extend(label_crops)
 
-        self.logger.debug(
-            f"images converted: {len(self.image_list)} == {len(self.label_list)}"
-        )
+        self.logger.debug(f"images converted: {len(self.image_list)} == {len(self.label_list)}")
 
     def train_val_test_split(self):
         """Two-step split of the input data into train/valid/test."""
@@ -276,7 +241,7 @@ class HandleCreate:
             x_list=x_trainval, y_list=y_trainval, valid_split=self.valid_split
         )
         self.logger.info(
-            f"\U0001F4A6 images split: {len(self.x_train)} train, {len(self.x_valid)} valid, {len(self.x_test)} test"
+            f"\U0001f4a6 images split: {len(self.x_train)} train, {len(self.x_valid)} valid, {len(self.x_test)} test"
         )
 
         # Convert DataFrame to Numpy array

@@ -2,9 +2,7 @@
 
 import numpy as np
 
-from ..data import get_prediction_matrix
-from ..data import next_power
-from ..data import normalize_image
+from ..data import get_prediction_matrix, next_power, normalize_image
 from ..io import load_npz
 from ._datasets import Dataset
 
@@ -27,9 +25,7 @@ class SpotsDataset(Dataset):
 
     def load_data(self) -> None:
         """Load dataset into memory."""
-        self.x_train, self.y_train, self.x_valid, self.y_valid, _, _ = load_npz(
-            self.data_filename
-        )
+        self.x_train, self.y_train, self.x_valid, self.y_valid, _, _ = load_npz(self.data_filename)
         self.prepare_data()
         self.normalize_dataset()
 
@@ -37,18 +33,12 @@ class SpotsDataset(Dataset):
     def image_size(self):
         """Check if all images have the same square shape."""
         base_shape = self.x_train[0].shape
-        if not all(
-            base_shape == x.shape
-            for dataset in [self.x_train, self.x_valid]
-            for x in dataset
-        ):
+        if not all(base_shape == x.shape for dataset in [self.x_train, self.x_valid] for x in dataset):
             raise ValueError("All images must have the same shape.")
         if not base_shape[0] == base_shape[1]:
             raise ValueError("Images must be square. ")
         if not base_shape[0] == next_power(base_shape[0]):
-            raise ValueError(
-                f"Images sidelength must be a power of two. {base_shape[0]} is not."
-            )
+            raise ValueError(f"Images sidelength must be a power of two. {base_shape[0]} is not.")
 
         return base_shape[0]
 
@@ -64,9 +54,7 @@ class SpotsDataset(Dataset):
             labels = []
             for coords in dataset:
                 matrix = get_prediction_matrix(coords, image_size, cell_size)
-                matrix[..., 0] = np.where(
-                    matrix[..., 0], self.smooth_factor, 1 - self.smooth_factor
-                )
+                matrix[..., 0] = np.where(matrix[..., 0], self.smooth_factor, 1 - self.smooth_factor)
                 labels.append(matrix)
             return np.array(labels)
 

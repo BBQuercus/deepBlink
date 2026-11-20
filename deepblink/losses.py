@@ -8,22 +8,20 @@ import keras
 import keras.ops as ops
 import tensorflow as tf
 
+Tensor = tf.Tensor
 
-def binary_crossentropy(y_true, y_pred):
+
+def binary_crossentropy(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Keras' binary crossentropy loss."""
-    return keras.losses.binary_crossentropy(
-        y_true=ops.flatten(y_true), y_pred=ops.flatten(y_pred)
-    )
+    return keras.losses.binary_crossentropy(y_true=ops.ravel(y_true), y_pred=ops.ravel(y_pred))
 
 
-def categorical_crossentropy(y_true, y_pred):
+def categorical_crossentropy(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Keras' categorical crossentropy loss."""
-    return keras.losses.categorical_crossentropy(
-        y_true=ops.flatten(y_true), y_pred=ops.flatten(y_pred)
-    )
+    return keras.losses.categorical_crossentropy(y_true=ops.ravel(y_true), y_pred=ops.ravel(y_pred))
 
 
-def dice_score(y_true, y_pred, smooth: int = 1):
+def dice_score(y_true: Tensor, y_pred: Tensor, smooth: int = 1) -> Tensor:
     r"""Computes the dice coefficient on a batch of tensors.
 
     .. math::
@@ -37,19 +35,19 @@ def dice_score(y_true, y_pred, smooth: int = 1):
         y_pred: Predicted masks.
         smooth: Epslion value to avoid division by zero.
     """
-    y_true_f = ops.flatten(y_true)
-    y_pred_f = ops.flatten(y_pred)
+    y_true_f = ops.ravel(y_true)
+    y_pred_f = ops.ravel(y_pred)
     intersection = ops.sum(y_true_f * y_pred_f)
     dice = (2.0 * intersection + smooth) / (ops.sum(y_true_f) + ops.sum(y_pred_f) + smooth)
     return dice
 
 
-def dice_loss(y_true, y_pred):
+def dice_loss(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Dice score loss corresponding to deepblink.losses.dice_score."""
     return 1 - dice_score(y_true, y_pred)
 
 
-def recall_score(y_true, y_pred):
+def recall_score(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Recall score metric.
 
     Defined as ``tp / (tp + fn)`` where tp is the number of true positives and fn the number of false negatives.
@@ -62,7 +60,7 @@ def recall_score(y_true, y_pred):
     return recall
 
 
-def precision_score(y_true, y_pred):
+def precision_score(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Precision score metric.
 
     Defined as ``tp / (tp + fp)`` where tp is the number of true positives and fp the number of false positives.
@@ -75,7 +73,7 @@ def precision_score(y_true, y_pred):
     return precision
 
 
-def f1_score(y_true, y_pred):
+def f1_score(y_true: Tensor, y_pred: Tensor) -> Tensor:
     r"""F1 score metric.
 
     .. math::
@@ -91,18 +89,16 @@ def f1_score(y_true, y_pred):
     return f1_value
 
 
-def f1_loss(y_true, y_pred):
+def f1_loss(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """F1 score loss corresponding to deepblink.losses.f1_score."""
-    if not (
-        y_true.ndim == y_pred.ndim == 3 and y_true.shape[2] == y_pred.shape[2] == 3
-    ):
+    if not (y_true.ndim == y_pred.ndim == 3 and y_true.shape[2] == y_pred.shape[2] == 3):
         raise ValueError(
             f"Tensors must have shape n*n*3. Tensors has shape y_true:{y_true.shape}, y_pred:{y_pred.shape}."
         )
     return 1 - f1_score(y_true, y_pred)
 
 
-def rmse(y_true, y_pred):
+def rmse(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Calculate root mean square error (rmse) between true and predicted coordinates."""
     # RMSE, takes in the full y_true/y_pred when used as metric.
     # Therefore, do not move the selection outside the function.
@@ -118,14 +114,12 @@ def rmse(y_true, y_pred):
     n_true_spots = tf.math.count_nonzero(sum_rc_coords, dtype=tf.float32)
 
     squared_displacement_xy_summed = ops.sum(ops.square(y_true_new - y_pred_new), axis=-1)
-    rmse_value = ops.sqrt(
-        ops.sum(squared_displacement_xy_summed) / (n_true_spots + keras.backend.epsilon())
-    )
+    rmse_value = ops.sqrt(ops.sum(squared_displacement_xy_summed) / (n_true_spots + keras.backend.epsilon()))
 
     return rmse_value
 
 
-def combined_f1_rmse(y_true, y_pred):
+def combined_f1_rmse(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Difference between F1 score and root mean square error (rmse).
 
     The optimal values for F1 score and rmse are 1 and 0 respectively.
@@ -134,17 +128,15 @@ def combined_f1_rmse(y_true, y_pred):
     return f1_score(y_true, y_pred) - rmse(y_true, y_pred)
 
 
-def combined_bce_rmse(y_true, y_pred):
+def combined_bce_rmse(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Loss that combines binary cross entropy for probability and rmse for coordinates.
 
     The optimal values for binary crossentropy (bce) and rmse are both 0.
     """
-    return (
-        binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) * 2
-    )
+    return binary_crossentropy(y_true[..., 0], y_pred[..., 0]) + rmse(y_true, y_pred) * 2
 
 
-def combined_dice_rmse(y_true, y_pred):
+def combined_dice_rmse(y_true: Tensor, y_pred: Tensor) -> Tensor:
     """Loss that combines dice for probability and rmse for coordinates.
 
     The optimal values for dice and rmse are both 0.

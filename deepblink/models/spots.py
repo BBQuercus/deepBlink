@@ -5,9 +5,7 @@ import functools
 import numpy as np
 
 from ..augment import augment_batch_baseline
-from ..losses import combined_f1_rmse
-from ..losses import f1_score
-from ..losses import rmse
+from ..losses import combined_f1_rmse, f1_score, rmse
 from ._models import Model
 
 

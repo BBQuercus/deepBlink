@@ -24,26 +24,14 @@ All submodules remain accessible for advanced usage (e.g.
 
 __version__ = "0.2.0"
 
-from . import augment
-from . import cli
-from . import data
-from . import datasets
-from . import inference
-from . import io
-from . import losses
-from . import metrics
-from . import models
-from . import networks
-from . import optimizers
-from . import training
-from . import util
+from . import augment, cli, data, datasets, inference, io, losses, metrics, models, networks, optimizers, training, util
+
+# Inference
+from .inference import get_intensities, predict
 
 # ── Core API ──────────────────────────────────────────────────────────
 # Loading
-from .io import load_model, load_image, load_npz
-
-# Inference
-from .inference import predict, get_intensities
+from .io import load_image, load_model, load_npz
 
 # Evaluation
 from .metrics import compute_metrics

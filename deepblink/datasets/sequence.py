@@ -1,10 +1,10 @@
 """SequenceDataset class."""
 
-from collections.abc import Callable
 import warnings
+from collections.abc import Callable
 
-import numpy as np
 import keras
+import numpy as np
 
 from ..util import relative_shuffle
 
@@ -49,7 +49,7 @@ class SequenceDataset(keras.utils.PyDataset):
 
         return int(np.floor(len(self.x) / self.batch_size))
 
-    def __getitem__(self, idx) -> tuple[np.ndarray, np.ndarray]:
+    def __getitem__(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
         """Return a single batch."""
         if self.overfit:
             idx = 0

@@ -2,13 +2,11 @@
 
 import math
 
+import keras
 import numpy as np
 import skimage.morphology
-import keras
 
-from .data import get_coordinate_list
-from .data import next_power
-from .data import normalize_image
+from .data import get_coordinate_list, next_power, normalize_image
 
 
 def predict(
@@ -35,9 +33,7 @@ def predict(
     # Predict on image
     pred = model.predict(image_pad[None, ..., None]).squeeze()
     prob = 0.5 if probability is None else probability
-    coords = get_coordinate_list(
-        pred, image_size=max(image_pad.shape), probability=prob
-    )
+    coords = get_coordinate_list(pred, image_size=max(image_pad.shape), probability=prob)
 
     # Remove spots in padded part of image
     coords = np.array([coords[..., 0], coords[..., 1]])
@@ -57,9 +53,7 @@ def predict(
     return coords
 
 
-def get_probabilities(
-    matrix: np.ndarray, coordinates: np.ndarray, image_size: int = 512
-) -> np.ndarray:
+def get_probabilities(matrix: np.ndarray, coordinates: np.ndarray, image_size: int = 512) -> np.ndarray:
     """Find prediction probability given the matrix and coordinates.
 
     Args:
@@ -85,7 +79,10 @@ def get_probabilities(
 
 
 def get_intensities(
-    image: np.ndarray, coordinate_list: np.ndarray, radius: int, method: str = "sum",
+    image: np.ndarray,
+    coordinate_list: np.ndarray,
+    radius: int,
+    method: str = "sum",
 ) -> np.ndarray:
     """Finds integrated intensities in a radius around each coordinate.
 

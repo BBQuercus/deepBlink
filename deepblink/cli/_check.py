@@ -19,7 +19,7 @@ class HandleCheck:
     def __init__(self, arg_input: str, logger: logging.Logger):
         self.raw_input = arg_input
         self.logger = logger
-        self.logger.info("\U0001F537 starting checking submodule")
+        self.logger.info("\U0001f537 starting checking submodule")
 
         self.abs_input = os.path.abspath(self.raw_input)
 
@@ -31,14 +31,14 @@ class HandleCheck:
         1. Your image has a shape of: {self.image.shape}
         ----------
         2. Possible parameters
-        \U000027A1 x, y: single 2D image used for one prediction
-        \U000027A1 z: third (height) dimension
-        \U000027A1 c: color channels
-        \U000027A1 t: time dimension
-        \U000027A1 3: RGB color stack
+        \U000027a1 x, y: single 2D image used for one prediction
+        \U000027a1 z: third (height) dimension
+        \U000027a1 c: color channels
+        \U000027a1 t: time dimension
+        \U000027a1 3: RGB color stack
         ----------
         3. By default we would assign: "({predict_shape(self.image.shape)})"
-        \U0001F449 If this is incorrect, please provide the proper shape using the --shape flag to the
+        \U0001f449 If this is incorrect, please provide the proper shape using the --shape flag to the
         submodule predict in deepblink's command line interface
         """
             )

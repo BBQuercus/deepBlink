@@ -1,6 +1,5 @@
 """List of functions to handle data including converting matrices <-> coordinates."""
 
-
 import math
 import operator
 
@@ -11,7 +10,7 @@ def next_power(x: int, k: int = 2) -> int:
     """Calculate x's next higher power of k."""
     y, power = 0, 1
     while y < x:
-        y = k ** power
+        y = k**power
         power += 1
     return y
 
@@ -29,9 +28,7 @@ def normalize_image(image: np.ndarray) -> np.ndarray:
     return image.astype(np.float32)
 
 
-def get_coordinate_list(
-    matrix: np.ndarray, image_size: int = 512, probability: float = 0.5
-) -> np.ndarray:
+def get_coordinate_list(matrix: np.ndarray, image_size: int = 512, probability: float = 0.5) -> np.ndarray:
     """Convert the prediction matrix into a list of coordinates.
 
     NOTE - plt.scatter uses the x, y system. Therefore any plots
@@ -63,7 +60,6 @@ def get_coordinate_list(
     # Coordinates of cells > 0.5
     matrix_r, matrix_c, *_ = np.where(matrix[..., 0] > probability, 1, 0).nonzero()
     for r, c in zip(matrix_r, matrix_c):
-
         grid_r = grid[r]
         grid_c = grid[c]
         spot_r = matrix[r, c, 1]

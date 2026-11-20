@@ -1,15 +1,14 @@
 """Utility helper functions."""
 
-from collections.abc import Callable, Iterable
 import importlib
 import os
 import random
+from collections.abc import Callable
 
-from PIL import Image
-from PIL import UnidentifiedImageError
-from PIL.TiffTags import TAGS
 import numpy as np
 import pandas as pd
+from PIL import Image, UnidentifiedImageError
+from PIL.TiffTags import TAGS
 
 
 def get_from_module(path: str, attribute: str) -> Callable:
@@ -19,9 +18,7 @@ def get_from_module(path: str, attribute: str) -> Callable:
     return attribute  # type: ignore[return-value]
 
 
-def relative_shuffle(
-    x: list | np.ndarray, y: list | np.ndarray
-) -> tuple[list | np.ndarray, list | np.ndarray]:
+def relative_shuffle(x: list | np.ndarray, y: list | np.ndarray) -> tuple[list | np.ndarray, list | np.ndarray]:
     """Shuffles x and y keeping their relative order."""
     if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
         shuffled_indices = np.random.permutation(x.shape[0])
@@ -45,6 +42,7 @@ def train_valid_split(
         x_list: First list of items. Typically input data.
         y_list: Second list of items. Typically labeled data.
         valid_split: Number between 0-1 to denote the percentage of examples used for validation.
+        shuffle: If True, shuffle the data before splitting.
 
     Returns:
         (x_train, x_valid, y_train, y_valid) splited lists containing training
@@ -53,13 +51,9 @@ def train_valid_split(
     if not 0 <= valid_split <= 1:
         raise ValueError(f"valid_split must be between 0-1 but is {valid_split}.")
     if len(x_list) != len(y_list):
-        raise ValueError(
-            f"Lists must be of equal length: {len(x_list)} != {len(y_list)}."
-        )
+        raise ValueError(f"Lists must be of equal length: {len(x_list)} != {len(y_list)}.")
     if len(x_list) <= 2:
-        raise ValueError(
-            f"At least 3 images/labels are required for a train/val split. Given: {len(x_list)}."
-        )
+        raise ValueError(f"At least 3 images/labels are required for a train/val split. Given: {len(x_list)}.")
 
     if shuffle:
         x_list, y_list = relative_shuffle(x_list, y_list)
@@ -107,14 +101,10 @@ def predict_shape(shape: tuple) -> str:
     max_len = 6 if is_rgb else 5
 
     if len(shape) > max_len:
-        raise ValueError(
-            f"Too many dimensions (max {max_len}). Shape {shape} can't be predicted."
-        )
+        raise ValueError(f"Too many dimensions (max {max_len}). Shape {shape} can't be predicted.")
 
     dims = {}
-    dims["x"], dims["y"] = [
-        idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]
-    ]
+    dims["x"], dims["y"] = [idx for idx, i in enumerate(shape) if i in sorted(shape)[-2:]]
     sorted_shape = sorted(shape)
 
     if is_rgb:
@@ -145,10 +135,7 @@ def predict_pixel_size(fname: str | os.PathLike[str]) -> tuple[float, float]:
     try:
         image = Image.open(fname)
     except UnidentifiedImageError as err:
-        raise ValueError(
-            f"{fname} could not be read by PIL. "
-            f"Check the format or pass a pixel-size directly."
-        ) from err
+        raise ValueError(f"{fname} could not be read by PIL. Check the format or pass a pixel-size directly.") from err
     if len(image.size) != 2:
         raise ValueError(f"Image {fname} has more than 2 dimensions.")
 

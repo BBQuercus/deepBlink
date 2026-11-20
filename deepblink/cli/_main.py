@@ -3,21 +3,21 @@
 import argparse
 import os
 
-from ._argparse import _parse_args_check
-from ._argparse import _parse_args_config
-from ._argparse import _parse_args_create
-from ._argparse import _parse_args_download
-from ._argparse import _parse_args_predict
-from ._argparse import _parse_args_train
-from ._argparse import _parse_args_visualize
+from ._argparse import (
+    _parse_args_check,
+    _parse_args_config,
+    _parse_args_create,
+    _parse_args_download,
+    _parse_args_predict,
+    _parse_args_train,
+    _parse_args_visualize,
+)
 from ._check import HandleCheck
 from ._config import HandleConfig
 from ._create import HandleCreate
 from ._download import HandleDownload
 from ._logger import _configure_logger
-from ._parseutil import Color
-from ._parseutil import CustomFormatter
-from ._parseutil import _add_utils
+from ._parseutil import Color, CustomFormatter, _add_utils
 from ._predict import HandlePredict
 from ._train import HandleTrain
 from ._visualize import HandleVisualize
@@ -30,11 +30,11 @@ def arg_parser() -> argparse.ArgumentParser:
     """Argument parser."""
     parser = argparse.ArgumentParser(
         prog="deepblink",
-        description=f"{Color.title}deepBlink's CLI \U0001F469\U0000200D\U0001F4BB to ferret out all of your spots.{Color.end}",  # noqa: E501, pylint: disable=C0301
+        description=f"{Color.title}deepBlink's CLI \U0001f469\U0000200d\U0001f4bb to ferret out all of your spots.{Color.end}",  # noqa: E501, pylint: disable=C0301
         epilog=(
             'See "deepblink <command> --help" to read about the specific subcommand.\n'
             'See the online wiki at "https://github.com/BBQuercus/deepBlink/wiki" for an overview.\n'
-            "We hope you enjoy using deepBlink \U0001F603"
+            "We hope you enjoy using deepBlink \U0001f603"
         ),
         formatter_class=CustomFormatter,
         add_help=False,
@@ -57,7 +57,7 @@ def arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
+def main() -> None:
     """Entrypoint for the CLI."""
     args = arg_parser().parse_args()
     logger = _configure_logger(args.verbose, args.debug)
@@ -82,9 +82,7 @@ def main():
         )
 
     if args.command == "download":
-        handler = HandleDownload(
-            arg_input=args.input, arg_list=args.list, arg_all=args.all, logger=logger
-        )
+        handler = HandleDownload(arg_input=args.input, arg_list=args.list, arg_all=args.all, logger=logger)
 
     if args.command == "predict":
         handler = HandlePredict(
