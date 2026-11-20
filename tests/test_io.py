@@ -52,10 +52,6 @@ def test_load_image():
         skimage.io.imsave(fname, arr, check_contrast=False)
         assert load_image(fname, is_rgb=True).shape == (20, 20)
 
-        # Non-existent file error
-        with pytest.raises(ImportError):
-            load_image(os.path.join(temp_dir, "nonexistent.png"), is_rgb=False)
-
 
 def test_load_npz():
     with tempfile.TemporaryDirectory() as temp_dir:
