@@ -292,7 +292,7 @@ def compute_metrics(pred: np.ndarray, true: np.ndarray, mdist: float = 3.0) -> p
             "offset": offsets,
         }
     )
-    df["f1_integral"] = np.trapz(df["f1_score"], cutoffs) / mdist  # Norm. to 0-1
+    df["f1_integral"] = np.trapezoid(df["f1_score"], cutoffs) / mdist  # Norm. to 0-1
     df["mean_euclidean"] = total_euclidean / (total_assignments + 1e-10)
 
     return df

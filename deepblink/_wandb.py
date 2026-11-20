@@ -25,7 +25,9 @@ from .models import Model
 
 def wandb_callback():
     """Callback function to avoid double imports."""
-    return wandb.keras.WandbCallback()
+    from wandb.integration.keras import WandbMetricsLogger
+
+    return WandbMetricsLogger()
 
 
 class WandbImageLogger(keras.callbacks.Callback):
@@ -80,11 +82,13 @@ class WandbImageLogger(keras.callbacks.Callback):
 
 
 class WandbComputeMetrics(keras.callbacks.Callback):
-    """Compute the final metrics once training is complete."""
+    """Compute the final metrics once training is complete.
 
-    def __init__(self, model: keras.Model, dataset: Dataset, mdist: int):
+    Predicts with ``self.model``, the network Keras attaches to every callback.
+    """
+
+    def __init__(self, dataset: Dataset, mdist: int):
         super().__init__()
-        self.model = model
         self.train_images = dataset.x_train
         self.train_labels = dataset.y_train
         self.valid_images = dataset.x_valid

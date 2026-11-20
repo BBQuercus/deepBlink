@@ -41,7 +41,7 @@ def train_model(
 
         cb_image = WandbImageLogger(model, dataset)
         cb_wandb = wandb_callback()
-        cb_metrics = WandbComputeMetrics(model, dataset, mdist=3)
+        cb_metrics = WandbComputeMetrics(dataset, mdist=3)
         callbacks.extend([cb_image, cb_wandb, cb_metrics])
 
     model.fit(dataset=dataset, callbacks=callbacks)

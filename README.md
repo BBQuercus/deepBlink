@@ -68,7 +68,7 @@ import deepblink
 
 model  = deepblink.load_model("model.h5")
 image  = deepblink.load_image("image.tif")
-coords = deepblink.predict(image, model, probability=0.5)
+coords = deepblink.predict(image, model)
 # coords is an (N, 2) array of [row, col] coordinates
 ```
 

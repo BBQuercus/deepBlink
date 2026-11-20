@@ -19,14 +19,14 @@ requirements:
     run:
       - python>=3.11,<3.14
       - keras>=3.8
-      - matplotlib>=3.8
+      - matplotlib>=3.9
       - numpy>=2.0
-      - pandas>=2.2
+      - pandas>=2.2.2
       - pyyaml
       - requests
-      - scikit-image>=0.22
-      - scipy>=1.11
-      - tensorflow>=2.16
+      - scikit-image>=0.24
+      - scipy>=1.13
+      - tensorflow>=2.18
 
 test:
   commands:

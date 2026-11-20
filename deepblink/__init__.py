@@ -6,7 +6,7 @@ Quick start::
 
     model  = deepblink.load_model("model.h5")
     image  = deepblink.load_image("image.tif")
-    coords = deepblink.predict(image, model, probability=0.5)
+    coords = deepblink.predict(image, model)
 
 Top-level convenience functions (re-exported from submodules):
 

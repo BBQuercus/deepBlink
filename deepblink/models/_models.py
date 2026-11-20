@@ -25,6 +25,7 @@ class Model:
         optimizer_fn: Optimizer function.
         train_args: Training arguments containing - batch_size, epochs, learning_rate.
         pre_model: Loaded, pre-trained model to bypass a new network creation.
+            It is compiled again with the given loss, optimizer and learning rate.
 
     Kwargs:
         batch_format_fn: Formatting function added in the specific model, e.g. spots.
@@ -53,9 +54,8 @@ class Model:
         self.loss_fn = loss_fn
         self.optimizer_fn = optimizer_fn
         self.train_args = train_args
-        self.has_pre_model = pre_model is not None
 
-        if self.has_pre_model:
+        if pre_model is not None:
             self.network: keras.Model = pre_model
         else:
             try:
@@ -79,12 +79,13 @@ class Model:
         if callbacks is None:
             callbacks = []
 
-        if not self.has_pre_model:
-            self.network.compile(
-                loss=self.loss_fn,
-                optimizer=self.optimizer_fn(float(self.train_args["learning_rate"])),
-                metrics=self.metrics,
-            )
+        # Also for a pre-trained network: the optimizer Keras 3 restores from an
+        # .h5 file is not bound to the network's variables and fails on the first step.
+        self.network.compile(
+            loss=self.loss_fn,
+            optimizer=self.optimizer_fn(float(self.train_args["learning_rate"])),
+            metrics=self.metrics,
+        )
 
         train_sequence = SequenceDataset(
             dataset.x_train,
