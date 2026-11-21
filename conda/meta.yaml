@@ -5,27 +5,29 @@ source:
     path: ..
 
 build:
-    build: 1
-    preserve_egg_dir: True
+    number: 0
+    noarch: python
     script: python -m pip install --no-deps --ignore-installed .
     entry_points:
       - deepblink = deepblink.cli:main
 
 requirements:
-    build:
-      - python>=3.6,<3.9
+    host:
+      - python >=3.10,<3.12
       - pip
       - setuptools
     run:
-      - python>=3.7,<3.11
-      - matplotlib>=3.0.0
-      - requests>=2.0.0
-      - numpy>=1.17.0,<2
-      - pandas>=1.0.0
-      - pillow>=7.0.0
-      - scikit-image>=0.16.2
-      - scipy>=1.4.0
-      - tensorflow>=2.0,<2.16
+      # TensorFlow below 2.16 (Keras 2) loads the published models; it exists
+      # only for Python 3.10 and 3.11.
+      - python >=3.10,<3.12
+      - matplotlib-base >=3.0.0
+      - requests >=2.0.0
+      - numpy >=1.17.0,<2
+      - pandas >=1.0.0
+      - pillow >=7.0.0
+      - scikit-image >=0.16.2
+      - scipy >=1.4.0
+      - tensorflow >=2.10,<2.16
 
 test:
   commands:
