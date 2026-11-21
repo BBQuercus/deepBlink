@@ -37,7 +37,7 @@ project = "deepblink"
 year = "2020"
 author = "Bastian Eichenberger"
 copyright = f"{year}, {author}"
-version = release = "0.1.4"
+version = release = "0.1.5"
 
 pygments_style = "trac"
 templates_path = ["."]
